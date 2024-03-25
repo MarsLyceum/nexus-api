@@ -5,3 +5,5 @@ const router = express.Router();
 export const getUsersRouter = router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
+
+export const postCreateUserRouter = router.post("/user");
