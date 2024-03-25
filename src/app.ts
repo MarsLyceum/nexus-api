@@ -29,7 +29,7 @@ async function bs() {
   const schema = await buildSchema({ resolvers: [HelloResolver] });
   const apolloServer = new ApolloServer({ schema });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app: app as any });
   // app.use(
   //   "/graphql",
   //   graphqlHTTP({
