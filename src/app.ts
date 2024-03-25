@@ -3,15 +3,10 @@ import express from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
-import { GraphQLSchema } from "graphql";
-import { graphqlHTTP } from "express-graphql";
-import { buildSchema } from "type-graphql";
-import { ApolloServer } from "apollo-server-express";
 
 import { getRootRouter } from "./routes/index";
 import { getUsersRouter } from "./routes/users";
 import { postRegisterRoute } from "./routes/register";
-import { HelloResolver } from "./resolvers/index";
 
 export const app = express();
 
@@ -24,22 +19,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", getRootRouter);
 app.use("/users", getUsersRouter);
 app.use(postRegisterRoute);
-
-async function bs() {
-  const schema = await buildSchema({ resolvers: [HelloResolver] });
-  const apolloServer = new ApolloServer({ schema });
-
-  apolloServer.applyMiddleware({ app: app as any });
-  // app.use(
-  //   "/graphql",
-  //   graphqlHTTP({
-  //     schema,
-  //     graphiql: true,
-  //   })
-  // );
-}
-
-bs();
 
 // catch 404 and forward to error handler
 app.use(function (
