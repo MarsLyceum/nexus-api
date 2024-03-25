@@ -3,7 +3,6 @@
     // It is faster to skip typechecking.
     // Remove if you want ts-node to do typechecking.
     "transpileOnly": false,
-    "experimentalSpecifierResolution": "node",
     "files": true,
     "compilerOptions": {
       // compilerOptions specified here will override those declared below,
@@ -12,8 +11,6 @@
     }
   },
   "node": {},
-  "include": ["/**/*.ts"],
-  "exclude": ["node_modules"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -26,7 +23,7 @@
     // "disableReferencedProjectLoad": true,             /* Reduce the number of projects loaded automatically by TypeScript. */
 
     /* Language and Environment */
-    "target": "es2017" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "target": "es2016" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     "lib": [
       "ESNext.AsyncIterable"
     ] /* Specify a set of bundled library declaration files that describe the target runtime environment. */,

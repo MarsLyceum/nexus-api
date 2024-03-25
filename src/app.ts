@@ -27,14 +27,16 @@ app.use(postRegisterRoute);
 
 async function bs() {
   const schema = await buildSchema({ resolvers: [HelloResolver] });
-  ApolloServer;
-  app.use(
-    "/graphql",
-    graphqlHTTP({
-      schema,
-      graphiql: true,
-    })
-  );
+  const apolloServer = new ApolloServer({ schema });
+
+  apolloServer.applyMiddleware({ app });
+  // app.use(
+  //   "/graphql",
+  //   graphqlHTTP({
+  //     schema,
+  //     graphiql: true,
+  //   })
+  // );
 }
 
 bs();
