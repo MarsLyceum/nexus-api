@@ -5,12 +5,16 @@
  */
 
 import { buildSchema } from "type-graphql";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import cors from "cors";
+import { json } from "express";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 
 import { app } from "./app";
 import { HelloResolver } from "./resolvers/index";
 
-const port = process.env.PORT || "3000";
+const port = process.env.PORT || "4000";
 app.set("port", port);
 
 /**
@@ -18,13 +22,25 @@ app.set("port", port);
  */
 async function createServer() {
   const schema = await buildSchema({ resolvers: [HelloResolver] });
-  const apolloServer = new ApolloServer({ schema });
+  const apolloServer = new ApolloServer({
+    schema,
+    // resolvers: {},
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer: app as any })],
+  });
 
   await apolloServer.start();
 
-  apolloServer.applyMiddleware({ app: app as any });
-  app.listen(4000, () => {
-    console.log("server started on http://localhost:4000/graphql");
+  app.post(
+    "/graphql",
+    cors<cors.CorsRequest>(),
+    json(),
+    expressMiddleware(apolloServer, {
+      context: async ({ req }) => ({ token: req.headers.token }),
+    })
+  );
+
+  app.listen(port, () => {
+    console.log(`server started on http://localhost:${port}/graphql`);
   });
 }
 
