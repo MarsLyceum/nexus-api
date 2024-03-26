@@ -12,7 +12,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 
 import { app } from "./app";
 // import { HelloResolver } from "./resolvers/index";
-import { schemas } from "./schemas/hello";
+import { schemas } from "./schemas";
 import { resolvers } from "./resolvers/index";
 
 const port = process.env.PORT || "4000";

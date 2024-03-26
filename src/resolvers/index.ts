@@ -9,6 +9,11 @@
 //   }
 // }
 export const resolvers = {
+  Mutation: {
+    registerUser() {
+      
+    }
+  }
   Query: {
     hello() {
       return "hello, world!";
