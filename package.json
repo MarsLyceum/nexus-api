@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon src/index.ts --watch",
+    "start": "ts-node src/index.ts",
+    "start:watch": "nodemon src/index.ts --watch",
     "build:compile": "npx babel src --extensions .ts --out-dir build --source-maps",
     "build:types": "tsc",
     "typeorm": "typeorm-ts-node-commonjs"
@@ -32,9 +33,7 @@
     "readline-sync": "^1.4.10",
     "reflect-metadata": "^0.2.1",
     "ts-node": "^10.9.2",
-    "typeorm": "^0.3.20"
-  },
-  "devDependencies": {
+    "typeorm": "^0.3.20",
     "@babel/cli": "^7.24.1",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.7",
