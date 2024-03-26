@@ -1,8 +1,9 @@
 import bcrypt from "bcrypt";
+import { Like } from "typeorm";
 import { AppDataSource } from "../db_connection/data-source";
 import { User } from "../db_models/User";
 
-export async function createUser(email: string, password: string) {
+export async function loginUser(email: string, password: string) {
   try {
     const dataSource = await AppDataSource.initialize();
   } catch (e) {
@@ -10,12 +11,22 @@ export async function createUser(email: string, password: string) {
   }
 
   const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(password, salt);
+  console.log("salt:", salt);
+  console.log("salt.length:", salt.length);
 
-  const user = new User(email, hashedPassword);
+  // const user = new User(email, hashedPassword);
 
-  const savedUser = await AppDataSource.manager.save(user);
-  return savedUser;
+  const foundUser = await AppDataSource.manager.findOne(User, {
+    where: { email },
+  });
+  const foundUserSalt = foundUser?.hashedPassword.slice(0, 29) ?? "";
+  const generatedHashedPassword = await bcrypt.hash(password, foundUserSalt);
+
+  if (foundUser?.hashedPassword === generatedHashedPassword) {
+    return foundUser;
+  } else {
+    return null;
+  }
 }
 
 // AppDataSource.initialize()

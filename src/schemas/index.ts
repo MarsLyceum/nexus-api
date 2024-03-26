@@ -13,5 +13,6 @@ export const schemas = `#graphql
   }
   type Query {
     hello: String
+    loginUser(email: String!, password: String!): User
   }
 `;

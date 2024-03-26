@@ -10,6 +10,7 @@
 // }
 
 import { createUser } from "../db_operations/createUser";
+import { loginUser } from "../db_operations/loginUser";
 
 export const resolvers = {
   Mutation: {
@@ -17,12 +18,18 @@ export const resolvers = {
       _: any,
       { email, password }: { email: string; password: string }
     ) {
-      createUser(email, password);
+      return createUser(email, password);
     },
   },
   Query: {
     hello() {
       return "hello, world!";
+    },
+    loginUser(
+      _: any,
+      { email, password }: { email: string; password: string }
+    ) {
+      return loginUser(email, password);
     },
   },
 };
