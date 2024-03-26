@@ -8,12 +8,18 @@
 //     return "Hello World!";
 //   }
 // }
+
+import { createUser } from "../db_operations/createUser";
+
 export const resolvers = {
   Mutation: {
-    registerUser() {
-      
-    }
-  }
+    registerUser(
+      _: any,
+      { email, password }: { email: string; password: string }
+    ) {
+      createUser(email, password);
+    },
+  },
   Query: {
     hello() {
       return "hello, world!";

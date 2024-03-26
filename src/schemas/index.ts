@@ -1,12 +1,15 @@
 export const schemas = `#graphql
 
-  type UserCredentials {
-    username: String!
-    password: String!
+  type User {
+    id: String!
+    email: String!
+    firstName: String
+    lastName: String
+    age: Int
   }
 
   type Mutation {
-    registerUser(username: String!, password: String!): UserCredentials
+    registerUser(email: String!, password: String!): User
   }
   type Query {
     hello: String

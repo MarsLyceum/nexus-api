@@ -8,9 +8,6 @@ export const postRegisterRoute = router.post(
   async function (req, res, next) {
     res.render("index", { title: "Express" });
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
     console.log("hashedPassword:", hashedPassword);
   }
 );
