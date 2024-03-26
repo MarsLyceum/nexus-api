@@ -34,6 +34,7 @@ COPY . .
 
 # Expose the port that the application listens on.
 EXPOSE 4000
+EXPOSE 5433
 
 # Run the application.
 CMD npm run start
