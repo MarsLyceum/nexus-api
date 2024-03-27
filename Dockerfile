@@ -15,7 +15,7 @@ FROM node:${NODE_VERSION}-alpine
 ENV NODE_ENV dev
 
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/web
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
@@ -34,7 +34,6 @@ COPY . .
 
 # Expose the port that the application listens on.
 EXPOSE 4000
-EXPOSE 5433
 
 # Run the application.
 CMD npm run start

@@ -5,6 +5,8 @@ import { decryptDbPassword } from "./decryptPassword";
 
 const DB_HOST = "host.docker.internal";
 
+const new_host = "hello";
+
 export const AppDataSource = new DataSource({
   type: "postgres",
   host: DB_HOST,
