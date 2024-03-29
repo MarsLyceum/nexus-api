@@ -4,13 +4,13 @@
  * Module dependencies.
  */
 
+import { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
 import express, { json } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 
-import { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { schemas } from './schemas';
 import { resolvers } from './resolvers/index';
 
