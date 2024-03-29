@@ -2,12 +2,11 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "../db_models/User";
 import { decryptDbPassword } from "./decryptPassword";
+import { isRunningInDocker } from "./isRunningInDocker";
 
-const DB_HOST = "host.docker.internal";
+const DB_HOST = isRunningInDocker() ? "host.docker.internal" : "localhost";
 
-const new_host = "hello";
-
-export const AppDataSource = new DataSource({
+export const appDataSource = new DataSource({
   type: "postgres",
   host: DB_HOST,
   port: 5433,

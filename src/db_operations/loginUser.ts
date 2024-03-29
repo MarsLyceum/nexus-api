@@ -1,15 +1,15 @@
 import bcrypt from "bcrypt";
-import { AppDataSource } from "../db_connection/data-source";
+import { appDataSource } from "../db_connection/appDataSource";
 import { User } from "../db_models/User";
 
 export async function loginUser(email: string, password: string) {
   try {
-    const dataSource = await AppDataSource.initialize();
+    const dataSource = await appDataSource.initialize();
   } catch (e) {
     console.log("error:", e);
   }
 
-  const foundUser = await AppDataSource.manager.findOne(User, {
+  const foundUser = await appDataSource.manager.findOne(User, {
     where: { email },
   });
 

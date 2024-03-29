@@ -22,9 +22,6 @@ export const resolvers = {
     },
   },
   Query: {
-    hello() {
-      return "hello, world!";
-    },
     loginUser(
       _: any,
       { email, password }: { email: string; password: string }

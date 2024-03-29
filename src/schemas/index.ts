@@ -6,13 +6,13 @@ export const schemas = `#graphql
     firstName: String
     lastName: String
     age: Int
+    token: String!
   }
 
   type Mutation {
     registerUser(email: String!, password: String!): User
   }
   type Query {
-    hello: String
     loginUser(email: String!, password: String!): User
   }
 `;
