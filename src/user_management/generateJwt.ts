@@ -1,22 +1,16 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
+import { promises as fs } from 'node:fs';
 
-import { User } from "./User";
+import { User } from './User';
 
 // Function to generate JWT
-export const generateJWT = (user: Omit<User, "token">): User => {
-  // Secret key for signing JWT - should be kept secure and private
-  const secretKey = "your_secret_key_here";
+export async function generateJwt(user: Omit<User, 'token'>): Promise<string> {
+    const jwtTokenKey = await fs.readFile('./keys/jwt_private_key.pem');
+    // Sign the token with a 1 day expiration
+    const token = jwt.sign(user, jwtTokenKey, {
+        expiresIn: '1d', // Token expires in 1 day
+        algorithm: 'RS256',
+    });
 
-  // JWT payload
-  const payload = {
-    userId,
-    // Add any other user/session data required
-  };
-
-  // Sign the token with a 1 day expiration
-  const token = jwt.sign(payload, secretKey, {
-    expiresIn: "1d", // Token expires in 1 day
-  });
-
-  return token;
-};
+    return token;
+}

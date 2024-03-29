@@ -1,7 +1,7 @@
 export const schemas = `#graphql
 
   type User {
-    id: String!
+    id: Int!
     email: String!
     firstName: String
     lastName: String

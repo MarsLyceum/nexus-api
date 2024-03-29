@@ -1,15 +1,19 @@
-import bcrypt from "bcrypt";
-import { User } from "../db_models/User";
-import { initializeDataSource } from "./initializeDataSource";
+import bcrypt from 'bcrypt';
+import { User as UserDbModel } from '../db_models/User';
+import { initializeDataSource } from './initializeDataSource';
+import { User, createAppUser } from '../user_management';
 
-export async function createUser(email: string, password: string) {
-  const dataSource = await initializeDataSource();
+export async function createUser(
+    email: string,
+    password: string
+): Promise<User> {
+    const dataSource = await initializeDataSource();
 
-  const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(password, salt);
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = new User(email, hashedPassword);
+    const dbUser = new UserDbModel(email, hashedPassword);
+    const savedDbUser = await dataSource.manager.save(dbUser);
 
-  const savedUser = await dataSource.manager.save(user);
-  return savedUser;
+    return createAppUser(savedDbUser);
 }

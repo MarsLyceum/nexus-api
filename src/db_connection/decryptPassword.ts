@@ -1,5 +1,6 @@
 import * as forge from 'node-forge';
 import * as fs from 'node:fs';
+import path from 'node:path';
 import readlineSync from 'readline-sync'; // Import readline-sync
 
 // Function to load the private key from a file
@@ -33,7 +34,8 @@ export function decryptPassword(
     return decrypted;
 }
 
-async function encryptPasswordWithKey(privateKey: forge.pki.rsa.PrivateKey) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function encryptPasswordWithKey(privateKey: forge.pki.rsa.PrivateKey) {
     // Get the public key from the private key
     const publicKey = forge.pki.rsa.setPublicKey(privateKey.n, privateKey.e);
 
@@ -47,28 +49,13 @@ async function encryptPasswordWithKey(privateKey: forge.pki.rsa.PrivateKey) {
     console.log('Encrypted Password (Base64):', encryptedPasswordBase64);
 }
 
-// Modified example usage to use readline-sync for password input
-async function main(): Promise<void> {
-    try {
-        // Load the private key from the file
-        const privateKey = loadPrivateKey('private_key.pem');
-        encryptPasswordWithKey(privateKey);
-    } catch {
-        // Generate a new RSA private key
-        const privateKey = generatePrivateKey();
-
-        // Save the private key to a file
-        savePrivateKey(privateKey, 'private_key.pem');
-
-        encryptPasswordWithKey(privateKey);
-    }
-}
-
 export function decryptDbPassword() {
     const ENCRYPTED_DB_PASSWORD =
         'MFxX8GDVxBjZwkMxH4RgzZbUnbxq47XzVdAhAzE+dobzA7zXjcQ4QErrE+QokR8wKtvlQYV0AqU7mh9cJXpG2L5Toy/gZK97rvTCuSCPw1PHb8GyWdjLnYrBxOuNQ26Pahi4vG82ZD7XZxOr5uEcyfTSMHNTAZAdYL3DgZvVqKj5YJiscKx/cuzDtXualeHQMgPxi8Tv1pgO+eyWG9HE1K3p60HDRM1EBTQdbjyBJnlap9lqapu4nF338x2u/zqkF9ixw1r69EB1bPYnPNZAaZjQ9tFx9D8krPPNoM0s/RFJJvm5085vCQjN6LYN+xDtDV/2qAO0ZDZ0XGcrm3V4/g==';
 
-    const privateKeyFile = loadPrivateKey('private_key.pem');
+    const privateKeyFile = loadPrivateKey(
+        path.join('./keys/db_private_key.pem')
+    );
     const decryptedPassword = decryptPassword(
         privateKeyFile,
         ENCRYPTED_DB_PASSWORD
@@ -76,5 +63,3 @@ export function decryptDbPassword() {
 
     return decryptedPassword;
 }
-
-// main().catch(console.error);
