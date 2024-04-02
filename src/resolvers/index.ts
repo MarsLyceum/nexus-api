@@ -12,6 +12,7 @@ export const resolvers = {
     },
     Query: {
         loginUser(_: never, { email, password }: LoginUserPayload) {
+            console.log('logging in user...');
             return loginUser(email, password);
         },
     },

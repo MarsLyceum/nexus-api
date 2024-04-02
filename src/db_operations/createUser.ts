@@ -10,20 +10,28 @@ export async function createUser({
     firstName,
     lastName,
     age,
-}: RegisterUserPayload): Promise<User> {
+}: RegisterUserPayload): Promise<User | undefined> {
     const dataSource = await initializeDataSource();
+    const foundUser =
+        (await dataSource.manager.findOne(UserDbModel, {
+            where: { email },
+        })) ?? undefined;
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    if (!foundUser) {
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-    const dbUser = new UserDbModel(
-        email,
-        hashedPassword,
-        firstName,
-        lastName,
-        age
-    );
-    const savedDbUser = await dataSource.manager.save(dbUser);
+        const dbUser = new UserDbModel(
+            email,
+            hashedPassword,
+            firstName,
+            lastName,
+            age
+        );
+        const savedDbUser = await dataSource.manager.save(dbUser);
 
-    return createAppUser(savedDbUser);
+        return createAppUser(savedDbUser);
+    }
+
+    return undefined;
 }
