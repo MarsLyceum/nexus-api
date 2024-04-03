@@ -1,12 +1,13 @@
-import { appDataSource } from '../db_connection/appDataSource';
+import { createAppDataSource } from '../db_connection/createAppDataSource';
 
 export async function initializeDataSource() {
+    const dataSource = await createAppDataSource();
     try {
-        const dataSource = await appDataSource.initialize();
+        await dataSource.initialize();
         return dataSource;
     } catch (error) {
         console.log('error:', error);
     }
 
-    return appDataSource;
+    return dataSource;
 }
