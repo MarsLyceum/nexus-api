@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { User } from '../db_models/User';
 import { decryptDbPassword } from './decryptPassword';
-import { getCurrentIPAddress } from './getCurrentIPAddress';
+import { isRunningInDocker } from './isRunningInDocker';
 
-export async function createAppDataSource(): Promise<DataSource> {
-    const DB_HOST = await getCurrentIPAddress();
+export function createAppDataSource(): DataSource {
+    const DB_HOST = isRunningInDocker() ? 'host.docker.internal' : 'localhost';
 
     return new DataSource({
         type: 'postgres',
