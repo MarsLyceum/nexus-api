@@ -1,0 +1,83 @@
+---
+- name: Deploy Node.js Application to Kubernetes
+  hosts: localhost
+  gather_facts: no
+  tasks:
+      - name: Create secret for Cloud SQL credentials
+        community.kubernetes.k8s:
+        state: present
+        kubeconfig: 'terraform/.kubeconfig'
+        definition:
+            kind: Secret
+            apiVersion: v1
+            metadata:
+            name: cloudsql-instance-credentials
+            namespace: default
+            type: Opaque
+            data:
+            credentials.json: "{{ lookup('file', 'terraform/hephaestus-418809-26f13a75446e.json') | b64encode }}"
+
+      - name: Create a Kubernetes Deployment for the Node.js application
+        community.kubernetes.k8s:
+            state: present
+            kubeconfig: 'terraform/.kubeconfig'
+            definition:
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                    name: hephaestus-api
+                    namespace: default
+                spec:
+                    replicas: 2
+                    selector:
+                        matchLabels:
+                            app: hephaestus-api
+                    template:
+                        metadata:
+                            labels:
+                                app: hephaestus-api
+                        spec:
+                            containers:
+                                - name: hephaestus-api
+                                  image: 'gcr.io/hephaestus-418809/hephaestus-api:latest'
+                                  ports:
+                                      - containerPort: 8080
+                                      - containerPort: 4000
+                                - name: cloud-sql-proxy
+                                  image: 'gcr.io/cloudsql-docker/gce-proxy:1.19.1'
+                                  command:
+                                      [
+                                          '/cloud_sql_proxy',
+                                          '-instances=hephaestus-418809:us-east1:hephaestus-postgres=tcp:5432"',
+                                          '-credential_file=/secrets/cloudsql/credentials.json',
+                                      ]
+                                  volumeMounts:
+                                      - name: cloudsql-instance-credentials
+                                        mountPath: /secrets/cloudsql
+                                        readOnly: true
+                            volumes:
+                                - name: cloudsql-instance-credentials
+                                  secret:
+                                      secretName: cloudsql-instance-credentials
+
+      - name: Expose the Node.js application via a LoadBalancer service
+        community.kubernetes.k8s:
+            state: present
+            kubeconfig: 'terraform/.kubeconfig'
+            definition:
+                kind: Service
+                apiVersion: v1
+                metadata:
+                    name: hephaestus-api-service
+                    namespace: default
+                spec:
+                    selector:
+                        app: hephaestus-api
+                    ports:
+                        - protocol: TCP
+                          port: 80
+                          targetPort: 8080
+                        - protocol: TCP
+                          port: 4000
+                          targetPort: 4000
+                    type: LoadBalancer

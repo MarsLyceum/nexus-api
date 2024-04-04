@@ -7,6 +7,48 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Service Account Key
+hephaestus-418809-*.json
+
+# General
+*.log
+*.tfstate
+*.tfvars
+*.retry
+secrets/
+credentials/
+
+# Terraform-specific
+.terraform/
+*.tfstate.backup
+terraform.rc
+terraform.tfvars
+terraform.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# Ansible-specific
+*.vault
+.hosts.*.cache
+.retry
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# System Files
+Thumbs.db
+
+# Compiled Python files
+*.pyc
+__pycache__/
+
 # Private Keys
 **/*.pem
 

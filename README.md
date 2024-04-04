@@ -17,3 +17,12 @@ to download the file securely.
 
 We need to authenticate with the Google SDK with this command
 `gcloud auth application-default login`.
+
+## Kubernetes Config
+
+The Ansible script uses the Kubernetes configuration that is created by
+Terraform to run you can get this saved to your local `.kube/config`
+file by running the command `gcloud container clusters get-credentials $(terraform output -raw cluster_name) --region $(terraform output -raw cluster_location)` then you can simply replace
+the contents of `.kubeconfig` with this file. The Terraform
+outputs _should_ be doing this but they don't seem to be working for some
+reason.
