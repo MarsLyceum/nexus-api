@@ -5,17 +5,17 @@
   tasks:
       - name: Create secret for Cloud SQL credentials
         community.kubernetes.k8s:
-        state: present
-        kubeconfig: 'terraform/.kubeconfig'
-        definition:
-            kind: Secret
-            apiVersion: v1
-            metadata:
-            name: cloudsql-instance-credentials
-            namespace: default
-            type: Opaque
-            data:
-            credentials.json: "{{ lookup('file', 'terraform/hephaestus-418809-26f13a75446e.json') | b64encode }}"
+            state: present
+            kubeconfig: 'terraform/.kubeconfig'
+            definition:
+                kind: Secret
+                apiVersion: v1
+                metadata:
+                    name: cloudsql-instance-credentials
+                    namespace: default
+                type: Opaque
+                data:
+                    credentials.json: "{{ lookup('file', 'terraform/hephaestus-418809-26f13a75446e.json') | b64encode }}"
 
       - name: Create a Kubernetes Deployment for the Node.js application
         community.kubernetes.k8s:
@@ -46,11 +46,9 @@
                                 - name: cloud-sql-proxy
                                   image: 'gcr.io/cloudsql-docker/gce-proxy:1.19.1'
                                   command:
-                                      [
-                                          '/cloud_sql_proxy',
-                                          '-instances=hephaestus-418809:us-east1:hephaestus-postgres=tcp:5432"',
-                                          '-credential_file=/secrets/cloudsql/credentials.json',
-                                      ]
+                                      - '/cloud_sql_proxy'
+                                      - '-instances=hephaestus-418809:us-east1:hephaestus-postgres=tcp:5432"'
+                                      - '-credential_file=/secrets/cloudsql/credentials.json'
                                   volumeMounts:
                                       - name: cloudsql-instance-credentials
                                         mountPath: /secrets/cloudsql
