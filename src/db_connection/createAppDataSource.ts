@@ -2,18 +2,21 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { User } from '../db_models/User';
 import { decryptDbPassword } from './decryptPassword';
-// import { isRunningInDocker } from './isRunningInDocker';
+import { isRunningInDocker } from './isRunningInDocker';
 
 export function createAppDataSource(): DataSource {
-    // const DB_HOST = isRunningInDocker() ? 'host.docker.internal' : 'localhost';
-    const DB_HOST = '/cloudsql/hephaestus-418809:us-east1:hephaestus-postgres';
+    const cloudDb = isRunningInDocker();
+    const DB_HOST = cloudDb
+        ? '/cloudsql/hephaestus-418809:us-east1:hephaestus-postgres'
+        : 'localhost';
+    const DB_USER = cloudDb ? 'hephaestus-db' : 'postgres';
 
     return new DataSource({
         type: 'postgres',
         host: DB_HOST,
         port: 5433,
-        username: 'hephaestus-db',
-        password: decryptDbPassword(),
+        username: DB_USER,
+        password: decryptDbPassword(cloudDb),
         database: 'postgres',
         synchronize: true,
         logging: false,
