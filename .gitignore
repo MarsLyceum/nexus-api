@@ -38,6 +38,7 @@ override.tf.json
 *.vault
 .hosts.*.cache
 .retry
+ansible-env
 
 # Editor directories and files
 .vscode/

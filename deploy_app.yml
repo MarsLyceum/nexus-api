@@ -4,7 +4,7 @@
   gather_facts: no
   tasks:
       - name: Create secret for Cloud SQL credentials
-        community.kubernetes.k8s:
+        kubernetes.core.k8s:
             state: present
             kubeconfig: 'terraform/.kubeconfig'
             definition:
@@ -18,7 +18,7 @@
                     credentials.json: "{{ lookup('file', 'terraform/hephaestus-418809-26f13a75446e.json') | b64encode }}"
 
       - name: Create a Kubernetes Deployment for the Node.js application
-        community.kubernetes.k8s:
+        kubernetes.core.k8s:
             state: present
             kubeconfig: 'terraform/.kubeconfig'
             definition:
@@ -59,7 +59,7 @@
                                       secretName: cloudsql-instance-credentials
 
       - name: Expose the Node.js application via a LoadBalancer service
-        community.kubernetes.k8s:
+        kubernetes.core.k8s:
             state: present
             kubeconfig: 'terraform/.kubeconfig'
             definition:
