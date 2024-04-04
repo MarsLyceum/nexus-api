@@ -1,5 +1,6 @@
 output "kubeconfig" {
-  value = <<KUBECONFIG
+  sensitive = true
+  value     = <<KUBECONFIG
 apiVersion: v1
 kind: Config
 clusters:
