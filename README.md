@@ -26,3 +26,7 @@ file by running the command `gcloud container clusters get-credentials $(terrafo
 the contents of `.kubeconfig` with this file. The Terraform
 outputs _should_ be doing this but they don't seem to be working for some
 reason.
+
+To keep billing low, let's only use Terraform clusters in bursts. We have
+to pay for having the cluster running so let's just run `terraform destroy`
+anytime we aren't actively testing stuff.

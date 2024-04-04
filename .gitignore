@@ -23,6 +23,7 @@ credentials/
 
 # Terraform-specific
 .terraform/
+*.tfstate*
 *.tfstate.backup
 terraform.rc
 terraform.tfvars
