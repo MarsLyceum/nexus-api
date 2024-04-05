@@ -1,4 +1,4 @@
-resource "kubernetes_service" "hephaestus_api_service" {
+resource "kubernetes_service" "this" {
   metadata {
     name = "hephaestus-api-service"
   }
@@ -9,14 +9,14 @@ resource "kubernetes_service" "hephaestus_api_service" {
     }
 
     port {
-      name        = "8080"
+      name        = "port-8080"
       protocol    = "TCP"
       port        = 80
       target_port = 8080
     }
 
     port {
-      name        = "4000"
+      name        = "port-4000"
       protocol    = "TCP"
       port        = 4000
       target_port = 4000

@@ -25,6 +25,7 @@ credentials/
 .terraform/
 *.tfstate*
 *.tfstate.backup
+*.tfplan
 terraform.rc
 terraform.tfvars
 terraform.tfvars.json
