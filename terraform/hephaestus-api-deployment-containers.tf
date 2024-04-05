@@ -1,4 +1,9 @@
-resource "kubernetes_deployment" "hephaestus-api-deployment-containers" {
+resource "kubernetes_deployment" "hephaestus_api_deployment_containers" {
+  depends_on = [
+    google_container_cluster.hephaestus_api_cluster,
+  ]
+  provider = kubernetes.gke
+
   metadata {
     name = "hephaestus-api-deployment-containers"
   }
@@ -8,21 +13,21 @@ resource "kubernetes_deployment" "hephaestus-api-deployment-containers" {
 
     selector {
       match_labels = {
-        app = "hephaestus-api"
+        app = "hephaestus_api"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "hephaestus-api"
+          app = "hephaestus_api"
         }
       }
 
       spec {
         container {
+          name  = "hephaestus_api"
           image = "gcr.io/hephaestus-418809/hephaestus-api:latest"
-          name  = "hephaestus-api"
 
           port {
             container_port = 8080
@@ -34,7 +39,7 @@ resource "kubernetes_deployment" "hephaestus-api-deployment-containers" {
         }
 
         container {
-          name  = "cloud-sql-proxy"
+          name  = "cloud_sql_proxy"
           image = "gcr.io/cloudsql-docker/gce-proxy:1.19.1"
 
           command = [
@@ -44,18 +49,19 @@ resource "kubernetes_deployment" "hephaestus-api-deployment-containers" {
           ]
 
           volume_mount {
-            name       = "cloudsql-instance-credentials"
+            name       = "cloudsql_instance_credentials"
             mount_path = "/secrets/cloudsql"
             read_only  = true
           }
 
           port {
+            name           = "5432"
             container_port = 5432
           }
         }
 
         volume {
-          name = "cloudsql-instance-credentials"
+          name = "cloudsql_instance_credentials"
 
           secret {
             secret_name = kubernetes_secret.cloudsql_creds.metadata[0].name

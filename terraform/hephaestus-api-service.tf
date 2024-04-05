@@ -1,11 +1,11 @@
-resource "kubernetes_service" "hephaestus-api-service" {
+resource "kubernetes_service" "hephaestus_api_service" {
   metadata {
     name = "hephaestus-api-service"
   }
 
   spec {
     selector = {
-      app = "hephaestus-api"
+      app = "hephaestus_api"
     }
 
     port {
