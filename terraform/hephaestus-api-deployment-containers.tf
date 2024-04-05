@@ -44,7 +44,7 @@ resource "kubernetes_deployment" "this" {
 
           command = [
             "/cloud_sql_proxy",
-            "-instances=hephaestus-418809:us-east1:hephaestus-postgres=tcp:5432",
+            "-instances=hephaestus-418809:us-east1-b:hephaestus-postgres=tcp:5432",
             "-credential_file=/secrets/cloudsql/credentials.json"
           ]
 

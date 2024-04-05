@@ -49,7 +49,7 @@
                                   image: 'gcr.io/cloudsql-docker/gce-proxy:1.19.1'
                                   command:
                                       - '/cloud_sql_proxy'
-                                      - '-instances=hephaestus-418809:us-east1:hephaestus-postgres=tcp:5432"'
+                                      - '-instances=hephaestus-418809:us-east1-b:hephaestus-postgres=tcp:5432"'
                                       - '-credential_file=/secrets/cloudsql/credentials.json'
                                   volumeMounts:
                                       - name: cloudsql-instance-credentials

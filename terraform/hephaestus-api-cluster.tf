@@ -1,7 +1,7 @@
 provider "google" {
   credentials = file("hephaestus-418809-26f13a75446e.json")
   project     = "hephaestus-418809"
-  region      = "us-east1"
+  region      = "us-east1-b"
 }
 
 resource "google_service_account" "this" {
@@ -29,7 +29,7 @@ resource "kubernetes_secret" "this" {
 
 resource "google_container_cluster" "this" {
   name                = "hephaestus-api-cluster"
-  location            = "us-east1"
+  location            = "us-east1-b"
   deletion_protection = false
   # remove_default_node_pool = true
   # initial_node_count       = 1
@@ -66,9 +66,10 @@ resource "google_container_cluster" "this" {
 
 
 provider "kubernetes" {
-  alias = "gke"
-  host  = "https://${google_container_cluster.this.endpoint}"
-  token = data.google_client_config.this.access_token
+  config_path = "~/.kube/config"
+  alias       = "gke"
+  host        = "https://${google_container_cluster.this.endpoint}"
+  token       = data.google_client_config.this.access_token
   cluster_ca_certificate = base64decode(
     google_container_cluster.this.master_auth[0].cluster_ca_certificate
   )
