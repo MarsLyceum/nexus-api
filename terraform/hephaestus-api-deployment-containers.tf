@@ -1,11 +1,11 @@
-resource "kubernetes_deployment" "hephaestus_api_deployment_containers" {
+resource "kubernetes_deployment" "this" {
   depends_on = [
-    google_container_cluster.hephaestus_api_cluster,
+    google_container_cluster.this,
   ]
   provider = kubernetes.gke
 
   metadata {
-    name = "hephaestus_api_deployment_containers"
+    name = "hephaestus-api-deployment-containers"
   }
 
   spec {
@@ -13,20 +13,20 @@ resource "kubernetes_deployment" "hephaestus_api_deployment_containers" {
 
     selector {
       match_labels = {
-        app = "hephaestus_api"
+        app = "hephaestus-api"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "hephaestus_api"
+          app = "hephaestus-api"
         }
       }
 
       spec {
         container {
-          name  = "hephaestus_api"
+          name  = "hephaestus-api"
           image = "gcr.io/hephaestus-418809/hephaestus-api:latest"
 
           port {
@@ -39,7 +39,7 @@ resource "kubernetes_deployment" "hephaestus_api_deployment_containers" {
         }
 
         container {
-          name  = "cloud_sql_proxy"
+          name  = "cloud-sql-proxy"
           image = "gcr.io/cloudsql-docker/gce-proxy:1.19.1"
 
           command = [
@@ -49,22 +49,22 @@ resource "kubernetes_deployment" "hephaestus_api_deployment_containers" {
           ]
 
           volume_mount {
-            name       = "cloudsql_instance_credentials"
+            name       = "cloudsql-instance-credentials"
             mount_path = "/secrets/cloudsql"
             read_only  = true
           }
 
           port {
-            name           = "5432"
+            name           = "port-5432"
             container_port = 5432
           }
         }
 
         volume {
-          name = "cloudsql_instance_credentials"
+          name = "cloudsql-instance-credentials"
 
           secret {
-            secret_name = kubernetes_secret.cloudsql_creds.metadata[0].name
+            secret_name = kubernetes_secret.this.metadata[0].name
           }
         }
       }

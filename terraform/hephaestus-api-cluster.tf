@@ -4,12 +4,12 @@ provider "google" {
   region      = "us-east1"
 }
 
-resource "google_service_account" "default" {
+resource "google_service_account" "this" {
   account_id   = "hephaestus-418809"
   display_name = "Compute Engine default service account"
 }
 
-resource "kubernetes_secret" "cloudsql_creds" {
+resource "kubernetes_secret" "this" {
   metadata {
     name = "cloudsql-instance-credentials"
   }
@@ -19,7 +19,7 @@ resource "kubernetes_secret" "cloudsql_creds" {
   }
 
   depends_on = [
-    google_container_cluster.hephaestus_api_cluster,
+    google_container_cluster.this,
   ]
 
   provider = kubernetes.gke
@@ -27,7 +27,7 @@ resource "kubernetes_secret" "cloudsql_creds" {
 }
 
 
-resource "google_container_cluster" "hephaestus_api_cluster" {
+resource "google_container_cluster" "this" {
   name                = "hephaestus-api-cluster"
   location            = "us-east1"
   deletion_protection = false
@@ -67,11 +67,11 @@ resource "google_container_cluster" "hephaestus_api_cluster" {
 
 provider "kubernetes" {
   alias = "gke"
-  host  = google_container_cluster.hephaestus_api_cluster.endpoint
-  token = data.google_client_config.current.access_token
+  host  = "https://${google_container_cluster.this.endpoint}"
+  token = data.google_client_config.this.access_token
   cluster_ca_certificate = base64decode(
-    google_container_cluster.hephaestus_api_cluster.master_auth[0].cluster_ca_certificate
+    google_container_cluster.this.master_auth[0].cluster_ca_certificate
   )
 }
 
-data "google_client_config" "current" {}
+data "google_client_config" "this" {}
