@@ -5,7 +5,7 @@ resource "kubernetes_deployment" "hephaestus_api_deployment_containers" {
   provider = kubernetes.gke
 
   metadata {
-    name = "hephaestus-api-deployment-containers"
+    name = "hephaestus_api_deployment_containers"
   }
 
   spec {
