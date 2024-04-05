@@ -2,6 +2,8 @@
 - name: Deploy Node.js Application to Kubernetes
   hosts: localhost
   gather_facts: no
+  environment:
+      K8S_AUTH_VERIFY_SSL: no
   tasks:
       - name: Create secret for Cloud SQL credentials
         kubernetes.core.k8s:
