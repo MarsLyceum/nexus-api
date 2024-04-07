@@ -22,5 +22,5 @@ resource "google_sql_database" "default" {
 resource "google_sql_user" "default" {
   name     = "hephaestus-db"
   instance = google_sql_database_instance.default.name
-  password = var.db_password
+  password = base64decode(var.db_password)
 }
