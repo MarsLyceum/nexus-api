@@ -4,7 +4,7 @@ provider "google" {
   region      = "us-central1"
 }
 
-resource "google_cloud_run_service" "this" {
+resource "google_cloud_run_service" "default" {
   name     = "google-cloud-run-service"
   location = "us-central1"
 
@@ -17,6 +17,25 @@ resource "google_cloud_run_service" "this" {
           container_port = 4000
         }
 
+        env {
+          name  = "DATABASE_USER"
+          value = "hephaestus-db"
+        }
+        env {
+          name  = "DATABASE_PASSWORD"
+          value = base64decode("bDBJeXJpQ2BHaEtTeSIvMQ==")
+        }
+        env {
+          name  = "DATABASE_NAME"
+          value = "hephaestus-postgres"
+        }
+
+      }
+    }
+
+    metadata {
+      annotations = {
+        "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.default.connection_name
       }
     }
   }
@@ -28,5 +47,5 @@ resource "google_cloud_run_service" "this" {
 }
 
 output "service_url" {
-  value = google_cloud_run_service.this.status[0].url
+  value = google_cloud_run_service.default.status[0].url
 }
