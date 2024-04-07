@@ -17,7 +17,7 @@
                     namespace: default
                 type: Opaque
                 data:
-                    credentials.json: "{{ lookup('file', 'terraform/hephaestus-418809-26f13a75446e.json') | b64encode }}"
+                    credentials.json: "{{ lookup('file', 'hephaestus-418809-d157e9e7f0bd.json') | b64encode }}"
 
       - name: Create a Kubernetes Deployment for the Node.js application
         kubernetes.core.k8s:
