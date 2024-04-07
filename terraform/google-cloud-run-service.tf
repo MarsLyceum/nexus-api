@@ -23,7 +23,7 @@ resource "google_cloud_run_service" "default" {
         }
         env {
           name  = "DATABASE_PASSWORD"
-          value = base64decode("bDBJeXJpQ2BHaEtTeSIvMQ==")
+          value = var.db_password
         }
         env {
           name  = "DATABASE_NAME"
