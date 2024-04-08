@@ -1,12 +1,12 @@
-resource "google_cloud_run_domain_mapping" "default" {
-  location = "us-central1"
-  name     = "www.hephaestus-api-staging.marslyceum.com" # Your custom domain
+# resource "google_cloud_run_domain_mapping" "default" {
+#   location = "us-west1"
+#   name     = "www.hephaestus-api-staging.marslyceum.com" # Your custom domain
 
-  metadata {
-    namespace = google_cloud_run_service.default.location
-  }
+#   metadata {
+#     namespace = "hephaestus-418809"
+#   }
 
-  spec {
-    route_name = google_cloud_run_service.default.name
-  }
-}
+#   spec {
+#     route_name = google_cloud_run_service.default.name
+#   }
+# }

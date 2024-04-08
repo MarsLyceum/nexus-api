@@ -1,12 +1,12 @@
 provider "google" {
   credentials = file("hephaestus-418809-ba3b07f622bf.json")
   project     = "hephaestus-418809"
-  region      = "us-central1"
+  region      = "us-west1"
 }
 
 resource "google_cloud_run_service" "default" {
   name     = "google-cloud-run-service"
-  location = "us-central1"
+  location = "us-west1"
 
   template {
     spec {

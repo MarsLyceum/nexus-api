@@ -1,12 +1,18 @@
 resource "google_sql_database_instance" "default" {
   name             = "hephaestus-postgres"
-  region           = "us-central1"
+  region           = "us-west1"
   database_version = "POSTGRES_15"
 
   settings {
     tier = "db-f1-micro"
   }
+
+  lifecycle {
+    ignore_changes = all
+  }
+
 }
+
 
 variable "db_password" {
   description = "The password for the database"
