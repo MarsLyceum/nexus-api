@@ -1,20 +1,15 @@
-- name: Manage Google Cloud Run service
-  collections:
-      - community.general
-      - community.general.gcp_cloud_run_service
+- name: Deploy Docker image to Google Cloud Run using gcloud CLI
   hosts: localhost
   gather_facts: no
   tasks:
-      - name: Ensure a Cloud Run service is present
-        community.general.gcp_cloud_run_service:
-            name: 'hephaestus-api'
-            location: 'us-west1'
-            template:
-                spec:
-                    containers:
-                        - image: 'gcr.io/hephaestus-418809/hephaestus-api:latest'
-            autogenerate_revision_name: true
-            state: present
-            project: hephaestus-418809
-            auth_kind: serviceaccount
-            service_account_file: '/terraform/hephaestus-418809-ba3b07f622bf.json'
+    - name: Authenticate gcloud with a service account
+      ansible.builtin.shell: |
+        gcloud auth activate-service-account --key-file=/home/milheht/src/hephaestus-api/terraform/hephaestus-418809-aca9086bcf82.json
+      environment:
+        GOOGLE_APPLICATION_CREDENTIALS: "/home/milheht/src/hephaestus-api/terraform/hephaestus-418809-aca9086bcf82.json"
+
+    - name: Deploy to Cloud Run using gcloud
+      ansible.builtin.command:
+        cmd: gcloud run deploy hephaestus-api --image=gcr.io/hephaestus-418809/hephaestus-api:latest --region=us-west1 --platform=managed --allow-unauthenticated --project=hephaestus-418809
+      environment:
+        GOOGLE_APPLICATION_CREDENTIALS: "/home/milheht/src/hephaestus-api/terraform/hephaestus-418809-aca9086bcf82.json"
