@@ -43,3 +43,16 @@ Cloud SQL Proxy simply download it from https://github.com/GoogleCloudPlatform/c
 and run it.
 First you need to authenticate with `gcloud auth application-default login`
 then you need to run it with `.\cloud-sql-proxy.exe hephaestus-418809:us-west1:hephaestus-postgres`
+
+You can also run it using docker with this command:
+
+```docker run --rm --network=host gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.6.1 --address 0.0.0.0 --port 5432 --token=$(gcloud auth print-access-token) --login-token=$(gcloud sql generate-login-token) --auto-iam-authn $(gcloud sql instances describe hephaestus-postgres --format='value(connectionName)')
+
+```
+
+or this one
+
+```docker run --rm --network=host gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.6.1 --address 0.0.0.0 --port 5432 --auto-iam-authn --credentials-file hephaestus-418809-aca9086bcf82.json hephaestus-418809:us-west1:hephaestus-postgres
+
+
+```

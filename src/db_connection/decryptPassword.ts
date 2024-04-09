@@ -49,18 +49,16 @@ function encryptPasswordWithKey(privateKey: forge.pki.rsa.PrivateKey) {
     console.log('Encrypted Password (Base64):', encryptedPasswordBase64);
 }
 
-export function decryptDbPassword(cloudDb = false) {
+export function decryptDbPassword() {
     const ENCRYPTED_DB_PASSWORD =
         'MFxX8GDVxBjZwkMxH4RgzZbUnbxq47XzVdAhAzE+dobzA7zXjcQ4QErrE+QokR8wKtvlQYV0AqU7mh9cJXpG2L5Toy/gZK97rvTCuSCPw1PHb8GyWdjLnYrBxOuNQ26Pahi4vG82ZD7XZxOr5uEcyfTSMHNTAZAdYL3DgZvVqKj5YJiscKx/cuzDtXualeHQMgPxi8Tv1pgO+eyWG9HE1K3p60HDRM1EBTQdbjyBJnlap9lqapu4nF338x2u/zqkF9ixw1r69EB1bPYnPNZAaZjQ9tFx9D8krPPNoM0s/RFJJvm5085vCQjN6LYN+xDtDV/2qAO0ZDZ0XGcrm3V4/g==';
-    const ENCRYPTED_DB_PASSWORD_GCP =
-        's+umOLDLK8h0plxi5yP379QVdo18BPoe34FCDh0sab5T2DAsSNlbBoRHaSFZly+vxNrGOOeZSdJS0NZhH07zFnyT1l6vFoUhj8w3vQeEA6nQ/9MPbfWSLElicNYMkzFAjF53Dkzu0WLa/N+3Q8Ru0blMmhZLi34xWY3MkDjFEToUTeW7Zig53Wxql86K5tI8Etsj3ME0QJN6TmakTm7uwTfp9xEsmxUR4nr+xhmHCM2xY0BqiitFms4Si5khIxUeXh2u0yWc4ni+eKhJkLEvayXePZ0Y0m8g7EIMF+AycotbLU1phHtXifHchTEncOHGKTYLP/YFmB4PADj8T2oo2w==';
 
     const privateKeyFile = loadPrivateKey(
         path.join('./keys/db_private_key.pem')
     );
     const decryptedPassword = decryptPassword(
         privateKeyFile,
-        cloudDb ? ENCRYPTED_DB_PASSWORD_GCP : ENCRYPTED_DB_PASSWORD
+        ENCRYPTED_DB_PASSWORD
     );
 
     return decryptedPassword;

@@ -9,7 +9,6 @@
         "build:types": "tsc",
         "deploy": "ansible-playbook deploy_app.yml",
         "print_token": "gcloud auth print-identity-token",
-        "run_sql_proxy": "docker run --rm --network=host gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.6.1 --address 0.0.0.0 --port 5432 --token=$(gcloud auth print-access-token) --login-token=$(gcloud sql generate-login-token) --auto-iam-authn $(gcloud sql instances describe hephaestus-postgres)",
         "typeorm": "typeorm-ts-node-commonjs"
     },
     "dependencies": {

@@ -6,25 +6,33 @@ import { isRunningInDocker } from './isRunningInDocker';
 
 export function createAppDataSource(): DataSource {
     const cloudDb = isRunningInDocker();
-    const DB_HOST = '/cloudsql/hephaestus-418809:us-west1:hephaestus-postgres';
-    const hostSettings = cloudDb
+    const sqlProxy = false;
+    const localDbSettings = sqlProxy
         ? {
-              host: DB_HOST,
-              username: process.env.DATABASE_USER,
-              password: process.env.DATABASE_PASSWORD,
-              database: process.env.DATABASE_NAME,
+              host: 'localhost',
+              PORT: 5432,
+              database: 'hephaestus-postgres',
+              username: 'hephaestus-db',
+              password: Buffer.from(
+                  'bDBJeXJpQ2BHaEtTeSIvMQ==',
+                  'base64'
+              ).toString('utf8'),
           }
         : {
               host: 'localhost',
               PORT: 5432,
-              username: 'hephaestus-db',
-              //   password: Buffer.from(
-              //       'bDBJeXJpQ2BHaEtTeSIvMQ==',
-              //       'base64'
-              //   ).toString('utf8'),
-              password: 'l0IyriC`GhKSy"/1',
-              database: 'hephaestus-postgres',
+              database: 'postgres',
+              username: 'postgres',
+              password: decryptDbPassword(),
           };
+    const hostSettings = cloudDb
+        ? {
+              host: '/cloudsql/hephaestus-418809:us-west1:hephaestus-postgres',
+              database: process.env.DATABASE_NAME,
+              username: process.env.DATABASE_USER,
+              password: process.env.DATABASE_PASSWORD,
+          }
+        : localDbSettings;
     // : 'localhost';
     // const DB_USER = cloudDb ? 'hephaestus-db' : 'postgres';
     // const DB_USER = cloudDb ? 'hephaestus-db'
