@@ -8,6 +8,7 @@
         "build:compile": "npx babel src --extensions .ts --out-dir build --source-maps",
         "build:types": "tsc",
         "deploy": "ansible-playbook deploy_app.yml",
+        "print_token": "gcloud auth print-identity-token",
         "typeorm": "typeorm-ts-node-commonjs"
     },
     "dependencies": {
