@@ -10,6 +10,10 @@ export function createAppDataSource(): DataSource {
     // : 'localhost';
     // const DB_USER = cloudDb ? 'hephaestus-db' : 'postgres';
     // const DB_USER = cloudDb ? 'hephaestus-db'
+    console.log(DB_HOST);
+    console.log(process.env.DATABASE_USER);
+    console.log(process.env.DATABASE_USER);
+    console.log(process.env.DATABASE_NAME);
 
     return new DataSource({
         type: 'postgres',
