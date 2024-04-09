@@ -12,13 +12,12 @@ export function createAppDataSource(): DataSource {
     // const DB_USER = cloudDb ? 'hephaestus-db'
     console.log(DB_HOST);
     console.log(process.env.DATABASE_USER);
-    console.log(process.env.DATABASE_USER);
     console.log(process.env.DATABASE_NAME);
 
     return new DataSource({
         type: 'postgres',
         host: DB_HOST,
-        port: 5433,
+        // port: 5433,
         username: process.env.DATABASE_USER,
         password: process.env.DATABASE_PASSWORD,
         database: process.env.DATABASE_NAME,
