@@ -6,7 +6,7 @@ provider "google" {
 }
 
 resource "google_cloud_run_service" "default" {
-  name     = "google-cloud-run-service"
+  name     = "hephaestus-api"
   location = "us-west1"
 
   template {

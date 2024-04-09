@@ -12,12 +12,17 @@ export async function createUser({
     age,
 }: RegisterUserPayload): Promise<User | undefined> {
     const dataSource = await initializeDataSource();
-    const foundUser =
-        (await dataSource.manager.findOne(UserDbModel, {
-            where: { email },
-        })) ?? undefined;
-
-    if (!foundUser) {
+    let error;
+    let foundUser;
+    try {
+        foundUser =
+            (await dataSource.manager.findOne(UserDbModel, {
+                where: { email },
+            })) ?? undefined;
+    } catch (error_: unknown) {
+        error = error_;
+    }
+    if (!foundUser || error) {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 

@@ -4,14 +4,14 @@
   tasks:
       - name: Ensure a Cloud Run service is present
         community.general.gcp_cloud_run_service:
-            name: 'example-service'
-            location: 'us-central1'
+            name: 'hephaestus-api'
+            location: 'us-west1'
             template:
                 spec:
                     containers:
-                        - image: 'gcr.io/your-project-id/example-image'
+                        - image: 'gcr.io/hephaestus-418809/hephaestus-api:latest'
             autogenerate_revision_name: true
             state: present
-            project: your-project-id
+            project: hephaestus-418809
             auth_kind: serviceaccount
-            service_account_file: '/path/to/your-service-account-file.json'
+            service_account_file: '/terraform/hephaestus-418809-ba3b07f622bf.json'
