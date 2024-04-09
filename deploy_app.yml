@@ -1,6 +1,7 @@
 - name: Manage Google Cloud Run service
   collections:
       - community.general
+      - community.general.gcp_cloud_run_service
   hosts: localhost
   gather_facts: no
   tasks:
