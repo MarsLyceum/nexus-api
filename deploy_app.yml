@@ -2,6 +2,14 @@
   hosts: localhost
   gather_facts: no
   tasks:
+    - name: Build latest docker
+      ansible.builtin.shell:
+        cmd: docker build -t gcr.io/hephaestus-418809/hephaestus-api:latest .
+    
+    - name: Push latest docker
+      ansible.builtin.shell:
+        cmd: docker push gcr.io/hephaestus-418809/hephaestus-api:latest
+
     - name: Authenticate gcloud with a service account
       ansible.builtin.shell: |
         gcloud auth activate-service-account --key-file=/home/milheht/src/hephaestus-api/terraform/hephaestus-418809-aca9086bcf82.json
