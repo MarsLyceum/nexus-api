@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # Service Account Key
 hephaestus-418809-*.json
+terraform/hephaestus-418809-*.json*
 
 # Windows executables
 *.exe

@@ -30,3 +30,9 @@ reason.
 To keep billing low, let's only use Terraform clusters in bursts. We have
 to pay for having the cluster running so let's just run `terraform destroy`
 anytime we aren't actively testing stuff.
+
+
+## Docker Config
+
+The Ansible `deploy_app.yml` script requires that Docker is authenticated with
+GCloud with `gcloud auth configure-docker`.
