@@ -31,6 +31,11 @@ resource "google_cloud_run_service" "default" {
           value = "hephaestus-postgres"
         }
 
+        env {
+          name  = "JWT_PRIVATE_KEY"
+          value = var.jwt_private_key
+        }
+
       }
     }
 

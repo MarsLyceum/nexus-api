@@ -20,6 +20,12 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "jwt_private_key" {
+  description = "The password for the database"
+  type        = string
+  sensitive   = true
+}
+
 resource "google_sql_database" "default" {
   name     = "hephaestus-postgres"
   instance = google_sql_database_instance.default.name
