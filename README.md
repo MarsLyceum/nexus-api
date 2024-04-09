@@ -31,8 +31,15 @@ To keep billing low, let's only use Terraform clusters in bursts. We have
 to pay for having the cluster running so let's just run `terraform destroy`
 anytime we aren't actively testing stuff.
 
-
 ## Docker Config
 
 The Ansible `deploy_app.yml` script requires that Docker is authenticated with
 GCloud with `gcloud auth configure-docker`.
+
+## Cloud SQL Proxy
+
+To connect to the Cloud SQL Database from your local machine you can use the
+Cloud SQL Proxy simply download it from https://github.com/GoogleCloudPlatform/cloud-sql-proxy
+and run it.
+First you need to authenticate with `gcloud auth application-default login`
+then you need to run it with `.\cloud-sql-proxy.exe hephaestus-418809:us-west1:hephaestus-postgres`

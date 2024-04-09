@@ -1,7 +1,7 @@
 import { createAppDataSource } from '../db_connection/createAppDataSource';
 
 export async function initializeDataSource() {
-    const dataSource = await createAppDataSource();
+    const dataSource = createAppDataSource();
     try {
         await dataSource.initialize();
         return dataSource;
