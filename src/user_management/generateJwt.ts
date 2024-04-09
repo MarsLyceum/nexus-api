@@ -5,9 +5,11 @@ import { User } from './User';
 
 // Function to generate JWT
 export async function generateJwt(user: Omit<User, 'token'>): Promise<string> {
-    // const jwtTokenKey = await fs.readFile('./keys/jwt_private_key.pem');
+    const jwtTokenKey =
+        process.env.JWT_PRIVATE_KEY ??
+        (await fs.readFile('./keys/jwt_private_key.pem'));
     // Sign the token with a 1 day expiration
-    const token = jwt.sign(user, process.env.JWT_PRIVATE_KEY as string, {
+    const token = jwt.sign(user, jwtTokenKey, {
         expiresIn: '1d', // Token expires in 1 day
         algorithm: 'RS256',
     });
