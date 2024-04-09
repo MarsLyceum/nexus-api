@@ -2,6 +2,7 @@ provider "google" {
   credentials = file("hephaestus-418809-ba3b07f622bf.json")
   project     = "hephaestus-418809"
   region      = "us-west1"
+  zone        = "us-west1-a"
 }
 
 resource "google_cloud_run_service" "default" {
