@@ -24,6 +24,6 @@
 
     - name: Deploy to Cloud Run using gcloud
       ansible.builtin.command:
-        cmd: gcloud run deploy hephaestus-api --image=gcr.io/hephaestus-418809/hephaestus-api:latest --region=us-west1 --platform=managed --allow-unauthenticated --project=hephaestus-418809
+        cmd: gcloud run deploy hephaestus-api --image=gcr.io/hephaestus-418809/hephaestus-api:latest --region=us-west1 --platform=managed --allow-unauthenticated --project=hephaestus-418809 --add-cloudsql-instances hephaestus-418809:us-west1:hephaestus-postgres
       environment:
         GOOGLE_APPLICATION_CREDENTIALS: "/home/milheht/src/hephaestus-api/terraform/hephaestus-418809-aca9086bcf82.json"
