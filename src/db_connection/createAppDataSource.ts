@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { User } from '../db_models/User';
+import { encode } from 'html-entities';
+
 import { decryptDbPassword } from './decryptPassword';
 import { isRunningInDocker } from './isRunningInDocker';
 
@@ -13,10 +15,12 @@ export function createAppDataSource(): DataSource {
               PORT: 5432,
               database: 'hephaestus-postgres',
               username: 'hephaestus-db',
-              password: Buffer.from(
-                  'bDBJeXJpQ2BHaEtTeSIvMQ==',
-                  'base64'
-              ).toString('utf8'),
+              password: encode(
+                  Buffer.from('bDBJeXJpQ2BHaEtTeSIvMQ==', 'base64').toString(
+                      'utf8'
+                  ),
+                  { mode: 'nonAsciiPrintable' }
+              ),
           }
         : {
               host: 'localhost',
@@ -28,9 +32,13 @@ export function createAppDataSource(): DataSource {
     const hostSettings = cloudDb
         ? {
               host: '/cloudsql/hephaestus-418809:us-west1:hephaestus-postgres',
-              database: process.env.DATABASE_NAME,
-              username: process.env.DATABASE_USER,
-              password: process.env.DATABASE_PASSWORD,
+              database: process.env.DATABASE_NAME ?? 'hephaestus-postgres',
+              username: process.env.DATABASE_USER ?? 'hephaestus-db',
+              password:
+                  process.env.DATABASE_PASSWORD ??
+                  Buffer.from('bDBJeXJpQ2BHaEtTeSIvMQ==', 'base64').toString(
+                      'utf8'
+                  ),
           }
         : localDbSettings;
     // : 'localhost';
@@ -41,9 +49,6 @@ export function createAppDataSource(): DataSource {
     return new DataSource({
         type: 'postgres',
         ...hostSettings,
-        username: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME,
         synchronize: true,
         logging: false,
         entities: [User],
