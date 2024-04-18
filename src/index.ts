@@ -24,6 +24,8 @@ app.use(
     })
 );
 
+app.options('*', cors()); // Enable pre-flight request for DELETE request
+
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
