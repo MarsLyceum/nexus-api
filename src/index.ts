@@ -54,6 +54,11 @@ async function createServer() {
             // origin: 'http://localhost:8081', // Or '*' for all origins
             origin: '*',
         }),
+        (req, res, next) => {
+            console.log(req.headers);
+            console.log(res);
+            next();
+        },
         json(),
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await
