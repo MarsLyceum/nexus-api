@@ -16,15 +16,16 @@ import { resolvers } from './resolvers/index';
 
 export const app = express();
 
+const corsSetting = {
+    origin: 'http://localhost:8081', // Or '*' for all origins
+};
+
 app.use(
     // enable cors for local development
-    cors({
-        // origin: 'http://localhost:8081', // Or '*' for all origins
-        origin: '*',
-    })
+    cors(corsSetting)
 );
 
-app.options('*', cors()); // Enable pre-flight request for DELETE request
+app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
 
 const port = process.env.PORT || '4000';
 app.set('port', port);
@@ -50,15 +51,7 @@ async function createServer() {
 
     app.post(
         '/graphql',
-        cors<cors.CorsRequest>({
-            // origin: 'http://localhost:8081', // Or '*' for all origins
-            origin: '*',
-        }),
-        (req, res, next) => {
-            console.log(req.headers);
-            console.log(res);
-            next();
-        },
+        cors<cors.CorsRequest>(corsSetting),
         json(),
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await

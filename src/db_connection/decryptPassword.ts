@@ -49,17 +49,21 @@ function encryptPasswordWithKey(privateKey: forge.pki.rsa.PrivateKey) {
     console.log('Encrypted Password (Base64):', encryptedPasswordBase64);
 }
 
-export function decryptDbPassword() {
-    const ENCRYPTED_DB_PASSWORD =
-        'MFxX8GDVxBjZwkMxH4RgzZbUnbxq47XzVdAhAzE+dobzA7zXjcQ4QErrE+QokR8wKtvlQYV0AqU7mh9cJXpG2L5Toy/gZK97rvTCuSCPw1PHb8GyWdjLnYrBxOuNQ26Pahi4vG82ZD7XZxOr5uEcyfTSMHNTAZAdYL3DgZvVqKj5YJiscKx/cuzDtXualeHQMgPxi8Tv1pgO+eyWG9HE1K3p60HDRM1EBTQdbjyBJnlap9lqapu4nF338x2u/zqkF9ixw1r69EB1bPYnPNZAaZjQ9tFx9D8krPPNoM0s/RFJJvm5085vCQjN6LYN+xDtDV/2qAO0ZDZ0XGcrm3V4/g==';
+export function decryptDbPassword(cloudDb = true) {
+    if (!cloudDb) {
+        const ENCRYPTED_DB_PASSWORD =
+            'MFxX8GDVxBjZwkMxH4RgzZbUnbxq47XzVdAhAzE+dobzA7zXjcQ4QErrE+QokR8wKtvlQYV0AqU7mh9cJXpG2L5Toy/gZK97rvTCuSCPw1PHb8GyWdjLnYrBxOuNQ26Pahi4vG82ZD7XZxOr5uEcyfTSMHNTAZAdYL3DgZvVqKj5YJiscKx/cuzDtXualeHQMgPxi8Tv1pgO+eyWG9HE1K3p60HDRM1EBTQdbjyBJnlap9lqapu4nF338x2u/zqkF9ixw1r69EB1bPYnPNZAaZjQ9tFx9D8krPPNoM0s/RFJJvm5085vCQjN6LYN+xDtDV/2qAO0ZDZ0XGcrm3V4/g==';
 
-    const privateKeyFile = loadPrivateKey(
-        path.join('./keys/db_private_key.pem')
-    );
-    const decryptedPassword = decryptPassword(
-        privateKeyFile,
-        ENCRYPTED_DB_PASSWORD
-    );
+        const privateKeyFile = loadPrivateKey(
+            path.join('./keys/db_private_key.pem')
+        );
+        const decryptedPassword = decryptPassword(
+            privateKeyFile,
+            ENCRYPTED_DB_PASSWORD
+        );
 
-    return decryptedPassword;
+        return decryptedPassword;
+    }
+
+    return '';
 }

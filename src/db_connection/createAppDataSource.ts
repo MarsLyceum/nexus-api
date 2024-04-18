@@ -8,30 +8,28 @@ import { isRunningInDocker } from './isRunningInDocker';
 
 export function createAppDataSource(): DataSource {
     const cloudDb = isRunningInDocker();
+    console.log('use cloudDb?:', cloudDb);
     const sqlProxy = false;
-    const localDbSettings =
-        !cloudDb &&
-        (sqlProxy
-            ? {
-                  host: 'localhost',
-                  PORT: 5432,
-                  database: 'hephaestus-postgres',
-                  username: 'hephaestus-db',
-                  password: encode(
-                      Buffer.from(
-                          'bDBJeXJpQ2BHaEtTeSIvMQ==',
-                          'base64'
-                      ).toString('utf8'),
-                      { mode: 'nonAsciiPrintable' }
+    const localDbSettings = sqlProxy
+        ? {
+              host: 'localhost',
+              PORT: 5432,
+              database: 'hephaestus-postgres',
+              username: 'hephaestus-db',
+              password: encode(
+                  Buffer.from('bDBJeXJpQ2BHaEtTeSIvMQ==', 'base64').toString(
+                      'utf8'
                   ),
-              }
-            : {
-                  host: 'localhost',
-                  PORT: 5432,
-                  database: 'postgres',
-                  username: 'postgres',
-                  password: decryptDbPassword(),
-              });
+                  { mode: 'nonAsciiPrintable' }
+              ),
+          }
+        : {
+              host: 'localhost',
+              PORT: 5432,
+              database: 'postgres',
+              username: 'postgres',
+              password: decryptDbPassword(cloudDb),
+          };
     const hostSettings = cloudDb
         ? {
               host: '/cloudsql/hephaestus-418809:us-west1:hephaestus-postgres',
