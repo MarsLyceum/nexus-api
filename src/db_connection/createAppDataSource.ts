@@ -8,7 +8,6 @@ import { isRunningInCloudRun } from './isRunningInCloudRun';
 
 export function createAppDataSource(): DataSource {
     const cloudDb = isRunningInCloudRun();
-    console.log('use cloudDb?:', cloudDb);
     const sqlProxy = false;
     const localDbSettings = sqlProxy
         ? {
@@ -45,7 +44,6 @@ export function createAppDataSource(): DataSource {
     // : 'localhost';
     // const DB_USER = cloudDb ? 'hephaestus-db' : 'postgres';
     // const DB_USER = cloudDb ? 'hephaestus-db'
-    console.log(hostSettings);
 
     return new DataSource({
         type: 'postgres',
