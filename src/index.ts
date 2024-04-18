@@ -19,7 +19,8 @@ export const app = express();
 app.use(
     // enable cors for local development
     cors({
-        origin: 'http://localhost:8081', // Or '*' for all origins
+        // origin: 'http://localhost:8081', // Or '*' for all origins
+        origin: '*',
     })
 );
 
@@ -47,7 +48,10 @@ async function createServer() {
 
     app.post(
         '/graphql',
-        cors<cors.CorsRequest>(),
+        cors<cors.CorsRequest>({
+            // origin: 'http://localhost:8081', // Or '*' for all origins
+            origin: '*',
+        }),
         json(),
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await
