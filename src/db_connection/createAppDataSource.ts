@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { User } from '../db_models/User';
 import { encode } from 'html-entities';
 
+import { User } from '../db_models/User';
 import { decryptDbPassword } from './decryptPassword';
-import { isRunningInDocker } from './isRunningInDocker';
+import { isRunningInCloudRun } from './isRunningInCloudRun';
 
 export function createAppDataSource(): DataSource {
-    const cloudDb = isRunningInDocker();
+    const cloudDb = isRunningInCloudRun();
     console.log('use cloudDb?:', cloudDb);
     const sqlProxy = false;
     const localDbSettings = sqlProxy
