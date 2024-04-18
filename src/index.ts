@@ -16,6 +16,13 @@ import { resolvers } from './resolvers/index';
 
 export const app = express();
 
+app.use(
+    // enable cors for local development
+    cors({
+        origin: 'http://localhost:8081', // Or '*' for all origins
+    })
+);
+
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
