@@ -83,6 +83,9 @@ importers:
       cookie-parser:
         specifier: ~1.4.4
         version: 1.4.6
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
       debug:
         specifier: ~2.6.9
         version: 2.6.9

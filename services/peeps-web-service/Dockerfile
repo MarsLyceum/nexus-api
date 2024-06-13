@@ -31,6 +31,13 @@ RUN pnpm install --frozen-lockfile --prod
 # Ensure native modules like bcrypt are rebuilt
 RUN pnpm rebuild bcrypt
 
+# Copy and set permissions for the entry point script
+# COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Set the entry point
+# ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
 # Run the application as a non-root user.
 USER node
 
