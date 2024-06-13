@@ -60,9 +60,11 @@ async function createServer() {
     );
 
     app.listen(port, () => {
-        console.log(`server started on http://localhost:${port}/graphql`);
+        console.log(`Server started on http://localhost:${port}/graphql`);
     });
 }
 
 // eslint-disable-next-line no-void
-void createServer();
+void createServer().catch((error) => {
+    console.error('Failed to start server:', error);
+});

@@ -168,8 +168,6 @@ importers:
         specifier: ^5.4.3
         version: 5.4.5
 
-  services/peeps-web-service: {}
-
 packages:
 
   '@ampproject/remapping@2.3.0':
