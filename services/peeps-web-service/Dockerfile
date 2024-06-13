@@ -13,19 +13,19 @@ ENV NODE_ENV dev
 
 WORKDIR /usr/src/web
 
+# Copy package.json and pnpm-lock.yaml first to leverage Docker cache
+COPY package.json pnpm-lock.yaml ./
+
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.pnpm-store to speed up subsequent builds.
-# Leverage bind mounts to package.json and pnpm-lock.yaml to avoid having to copy them into this layer.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=pnpm-lock.yaml,target=pnpm-lock.yaml \
-    --mount=type=cache,target=/root/.pnpm-store \
+RUN --mount=type=cache,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile --prod
-
-# Run the application as a non-root user.
-USER node
 
 # Copy the rest of the source files into the image.
 COPY . .
+
+# Run the application as a non-root user.
+USER node
 
 # Expose the port that the application listens on.
 EXPOSE 4000
