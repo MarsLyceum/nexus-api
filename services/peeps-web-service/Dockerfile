@@ -26,6 +26,9 @@ RUN rm -rf node_modules
 # Copy the rest of the source files into the image.
 COPY . .
 
+# Ensure native modules like bcrypt are rebuilt
+RUN pnpm rebuild bcrypt
+
 # Run the application as a non-root user.
 USER node
 
