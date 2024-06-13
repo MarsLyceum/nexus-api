@@ -10,6 +10,9 @@ RUN npm install -g pnpm
 # Use production node environment by default.
 ENV NODE_ENV production
 
+# Set pnpm store directory
+RUN pnpm config set store-dir /root/.pnpm-store
+
 WORKDIR /usr/src/web
 
 # Copy package.json and pnpm-lock.yaml first to leverage Docker cache
@@ -34,6 +37,9 @@ USER node
 
 # Expose the port that the application listens on.
 EXPOSE 4000
+
+# Set the environment variable for the port
+ENV PORT=4000
 
 # Run the application.
 CMD pnpm run start
