@@ -15,14 +15,13 @@ WORKDIR /usr/src/web
 # Copy package.json and pnpm-lock.yaml first to leverage Docker cache
 COPY package.json pnpm-lock.yaml ./
 
-# Clean up node_modules directory to prevent conflicts
-RUN rm -rf node_modules
-
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.pnpm-store to speed up subsequent builds.
 RUN --mount=type=cache,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile --prod
 
+# Remove local node_modules to avoid conflicts
+RUN rm -rf node_modules
 
 # Copy the rest of the source files into the image.
 COPY . .
