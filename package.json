@@ -1,16 +1,14 @@
 {
-    "name": "hephaestus-api",
-    "version": "0.0.0",
+    "name": "peeps-api",
+    "version": "1.0.0",
     "private": true,
-    "scripts": {
-        "start": "ts-node src/index.ts",
-        "start:watch": "nodemon src/index.ts --watch",
-        "build:compile": "npx babel src --extensions .ts --out-dir build --source-maps",
-        "build:types": "tsc",
-        "deploy": "ansible-playbook deploy_app.yml",
-        "print_token": "gcloud auth print-identity-token",
-        "typeorm": "typeorm-ts-node-commonjs"
-    },
+    "description": "",
+    "scripts": {},
+    "keywords": [],
+    "author": "Mars Lyceum Inc.",
+    "workspaces": [
+        "services/*"
+    ],
     "dependencies": {
         "@apollo/server": "^4.10.2",
         "@babel/cli": "^7.24.1",
