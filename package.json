@@ -7,7 +7,9 @@
         "lint": "npx eslint .",
         "typecheck": "tsc --noEmit",
         "lerna:lint": "npx lerna run lint",
-        "lerna:typecheck": "npx lerna run typecheck"
+        "lerna:typecheck": "npx lerna run typecheck",
+        "lint-all": "./run-scripts.sh lint",
+        "typecheck-all": "./run-scripts.sh typecheck"
     },
     "keywords": [],
     "author": "Mars Lyceum Inc.",
