@@ -10,8 +10,8 @@ RUN npm install -g pnpm
 # Use production node environment by default.
 ENV NODE_ENV production
 
-# Set pnpm store directory
-RUN pnpm config set store-dir /root/.pnpm-store
+# Set pnpm store directory globally
+RUN pnpm config set store-dir /root/.pnpm-store --global
 
 WORKDIR /usr/src/web
 
