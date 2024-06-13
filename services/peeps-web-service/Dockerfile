@@ -31,4 +31,4 @@ USER node
 EXPOSE 4000
 
 # Run the application.
-CMD ["pnpm", "start"]
+CMD pnpm run start
