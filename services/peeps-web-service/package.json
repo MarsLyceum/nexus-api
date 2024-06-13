@@ -6,11 +6,12 @@
     "scripts": {
         "start": "ts-node src/index.ts",
         "start:watch": "nodemon src/index.ts --watch",
-        "build:compile": "npx babel src --extensions .ts --out-dir build --source-maps",
-        "build:types": "tsc",
+        "build": "npx babel src --extensions .ts --out-dir build --source-maps",
         "deploy": "ansible-playbook deploy_app.yml",
         "print_token": "gcloud auth print-identity-token",
-        "typeorm": "typeorm-ts-node-commonjs"
+        "typeorm": "typeorm-ts-node-commonjs",
+        "typecheck": "tsc --noEmit",
+        "lint": "npx eslint ."
     },
     "dependencies": {
         "@apollo/server": "^4.10.2",
