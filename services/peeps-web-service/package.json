@@ -11,5 +11,6 @@
         "deploy": "ansible-playbook deploy_app.yml",
         "print_token": "gcloud auth print-identity-token",
         "typeorm": "typeorm-ts-node-commonjs"
-    }
+    },
+    "dependencies": {}
 }
