@@ -8,8 +8,7 @@ FROM node:${NODE_VERSION}-alpine
 RUN npm install -g pnpm
 
 # Use production node environment by default.
-# ENV NODE_ENV production
-ENV NODE_ENV dev
+ENV NODE_ENV production
 
 WORKDIR /usr/src/web
 
@@ -20,6 +19,9 @@ COPY package.json pnpm-lock.yaml ./
 # Leverage a cache mount to /root/.pnpm-store to speed up subsequent builds.
 RUN --mount=type=cache,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile --prod
+
+# Clean up node_modules directory to prevent conflicts
+RUN rm -rf node_modules
 
 # Copy the rest of the source files into the image.
 COPY . .
