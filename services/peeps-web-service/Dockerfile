@@ -30,7 +30,7 @@ RUN rm -rf node_modules
 COPY . .
 
 # Ensure native modules like bcrypt are rebuilt
-RUN pnpm rebuild bcrypt
+RUN pnpm config set store-dir /root/.pnpm-store --global && pnpm rebuild bcrypt
 
 # Run the application as a non-root user.
 USER node
