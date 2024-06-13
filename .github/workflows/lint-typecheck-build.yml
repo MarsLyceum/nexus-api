@@ -32,7 +32,7 @@ jobs:
               run: pnpm install
 
             - name: Run lint
-              run: pnpm run lint-all
+              run: pnpm run lerna:lint
 
     typecheck:
         runs-on: ubuntu-latest
@@ -57,4 +57,4 @@ jobs:
               run: pnpm install
 
             - name: Run type check
-              run: pnpm run typecheck-all
+              run: pnpm run lerna:typecheck
