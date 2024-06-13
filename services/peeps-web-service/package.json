@@ -12,5 +12,7 @@
         "print_token": "gcloud auth print-identity-token",
         "typeorm": "typeorm-ts-node-commonjs"
     },
-    "dependencies": {}
+    "dependencies": {
+        "colormaker": "1.0.4"
+    }
 }
