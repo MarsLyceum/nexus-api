@@ -26,13 +26,13 @@ export async function createUser({
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const dbUser = new UserDbModel(
-            email,
-            hashedPassword,
-            firstName,
-            lastName,
-            age
-        );
+        const dbUser = new UserDbModel();
+        dbUser.email = email;
+        dbUser.hashedPassword = hashedPassword;
+        dbUser.firstName = firstName ?? '';
+        dbUser.lastName = lastName ?? '';
+        dbUser.age = age ?? 0;
+
         const savedDbUser = await dataSource.manager.save(dbUser);
 
         return createAppUser(savedDbUser);
