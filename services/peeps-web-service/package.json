@@ -34,6 +34,7 @@
         "@types/node": "^20.14.2",
         "@types/node-forge": "^1.3.11",
         "@types/readline-sync": "^1.4.8",
+        "@types/ws": "^8.5.10",
         "@typescript-eslint/eslint-plugin": "^7.4.0",
         "@typescript-eslint/parser": "^7.4.0",
         "axios": "^1.6.8",
@@ -68,11 +69,10 @@
         "prettier": "3.2.5",
         "readline-sync": "^1.4.10",
         "reflect-metadata": "^0.2.2",
+        "subscriptions-transport-ws": "^0.11.0",
         "ts-node": "^10.9.2",
         "typeorm": "^0.3.20",
         "typescript": "^5.4.3",
-        "ws": "^8.17.0",
-        "@types/ws": "^8.5.10"
-    },
-    "devDependencies": {}
+        "ws": "^8.17.0"
+    }
 }

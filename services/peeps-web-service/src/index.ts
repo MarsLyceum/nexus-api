@@ -4,7 +4,6 @@
  * Module dependencies.
  */
 import 'reflect-metadata';
-
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -56,6 +55,7 @@ async function startServer() {
 
     await apolloServer.start();
 
+    // WebSocket server for graphql-ws
     const wsServer = new WebSocketServer({
         server: httpServer,
         path: '/graphql',
