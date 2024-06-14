@@ -2,11 +2,14 @@
 
 The backend API for Hephaestus.
 
-## Required Tools
+## Required Development Tools
 
 - Python 3 for build and deploy scripts
 - Terraform
 - GCloud CLI
+- Docker
+- PostgreSQL for local DB config if you want to run it locally
+- pnpm package manager
 
 ## DB
 
