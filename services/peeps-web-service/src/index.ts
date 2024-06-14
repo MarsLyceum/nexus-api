@@ -1,28 +1,21 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-import 'reflect-metadata';
-
-import { IncomingMessage, Server, ServerResponse } from 'node:http';
+import { PubSub } from 'graphql-subscriptions';
+import { createServer } from 'http';
+import express, { json } from 'express';
+import cors from 'cors';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { createServer } from 'http';
-import cors from 'cors';
-import express, { json } from 'express';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { PubSub } from 'graphql-subscriptions';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { resolvers } from './resolvers/index';
 
 const pubsub = new PubSub();
-export const app = express();
+const app = express();
 const httpServer = createServer(app);
+
 const schema = makeExecutableSchema({
     typeDefs: schemaTypeDefs,
     resolvers,
@@ -32,19 +25,12 @@ const corsSetting = {
     origin: 'http://localhost:8081', // Or '*' for all origins
 };
 
-app.use(
-    // enable cors for local development
-    cors(corsSetting)
-);
-
-app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
+app.use(cors(corsSetting));
+app.options('*', cors(corsSetting));
 
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
 async function startServer() {
     const apolloServer = new ApolloServer({
         schema,
@@ -62,14 +48,19 @@ async function startServer() {
         path: '/graphql',
     });
 
-    useServer({ schema, context: { pubsub } }, wsServer);
+    useServer(
+        {
+            schema,
+            context: () => ({ pubsub }),
+        },
+        wsServer
+    );
 
     app.post(
         '/graphql',
-        cors<cors.CorsRequest>(corsSetting),
+        cors(corsSetting),
         json(),
         expressMiddleware(apolloServer, {
-            // eslint-disable-next-line @typescript-eslint/require-await
             context: async ({ req }) => ({ token: req.headers.token, pubsub }),
         })
     );
@@ -79,11 +70,11 @@ async function startServer() {
     });
 
     setInterval(() => {
+        console.log('Publishing greetings...');
         pubsub.publish('GREETINGS', { greetings: 'Hello every 5 seconds' });
     }, 5000);
 }
 
-// eslint-disable-next-line no-void
-void startServer().catch((error) => {
+startServer().catch((error) => {
     console.error('Failed to start server:', error);
 });
