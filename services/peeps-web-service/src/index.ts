@@ -78,7 +78,6 @@ async function startServer() {
     });
 
     async function publishGreetings() {
-        console.log('Publishing greetings...');
         await pubsub.publish('GREETINGS', { greetings: 'Hello every 5 seconds' });
     }
 

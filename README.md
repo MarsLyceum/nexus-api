@@ -61,3 +61,27 @@ To test a Google Cloud Run change locally you can run these Docker commands
 docker build -t local-test .
 docker run -it --rm -p 4000:4000 local-test
 ```
+
+### Testing WebSocket Connection
+
+To test the WebSocket connection you can do the following:
+
+Connect with
+```sh
+wscat -c ws://localhost:4000/graphql -s graphql-transport-ws
+```
+or on Google Cloud Run with
+
+```sh
+wscat -c wss://hephaestus-api-iwesf7iypq-uw.a.run.app/graphql -s graphql-transport-ws
+```
+
+Send the initialization message with
+```sh
+{"type":"connection_init","payload":{"reconnect":true}}
+```
+
+Send the GraphQL subscription message:
+```sh
+ {"id":"1","type":"subscribe","payload":{"query":"subscription OnGreeting { greetings }"}}
+```
