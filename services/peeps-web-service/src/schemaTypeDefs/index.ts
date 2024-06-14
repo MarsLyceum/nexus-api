@@ -1,4 +1,4 @@
-export const schemas = `#graphql
+export const schemaTypeDefs = `#graphql
 
   type User {
     id: Int!
@@ -19,5 +19,9 @@ export const schemas = `#graphql
   }
   type Query {
     loginUser(email: String!, password: String!): User
+  }
+
+  type Subscription {
+    greetings: String
   }
 `;

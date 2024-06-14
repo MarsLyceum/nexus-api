@@ -53,6 +53,8 @@
         "eslint-plugin-unicorn": "^51.0.1",
         "express": "^4.19.2",
         "graphql": "^16.8.1",
+        "graphql-subscriptions": "^2.0.0",
+        "graphql-ws": "^5.16.0",
         "html-entities": "^2.5.2",
         "http-errors": "~1.6.3",
         "jade": "~1.11.0",
@@ -67,6 +69,10 @@
         "reflect-metadata": "^0.2.2",
         "ts-node": "^10.9.2",
         "typeorm": "^0.3.20",
-        "typescript": "^5.4.3"
+        "typescript": "^5.4.3",
+        "ws": "^8.17.0"
+    },
+    "devDependencies": {
+        "@types/ws": "^8.5.10"
     }
 }
