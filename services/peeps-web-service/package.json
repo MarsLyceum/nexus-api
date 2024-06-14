@@ -7,7 +7,7 @@
         "start": "ts-node src/index.ts",
         "start:watch": "nodemon src/index.ts --watch",
         "build": "python ./test-build.py",
-        "deploy": "ansible-playbook deploy_app.yml",
+        "deploy": "python deploy_app.py",
         "print_token": "gcloud auth print-identity-token",
         "typeorm": "typeorm-ts-node-commonjs",
         "typecheck": "tsc --noEmit",

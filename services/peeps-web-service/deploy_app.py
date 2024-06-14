@@ -3,87 +3,105 @@ import subprocess
 import sys
 from glob import glob
 
+# ANSI escape sequences for colors
+HEADER = "\033[95m"
+OKBLUE = "\033[94m"
+OKCYAN = "\033[96m"
+OKGREEN = "\033[92m"
+WARNING = "\033[93m"
+FAIL = "\033[91m"
+ENDC = "\033[0m"
+BOLD = "\033[1m"
+UNDERLINE = "\033[4m"
 
-# ANSI escape sequences for coloring
-class bcolors:
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
+
+def color_text(text, color_code):
+    return f"{color_code}{text}{ENDC}"
 
 
 def find_key_file():
     key_files = glob("./terraform/hephaestus-418809-*.json")
     if not key_files:
-        print(f"{bcolors.FAIL}No service account key file found{bcolors.ENDC}")
+        print(color_text("No service account key file found", FAIL))
         sys.exit(1)
     return key_files[0]
 
 
 def run_command(command, env=None):
-    print(
-        f"{bcolors.OKBLUE}Running command: {bcolors.BOLD}{command}{bcolors.ENDC}"
-    )
+    print(color_text(f"Running command: {command}", OKBLUE + BOLD))
     result = subprocess.run(command, shell=True, env=env)
     if result.returncode != 0:
-        print(f"{bcolors.FAIL}Command failed: {command}{bcolors.ENDC}")
+        print(color_text(f"Command failed: {command}", FAIL))
         sys.exit(result.returncode)
 
 
 def main():
+    project_id = "hephaestus-418809"
+    region = "us-west1"
+
     # Find the service account key file
     key_file = find_key_file()
-    print(f"{bcolors.OKGREEN}Using key file: {key_file}{bcolors.ENDC}")
+    print(color_text(f"Using key file: {key_file}", OKGREEN))
 
     # Set environment variable for gcloud authentication
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
 
     # Configure Docker to use gcloud as a credential helper
     print(
-        f"{bcolors.OKCYAN}Configuring Docker to use gcloud as a credential helper...{bcolors.ENDC}"
+        color_text(
+            "Configuring Docker to use gcloud as a credential helper...",
+            OKCYAN,
+        )
     )
     run_command("gcloud auth configure-docker --quiet")
 
     # Authenticate gcloud with a service account
     print(
-        f"{bcolors.OKCYAN}Authenticating gcloud with a service account...{bcolors.ENDC}"
+        color_text("Authenticating gcloud with a service account...", OKCYAN)
     )
     run_command(f"gcloud auth activate-service-account --key-file={key_file}")
 
-    # Build Docker image
-    print(f"{bcolors.OKCYAN}Building Docker image...{bcolors.ENDC}")
+    # Ensure the correct project is set for gcloud commands
+    run_command(f"gcloud config set project {project_id}")
+
+    # Enable Cloud Run Admin API
+    print(color_text("Enabling Cloud Run Admin API...", OKCYAN))
     run_command(
-        "DOCKER_BUILDKIT=1 docker build -t gcr.io/hephaestus-418809/hephaestus-api:latest ."
+        f"gcloud services enable run.googleapis.com --project={project_id}"
+    )
+
+    # Build Docker image with BuildKit enabled
+    print(color_text("Building Docker image...", OKCYAN))
+    env = os.environ.copy()
+    env["DOCKER_BUILDKIT"] = "1"
+    run_command(
+        "docker build -t gcr.io/hephaestus-418809/hephaestus-api:latest .",
+        env=env,
     )
 
     # Push Docker image
-    print(f"{bcolors.OKCYAN}Pushing Docker image...{bcolors.ENDC}")
+    print(color_text("Pushing Docker image...", OKCYAN))
     run_command("docker push gcr.io/hephaestus-418809/hephaestus-api:latest")
 
     # Deploy to Cloud Run
-    print(f"{bcolors.OKCYAN}Deploying to Cloud Run...{bcolors.ENDC}")
+    print(color_text("Deploying to Cloud Run...", OKCYAN))
     run_command(
-        "gcloud run deploy hephaestus-api "
-        "--image=gcr.io/hephaestus-418809/hephaestus-api:latest "
-        "--region=us-west1 "
-        "--platform=managed "
-        "--allow-unauthenticated "
-        "--project=hephaestus-418809 "
-        "--add-cloudsql-instances hephaestus-418809:us-west1:hephaestus-postgres"
+        f"gcloud run deploy hephaestus-api "
+        f"--image=gcr.io/{project_id}/hephaestus-api:latest "
+        f"--region={region} "
+        f"--platform=managed "
+        f"--allow-unauthenticated "
+        f"--project={project_id} "
+        f"--add-cloudsql-instances {project_id}:{region}:hephaestus-postgres"
     )
 
     # Enable unauthenticated calls
-    print(f"{bcolors.OKCYAN}Enabling unauthenticated calls...{bcolors.ENDC}")
+    print(color_text("Enabling unauthenticated calls...", OKCYAN))
     run_command(
-        "gcloud run services add-iam-policy-binding hephaestus-api "
-        '--member="allUsers" '
-        '--role="roles/run.invoker" '
-        "--region=us-west1"
+        f"gcloud run services add-iam-policy-binding hephaestus-api "
+        f'--member="allUsers" '
+        f'--role="roles/run.invoker" '
+        f"--region={region}"
     )
 
 
