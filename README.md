@@ -56,3 +56,12 @@ or this one
 
 
 ```
+
+## Testing Local Changes
+
+To test a Google Cloud Run change locally you can run these Docker commands
+
+```sh
+docker build -t local-test .
+docker run -it --rm -p 4000:4000 local-test
+```
