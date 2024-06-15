@@ -66,7 +66,12 @@ async function startServer() {
         socket.on('error', (err) => console.error('WebSocket error:', err));
     });
 
-    useServer({ schema, context: { pubsub } }, wsServer);
+    useServer({
+        schema,
+        context: { pubsub },
+        onConnect: (ctx) => console.log('Client connected', ctx),
+        onError: (ctx, msg, error) => console.error('Connection error', msg, error),
+      }, wsServer);
 
     app.post(
         '/graphql',
