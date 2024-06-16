@@ -131,6 +131,9 @@ importers:
       graphql:
         specifier: ^16.8.1
         version: 16.8.2
+      graphql-sse:
+        specifier: ^2.5.3
+        version: 2.5.3(graphql@16.8.2)
       graphql-subscriptions:
         specifier: ^2.0.0
         version: 2.0.0(graphql@16.8.2)
@@ -2450,6 +2453,12 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  graphql-sse@2.5.3:
+    resolution: {integrity: sha512-5IcFW3e7fPOG7oFkK1v3X1wWtCJArQKB/H1UJeNotjy7a/9EYA5K+EiHJF1BiDSVNx7y64bd0FlDETrNBSvIHQ==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      graphql: '>=0.11 <=16'
 
   graphql-subscriptions@2.0.0:
     resolution: {integrity: sha512-s6k2b8mmt9gF9pEfkxsaO1lTxaySfKoEJzEfmwguBbQ//Oq23hIXCfR1hm4kdh5hnR20RdwB+s3BCb+0duHSZA==}
@@ -7217,6 +7226,10 @@ snapshots:
   graceful-readlink@1.0.1: {}
 
   graphemer@1.4.0: {}
+
+  graphql-sse@2.5.3(graphql@16.8.2):
+    dependencies:
+      graphql: 16.8.2
 
   graphql-subscriptions@2.0.0(graphql@16.8.2):
     dependencies:

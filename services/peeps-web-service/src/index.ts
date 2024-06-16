@@ -9,9 +9,7 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createServer } from 'node:http';
 import cors from 'cors';
-import express, { json } from 'express';
-import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import express, { Request, Response, NextFunction, json } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { PubSub } from 'graphql-subscriptions';
 
@@ -40,6 +38,18 @@ app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE req
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
+interface ExtendedRequest extends Request {
+    getHeader: (header: string) => string | undefined;
+}
+
+function addGetHeader(req: Request, res: Response, next: NextFunction) {
+    (req as ExtendedRequest).getHeader = (header: string) => {
+        const value = req.headers[header.toLowerCase()];
+        return Array.isArray(value) ? value.join(', ') : value;
+    };
+    next();
+}
+
 /**
  * Create HTTP server.
  */
@@ -55,31 +65,44 @@ async function startServer() {
 
     await apolloServer.start();
 
-    // WebSocket server for graphql-ws
-    const wsServer = new WebSocketServer({
-        server: httpServer,
-        path: '/graphql',
-    });
+    app.use(addGetHeader);
 
-    wsServer.on('connection', (socket) => {
-        console.log('New WebSocket connection');
-        socket.on('error', (err) => console.error('WebSocket error:', err));
-    });
+    // SSE endpoint
+    app.get('/graphql/stream', (req, res) => {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
 
-    useServer({
-        schema,
-        context: { pubsub },
-        onConnect: (ctx) => console.log('Client connected', ctx),
-        onError: (ctx, msg, error) => console.error('Connection error', msg, error),
-      }, wsServer);
+        const asyncIterator = pubsub.asyncIterator<{ greetings: string }>('GREETINGS');
+
+        const onData = async () => {
+            try {
+                for await (const data of asyncIterator as AsyncIterableIterator<{ greetings: string }>) {
+                    res.write(`data: ${JSON.stringify(data)}\n\n`);
+                }
+            } catch (error) {
+                console.error('Failed to stream data:', error);
+            }
+        };
+
+        onData();
+
+        req.on('close', () => {
+            if (asyncIterator.return) {
+                asyncIterator.return();
+            }
+        });
+    });
 
     app.post(
         '/graphql',
         cors<cors.CorsRequest>(corsSetting),
         json(),
         expressMiddleware(apolloServer, {
-            // eslint-disable-next-line @typescript-eslint/require-await
-            context: async ({ req }) => ({ token: req.headers.token, pubsub }),
+            context: async ({ req }) => {
+                const extendedReq = req as ExtendedRequest;
+                return { token: extendedReq.getHeader('token'), pubsub };
+            },
         })
     );
 
@@ -92,7 +115,7 @@ async function startServer() {
     }
 
     setInterval(() => {
-        publishGreetings().catch(error => {
+        publishGreetings().catch((error) => {
             console.error('Failed to publish greetings:', error);
         });
     }, 5000);
