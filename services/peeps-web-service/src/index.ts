@@ -38,17 +38,6 @@ app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE req
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
-interface ExtendedRequest extends Request {
-    getHeader: (header: string) => string | undefined;
-}
-
-function addGetHeader(req: Request, res: Response, next: NextFunction) {
-    (req as ExtendedRequest).getHeader = (header: string) => {
-        const value = req.headers[header.toLowerCase()];
-        return Array.isArray(value) ? value.join(', ') : value;
-    };
-    next();
-}
 
 /**
  * Create HTTP server.
@@ -65,7 +54,6 @@ async function startServer() {
 
     await apolloServer.start();
 
-    app.use(addGetHeader);
 
     // SSE endpoint
     app.get('/graphql/stream', (req, res) => {
@@ -77,6 +65,7 @@ async function startServer() {
 
         const onData = async () => {
             try {
+                // eslint-disable-next-line no-restricted-syntax
                 for await (const data of asyncIterator as AsyncIterableIterator<{ greetings: string }>) {
                     res.write(`data: ${JSON.stringify(data)}\n\n`);
                 }

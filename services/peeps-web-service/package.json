@@ -11,7 +11,8 @@
         "print_token": "gcloud auth print-identity-token",
         "typeorm": "typeorm-ts-node-commonjs",
         "typecheck": "tsc --noEmit",
-        "lint": "npx eslint ."
+        "lint": "npx eslint .",
+        "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
         "@apollo/server": "^4.10.2",
@@ -21,6 +22,7 @@
         "@babel/plugin-transform-runtime": "^7.24.3",
         "@babel/preset-env": "^7.24.3",
         "@babel/preset-typescript": "^7.24.1",
+        "@google-cloud/api-gateway": "^3.3.0",
         "@google-cloud/secret-manager": "^5.2.0",
         "@graphql-tools/schema": "^10.0.4",
         "@graphql-tools/utils": "^10.1.2",
@@ -73,7 +75,8 @@
         "subscriptions-transport-ws": "^0.11.0",
         "ts-node": "^10.9.2",
         "typeorm": "^0.3.20",
-        "typescript": "^5.4.3",
-        "ws": "^8.17.0"
+        "typescript": "^5.4.5",
+        "ws": "^8.17.0",
+        "yargs": "^17.7.2"
     }
 }

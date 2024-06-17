@@ -8,7 +8,8 @@
         "typecheck": "tsc --noEmit",
         "lerna:lint": "npx lerna run lint",
         "lerna:typecheck": "npx lerna run typecheck",
-        "lerna:build": "npx lerna run build"
+        "lerna:build": "npx lerna run build",
+        "lerna:clean-pnpm": "npx lerna run clean-pnpm"
     },
     "keywords": [],
     "author": "Mars Lyceum Inc.",
