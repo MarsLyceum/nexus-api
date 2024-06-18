@@ -114,8 +114,8 @@ def main():
     run_command("docker push gcr.io/hephaestus-418809/hephaestus-api:latest")
 
     # Prepare the environment variables for Cloud Run
-    env_var_flags = " ".join(
-        [f"--set-env-vars {key}={value}" for key, value in env_vars.items()]
+    env_var_flags = ",".join(
+        [f"{key}={value}" for key, value in env_vars.items()]
     )
 
     # Deploy to Cloud Run
@@ -125,10 +125,10 @@ def main():
         f"--image=gcr.io/{project_id}/hephaestus-api:latest "
         f"--region={region} "
         f"--platform=managed "
-        f"--add-cloudsql-instances {cloud_sql_instance}"
+        f"--add-cloudsql-instances {cloud_sql_instance} "
         f"--allow-unauthenticated "
         f"--project={project_id} "
-        f"{env_var_flags}"
+        f'--set-env-vars INSTANCE_CONNECTION_NAME="{cloud_sql_instance}",{env_var_flags}'
     )
 
     # Enable unauthenticated calls

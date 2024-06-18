@@ -1,4 +1,0 @@
-# The main GCP App Engine file
-runtime: nodejs20
-beta_settings:
-    cloud_sql_instances: hephaestus-418809:us-west1:hephaestus-postgres
