@@ -91,8 +91,7 @@ async function startServer() {
         json(),
         expressMiddleware(apolloServer, {
             context: async ({ req }) => {
-                const extendedReq = req as ExtendedRequest;
-                return { token: extendedReq.getHeader('token'), pubsub };
+                return { pubsub };
             },
         })
     );
