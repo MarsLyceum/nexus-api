@@ -60,6 +60,7 @@ def load_env_variables(env_file):
 def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
+    cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
 
     # Find the .env file
     env_file = find_env_file()
@@ -124,6 +125,7 @@ def main():
         f"--image=gcr.io/{project_id}/hephaestus-api:latest "
         f"--region={region} "
         f"--platform=managed "
+        f"--add-cloudsql-instances {cloud_sql_instance}"
         f"--allow-unauthenticated "
         f"--project={project_id} "
         f"{env_var_flags}"
