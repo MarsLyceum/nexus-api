@@ -96,3 +96,26 @@ DATABASE_PASSWORD=...
 ```
 
 you can get this information from David, make sure that you do not check it into git.
+
+## Port Binding Error
+
+Sometimes when running a service on Windows you will get this error:
+`listen EACCES: permission denied 0.0.0.0:4000` if this happens the solution
+is to stop and restart the Windows NAT driver service with [listen-eacces-permission-denied-in-windows](#https://stackoverflow.com/questions/59428844/listen-eacces-permission-denied-in-windows)
+```sh
+net stop winnat
+net start winnat
+```
+
+## Migrations
+
+TypeORM requires that we generate and perform migrations each time we change one of the entities
+as that changes the structure of the database. In order to do this run
+the scripts in the package.json for the service: `typeorm:migration:generate`.
+Then you should move any generated migrations into a `migrations` folder.
+Then you should run `npx tsc` from the `migrations` folder to generate
+JavaScript migrations from the TypeScript migrations.
+
+Then once you have the JavaScript migrations in the `migrations` folder, which
+will be connected to the TypeORM `DataSource` run `typeorm:migrations:run` and
+it will scan that folder and run the migrations to apply the changes to the database.

@@ -39,7 +39,11 @@ if build_status != 0:
 
 # Remove any existing container with the same name
 print("Removing any existing container with the same name...")
-run_command("docker rm -f local-test-container > /dev/null 2>&1")
+remove_status, remove_output, remove_error = run_command(
+    "docker rm -f local-test-container"
+)
+if remove_status != 0:
+    print(f"Warning: Could not remove existing container: {remove_error}")
 
 # Run the Docker container in detached mode
 print("Running Docker container in detached mode...")

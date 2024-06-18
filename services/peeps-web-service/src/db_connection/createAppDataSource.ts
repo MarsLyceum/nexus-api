@@ -37,7 +37,7 @@ export function createAppDataSource(): DataSource {
         synchronize: false,
         logging: true,
         entities: [User],
-        migrations: [],
+        migrations: ["migrations/**/*.js"],
         subscribers: [],
     });
 }
