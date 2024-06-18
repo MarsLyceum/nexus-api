@@ -15,7 +15,7 @@
         "clean-pnpm": "python clean_pnpm.py",
         "typeorm:migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d ./src/db_connection/createAppDataSource.ts",
         "typeorm:migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d ./src/db_connection/createAppDataSource.ts",
-        "cloud_sql_proxy": "cloud-sql-proxy hephaestus-418809:us-west1:hephaestus-postgres --port=5434"
+        "cloud_sql_proxy": "cloud-sql-proxy hephaestus-418809:us-west1:user-api --port=5434"
     },
     "dependencies": {
         "@apollo/server": "^4.10.2",
