@@ -13,9 +13,8 @@ export const resolvers = {
         },
     },
     Query: {
-        fetchUser(_: never, { email }: FetchUserPayload) {
-            return fetchUser(email);
-        },
+        fetchUser: async (_: never, { email }: FetchUserPayload) =>
+            fetchUser(email),
     },
     Subscription: {
         greetings: {
