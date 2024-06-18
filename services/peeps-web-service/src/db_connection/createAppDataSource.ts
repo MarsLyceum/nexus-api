@@ -34,10 +34,12 @@ export function createAppDataSource(): DataSource {
     return new DataSource({
         type: 'postgres',
         ...hostSettings,
-        synchronize: true,
-        logging: false,
+        synchronize: false,
+        logging: true,
         entities: [User],
         migrations: [],
         subscribers: [],
     });
 }
+
+export const DATA_SOURCE = createAppDataSource()

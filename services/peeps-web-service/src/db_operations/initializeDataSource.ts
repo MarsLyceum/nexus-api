@@ -3,7 +3,9 @@ import { createAppDataSource } from '../db_connection/createAppDataSource';
 export async function initializeDataSource() {
     const dataSource = createAppDataSource();
     try {
-        await dataSource.initialize();
+        if (!dataSource.isInitialized) {
+            await dataSource.initialize();
+        }
         return dataSource;
     } catch (error) {
         console.log('error:', error);
@@ -11,5 +13,3 @@ export async function initializeDataSource() {
 
     return dataSource;
 }
-
-export const DATA_SOURCE = initializeDataSource();
