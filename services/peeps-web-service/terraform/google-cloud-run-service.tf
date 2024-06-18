@@ -20,7 +20,7 @@ resource "google_cloud_run_service" "default" {
 
         env {
           name  = "DATABASE_USER"
-          value = "hephaestus-db"
+          value = "postgres"
         }
         env {
           name  = "DATABASE_PASSWORD"
@@ -28,7 +28,7 @@ resource "google_cloud_run_service" "default" {
         }
         env {
           name  = "DATABASE_NAME"
-          value = "hephaestus-postgres"
+          value = "postgres"
         }
 
         env {

@@ -35,9 +35,38 @@ def run_command(command, env=None):
         sys.exit(result.returncode)
 
 
+def find_env_file():
+    current_dir = os.getcwd()
+    while current_dir != os.path.dirname(current_dir):
+        env_path = os.path.join(current_dir, ".env")
+        if os.path.isfile(env_path):
+            return env_path
+        current_dir = os.path.dirname(current_dir)
+    print(color_text(".env file not found", FAIL))
+    sys.exit(1)
+
+
+def load_env_variables(env_file):
+    env_vars = {}
+    with open(env_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                key, value = line.split("=", 1)
+                env_vars[key] = value
+    return env_vars
+
+
 def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
+
+    # Find the .env file
+    env_file = find_env_file()
+    print(color_text(f"Using .env file: {env_file}", OKGREEN))
+
+    # Load environment variables from .env file
+    env_vars = load_env_variables(env_file)
 
     # Find the service account key file
     key_file = find_key_file()
@@ -83,6 +112,11 @@ def main():
     print(color_text("Pushing Docker image...", OKCYAN))
     run_command("docker push gcr.io/hephaestus-418809/hephaestus-api:latest")
 
+    # Prepare the environment variables for Cloud Run
+    env_var_flags = " ".join(
+        [f"--set-env-vars {key}={value}" for key, value in env_vars.items()]
+    )
+
     # Deploy to Cloud Run
     print(color_text("Deploying to Cloud Run...", OKCYAN))
     run_command(
@@ -92,7 +126,7 @@ def main():
         f"--platform=managed "
         f"--allow-unauthenticated "
         f"--project={project_id} "
-        f"--add-cloudsql-instances {project_id}:{region}:hephaestus-postgres"
+        f"{env_var_flags}"
     )
 
     # Enable unauthenticated calls

@@ -23,13 +23,14 @@ export function createAppDataSource(): DataSource {
         ? {
               host: '/cloudsql/hephaestus-418809:us-west1:user-api',
               database: process.env.DATABASE_NAME ?? 'postgres',
-              username: process.env.DATABASE_USER ?? 'postgres',
+              username: process.env.DATABASE_USERNAME ?? 'postgres',
               password: process.env.DATABASE_PASSWORD,
           }
         : localDbSettings;
     // : 'localhost';
     // const DB_USER = cloudDb ? 'hephaestus-db' : 'postgres';
     // const DB_USER = cloudDb ? 'hephaestus-db'
+
 
     return new DataSource({
         type: 'postgres',
