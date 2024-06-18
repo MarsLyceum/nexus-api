@@ -29,10 +29,14 @@ def find_key_file():
 
 def run_command(command, env=None):
     print(color_text(f"Running command: {command}", OKBLUE + BOLD))
-    result = subprocess.run(command, shell=True, env=env)
+    result = subprocess.run(
+        command, shell=True, env=env, capture_output=True, text=True
+    )
     if result.returncode != 0:
         print(color_text(f"Command failed: {command}", FAIL))
+        print(result.stderr)
         sys.exit(result.returncode)
+    return result.stdout
 
 
 def find_env_file():
@@ -61,6 +65,9 @@ def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
     cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
+    api_config_file = "peeps-web-service.yml"
+    api_gateway_name = "peeps-web-service-api-gateway"
+    api_id = "peeps-web-service-api"
 
     # Find the .env file
     env_file = find_env_file()
@@ -94,10 +101,10 @@ def main():
     # Ensure the correct project is set for gcloud commands
     run_command(f"gcloud config set project {project_id}")
 
-    # Enable Cloud Run Admin API
-    print(color_text("Enabling Cloud Run Admin API...", OKCYAN))
+    # Enable required APIs
+    print(color_text("Enabling required APIs...", OKCYAN))
     run_command(
-        f"gcloud services enable run.googleapis.com --project={project_id}"
+        f"gcloud services enable run.googleapis.com apigateway.googleapis.com --project={project_id}"
     )
 
     # Build Docker image with BuildKit enabled
@@ -126,19 +133,48 @@ def main():
         f"--region={region} "
         f"--platform=managed "
         f"--add-cloudsql-instances {cloud_sql_instance} "
-        f"--allow-unauthenticated "
         f"--project={project_id} "
         f'--set-env-vars INSTANCE_CONNECTION_NAME="{cloud_sql_instance}",{env_var_flags}'
     )
 
-    # Enable unauthenticated calls
-    print(color_text("Enabling unauthenticated calls...", OKCYAN))
+    # Create or update API Gateway
+    print(color_text("Creating or updating API Gateway...", OKCYAN))
     run_command(
-        f"gcloud run services add-iam-policy-binding hephaestus-api "
-        f'--member="allUsers" '
-        f'--role="roles/run.invoker" '
-        f"--region={region}"
+        f"gcloud api-gateway api-configs create {api_id} "
+        f"--api={api_gateway_name} "
+        f"--openapi-spec={api_config_file} "
+        f"--project={project_id}"
     )
+
+    # Deploy API Gateway
+    run_command(
+        f"gcloud api-gateway gateways create {api_gateway_name}-gateway "
+        f"--api={api_gateway_name} "
+        f"--api-config={api_id} "
+        f"--location={region} "
+        f"--project={project_id}"
+    )
+
+    # Get API Gateway URL
+    print(color_text("Retrieving API Gateway URL...", OKCYAN))
+    gateway_info = run_command(
+        f"gcloud api-gateway gateways describe {api_gateway_name}-gateway "
+        f"--location={region} "
+        f"--project={project_id}"
+    )
+
+    # Extract the defaultHostname from the gateway info
+    for line in gateway_info.splitlines():
+        if "defaultHostname" in line:
+            api_gateway_url = line.split(":")[1].strip()
+            print(
+                color_text(
+                    f"API Gateway URL: https://{api_gateway_url}", OKGREEN
+                )
+            )
+            break
+    else:
+        print(color_text("API Gateway URL not found in the output.", FAIL))
 
 
 if __name__ == "__main__":

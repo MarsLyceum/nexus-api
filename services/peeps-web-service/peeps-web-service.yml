@@ -1,0 +1,24 @@
+swagger: '2.0'
+info:
+  title: Peeps Web Service
+  description: API Gateway for Peeps Web Service
+  version: 1.0.0
+paths:
+  /graphql:
+    post:
+      operationId: graphqlPost
+      x-google-backend:
+        address: https://hephaestus-api-iwesf7iypq-uw.a.run.app
+      security:
+        - auth0_jwt: []
+      responses:
+        '200':
+          description: A successful response
+securityDefinitions:
+  auth0_jwt:
+    type: "oauth2"
+    flow: "implicit"
+    authorizationUrl: "https://dev-upkzwvoukjr1xaus.us.auth0.com/authorize"
+    x-google-issuer: "https://dev-upkzwvoukjr1xaus.us.auth0.com/"
+    x-google-jwks_uri: "https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json"
+    x-google-audiences: "JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8"
