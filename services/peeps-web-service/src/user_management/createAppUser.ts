@@ -8,8 +8,7 @@ export async function createAppUser(dbUser: UserDbModel) {
         email: dbUser.email,
         firstName: dbUser.firstName,
         lastName: dbUser.lastName,
-        age: dbUser.age,
-        token: '',
+        phoneNumber: dbUser.phoneNumber,
     };
     const jwt = await generateJwt(appUser);
     return { ...appUser, token: jwt };
