@@ -13,5 +13,6 @@ export async function fetchUser(
             where: { email },
         })) ?? undefined;
 
+    // eslint-disable-next-line unicorn/no-null
     return foundUser ?? null;
 }

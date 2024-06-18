@@ -12,24 +12,19 @@ console.log('DATABASE_PASSWORD:', DATABASE_PASSWORD)
 
 export function createAppDataSource(): DataSource {
     const cloudDb = isRunningInCloudRun();
-    // const sqlProxy = true;
-    const localDbSettings = {
-            //   host: '127.0.0.1',
-            //   PORT: 5434,
-            //   database: DATABASE_NAME,
-            //   username: DATABASE_USERNAME,
-            //   password: DATABASE_PASSWORD
+    const sqlProxy = true;
+    const localDbSettings = sqlProxy ? {
 
               url: `postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@127.0.0.1:5434/${DATABASE_NAME}`
 
           }
-        // : {
-        //       host: 'localhost',
-        //       PORT: 5432,
-        //       database: 'postgres',
-        //       username: 'postgres',
-        //       password: decryptDbPassword(cloudDb),
-        //   };
+        : {
+              host: 'localhost',
+              PORT: 5432,
+              database: 'postgres',
+              username: 'postgres',
+            //   password: decryptDbPassword(cloudDb),
+          };
     const hostSettings = cloudDb
         ? {
               host: '/cloudsql/hephaestus-418809:us-west1:hephaestus-postgres',
@@ -42,15 +37,6 @@ export function createAppDataSource(): DataSource {
     // : 'localhost';
     // const DB_USER = cloudDb ? 'hephaestus-db' : 'postgres';
     // const DB_USER = cloudDb ? 'hephaestus-db'
-    console.log({
-        type: 'postgres',
-        ...hostSettings,
-        synchronize: true,
-        logging: false,
-        entities: [User],
-        migrations: [],
-        subscribers: [],
-    })
 
     return new DataSource({
         type: 'postgres',
