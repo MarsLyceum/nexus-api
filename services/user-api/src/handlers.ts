@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
 
-import { User, UserIdParam } from './RequestTypes'
+import { User, UserIdParam } from './RequestTypes';
 
-// eslint-disable-next-line @typescript-eslint/require-await
-export const createUser = async (req: Request<unknown, unknown, User>, res: Response) => {
+export const createUser = async (
+    req: Request<unknown, unknown, User>,
+    res: Response
+    // eslint-disable-next-line @typescript-eslint/require-await
+) => {
     try {
         const { name, email } = req.body;
         // TODO: Add logic to create a user in the database
@@ -21,15 +24,22 @@ export const getUser = async (req: Request<UserIdParam>, res: Response) => {
         if (!userId) {
             res.status(404).send('User not found');
         } else {
-            res.json({ id: userId, name: 'Sample Name', email: 'Sample Email' });
+            res.json({
+                id: userId,
+                name: 'Sample Name',
+                email: 'Sample Email',
+            });
         }
     } catch (error) {
         res.status(500).send((error as Error).message);
     }
 };
 
-// eslint-disable-next-line @typescript-eslint/require-await
-export const updateUser = async (req: Request<UserIdParam, unknown, User>, res: Response) => {
+export const updateUser = async (
+    req: Request<UserIdParam, unknown, User>,
+    res: Response
+    // eslint-disable-next-line @typescript-eslint/require-await
+) => {
     try {
         const userId = req.params.id;
         const { name, email } = req.body;

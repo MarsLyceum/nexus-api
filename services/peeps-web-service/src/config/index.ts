@@ -1,1 +1,1 @@
-export * from './loadDotenv'
+export * from './loadDotenv';

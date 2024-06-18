@@ -5,4 +5,4 @@ export type User = {
 
 export type UserIdParam = {
     id: string;
-}
+};

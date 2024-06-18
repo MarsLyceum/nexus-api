@@ -38,7 +38,6 @@ app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE req
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
-
 /**
  * Create HTTP server.
  */
@@ -54,19 +53,22 @@ async function startServer() {
 
     await apolloServer.start();
 
-
     // SSE endpoint
     app.get('/graphql/stream', (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        const asyncIterator = pubsub.asyncIterator<{ greetings: string }>('GREETINGS');
+        const asyncIterator = pubsub.asyncIterator<{ greetings: string }>(
+            'GREETINGS'
+        );
 
         const onData = async () => {
             try {
                 // eslint-disable-next-line no-restricted-syntax
-                for await (const data of asyncIterator as AsyncIterableIterator<{ greetings: string }>) {
+                for await (const data of asyncIterator as AsyncIterableIterator<{
+                    greetings: string;
+                }>) {
                     res.write(`data: ${JSON.stringify(data)}\n\n`);
                 }
             } catch (error) {
@@ -100,7 +102,9 @@ async function startServer() {
     });
 
     async function publishGreetings() {
-        await pubsub.publish('GREETINGS', { greetings: 'Hello every 5 seconds' });
+        await pubsub.publish('GREETINGS', {
+            greetings: 'Hello every 5 seconds',
+        });
     }
 
     setInterval(() => {

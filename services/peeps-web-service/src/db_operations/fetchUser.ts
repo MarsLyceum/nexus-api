@@ -2,9 +2,7 @@ import { initializeDataSource } from './initializeDataSource';
 import { User as UserDbModel } from '../db_models/User';
 import { User } from '../user_management';
 
-export async function fetchUser(
-    email: string,
-): Promise<User | null> {
+export async function fetchUser(email: string): Promise<User | null> {
     const dataSource = await initializeDataSource();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

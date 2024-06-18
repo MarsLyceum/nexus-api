@@ -12,4 +12,4 @@ export async function initializeDataSource() {
     return dataSource;
 }
 
-export const DATA_SOURCE = initializeDataSource()
+export const DATA_SOURCE = initializeDataSource();

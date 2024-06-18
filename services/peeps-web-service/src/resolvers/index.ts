@@ -1,7 +1,7 @@
 import { PubSub } from 'graphql-subscriptions';
 
 import { createUser } from '../db_operations/createUser';
-import { loginUser } from '../db_operations/loginUser';
+import { fetchUser } from '../db_operations/fetchUser';
 import { RegisterUserPayload, FetchUserPayload } from '../payloads';
 
 export const resolvers = {
@@ -14,14 +14,16 @@ export const resolvers = {
     },
     Query: {
         fetchUser(_: never, { email }: FetchUserPayload) {
-            console.log('logging in user...');
-            return loginUser(email, password);
+            return fetchUser(email);
         },
     },
     Subscription: {
         greetings: {
-            subscribe: (_: any, __: any, { pubsub }: { pubsub: PubSub }) =>
-                pubsub.asyncIterator(['GREETINGS']),
+            subscribe: (
+                _: unknown,
+                __: unknown,
+                { pubsub }: { pubsub: PubSub }
+            ) => pubsub.asyncIterator(['GREETINGS']),
         },
     },
 };
