@@ -11,14 +11,13 @@ export const schemaTypeDefs = `#graphql
 
   type Mutation {
     registerUser( email: String!,
-                  password: String!,
                   firstName: String!,
                   lastName: String!,
-                  age: Int!,
+                  phoneNumber: String!
                 ): User
   }
   type Query {
-    loginUser(email: String!, password: String!): User
+    fetchUser(email: String!): User
   }
 
   type Subscription {

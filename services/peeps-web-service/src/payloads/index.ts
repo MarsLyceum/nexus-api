@@ -1,12 +1,10 @@
 export type RegisterUserPayload = {
     email: string;
-    password: string;
     firstName: string;
     lastName: string;
-    age: number;
+    phoneNumber: string;
 };
 
-export type LoginUserPayload = {
+export type FetchUserPayload = {
     email: string;
-    password: string;
 };

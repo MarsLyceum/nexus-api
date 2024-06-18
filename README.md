@@ -85,3 +85,14 @@ Send the GraphQL subscription message:
 ```sh
  {"id":"1","type":"subscribe","payload":{"query":"subscription OnGreeting { greetings }"}}
 ```
+
+To access the database you will need the credentials. If you want to run things
+such as TypeORM migrations or run the service locally and connect to the Cloud DB
+you will need to make a .env file and put the following information in it
+```.env
+DATABASE_NAME=...
+DATABASE_USERNAME=...
+DATABASE_PASSWORD=...
+```
+
+you can get this information from David, make sure that you do not check it into git.

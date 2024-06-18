@@ -9,14 +9,14 @@ export class User {
     email!: string;
 
     @Column()
-    hashedPassword!: string;
-
-    @Column({ nullable: true })
     firstName!: string;
 
-    @Column({ nullable: true })
+    @Column()
     lastName!: string;
 
-    @Column({ nullable: true })
-    age!: number;
+    @Column()
+    phoneNumber!: string;
+
+    // @Column({ nullable: true })
+    // age!: number;
 }

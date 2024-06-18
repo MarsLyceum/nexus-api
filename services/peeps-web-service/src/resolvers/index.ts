@@ -2,7 +2,7 @@ import { PubSub } from 'graphql-subscriptions';
 
 import { createUser } from '../db_operations/createUser';
 import { loginUser } from '../db_operations/loginUser';
-import { RegisterUserPayload, LoginUserPayload } from '../payloads';
+import { RegisterUserPayload, FetchUserPayload } from '../payloads';
 
 export const resolvers = {
     Mutation: {
@@ -13,7 +13,7 @@ export const resolvers = {
         },
     },
     Query: {
-        loginUser(_: never, { email, password }: LoginUserPayload) {
+        fetchUser(_: never, { email }: FetchUserPayload) {
             console.log('logging in user...');
             return loginUser(email, password);
         },

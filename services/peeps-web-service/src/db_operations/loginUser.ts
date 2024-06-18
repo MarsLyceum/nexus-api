@@ -1,11 +1,9 @@
-import bcrypt from 'bcrypt';
 import { initializeDataSource } from './initializeDataSource';
 import { User as UserDbModel } from '../db_models/User';
-import { User, createAppUser } from '../user_management';
+import { User } from '../user_management';
 
-export async function loginUser(
+export async function fetchUser(
     email: string,
-    password: string
 ): Promise<User | null> {
     const dataSource = await initializeDataSource();
 
@@ -15,10 +13,5 @@ export async function loginUser(
             where: { email },
         })) ?? undefined;
 
-    return (await bcrypt.compare(password, foundUser?.hashedPassword ?? '')) &&
-        foundUser
-        ? createAppUser(foundUser)
-        : // we need null for the GraphQL response
-          // eslint-disable-next-line unicorn/no-null
-          null;
+    return foundUser ?? null;
 }
