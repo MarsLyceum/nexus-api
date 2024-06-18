@@ -5,8 +5,7 @@ export const schemaTypeDefs = `#graphql
     email: String!
     firstName: String!
     lastName: String!
-    age: Int!
-    token: String!
+    phoneNumber: String!
   }
 
   type Mutation {
