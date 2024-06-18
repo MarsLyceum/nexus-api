@@ -32,8 +32,6 @@ if (envPath) {
     config({ path: envPath });
 } else {
     console.error('.env file not found.');
-    // eslint-disable-next-line unicorn/no-process-exit
-    process.exit(1);
 }
 
 // Now you can access the environment variables
