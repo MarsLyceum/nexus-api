@@ -1,0 +1,53 @@
+service: peeps-web-service
+
+provider:
+  name: google
+  runtime: nodejs16
+  project: hephaestus-418809
+  credentials: ./terraform/hephaestus-418809-*.json # Path to your service account key
+  region: us-east1
+
+plugins:
+  - serverless-google-cloudfunctions
+  - serverless-dotenv-plugin
+  - serverless-plugin-typescript
+
+package:
+  exclude:
+    - node_modules/**
+    - .git/**
+
+functions:
+  graphqlHandler:
+    handler: graphqlHandler
+    events:
+      - http:
+          path: graphql
+          method: post
+      - http:
+          path: graphql/stream
+          method: get
+    environment:
+      DATABASE_NAME: postgres
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: S6MsAErp%^rZ1$m$
+
+
+custom:
+  dotenv:
+      path: .env
+
+  apigateway:
+    apiConfigId: peeps-web-service-api-config
+    apiId: peeps-web-service-api
+    apiConfigFile: peeps-web-service.yml
+    apiGatewayName: peeps-web-service-api-gateway
+    location: us-west2
+
+resources:
+  extensions:
+    - name: Enable APIs
+      type: enable-apis
+      apis:
+        - cloudfunctions.googleapis.com
+        - apigateway.googleapis.com

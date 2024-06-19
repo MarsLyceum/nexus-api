@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "description": "",
-    "packageManager": "pnpm@9.3.0",
+    "packageManager": "npm@10.8.1",
     "scripts": {
         "lint": "npx eslint .",
         "typecheck": "tsc --noEmit",
@@ -11,7 +11,7 @@
         "lerna:typecheck": "npx lerna run typecheck",
         "lerna:build": "npx lerna run build",
         "lerna:clean-pnpm": "npx lerna run clean-pnpm",
-        "prettier:write": "pnpm prettier --write \"**/src/**/*.{js,ts,jsx,tsx,json,css,scss,md}\" --ignore-path .prettierignore",
+        "prettier:write": "npm prettier --write \"**/src/**/*.{js,ts,jsx,tsx,json,css,scss,md}\" --ignore-path .prettierignore",
         "prettier:watch": "chokidar \"**/src/**/*.{js,ts,jsx,tsx,json,css,scss,md}\" -i \"**/node_modules/**\" -c \"pnpm run prettier:write\""
     },
     "keywords": [],
