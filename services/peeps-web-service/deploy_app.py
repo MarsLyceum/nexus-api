@@ -28,12 +28,13 @@ def find_key_file():
 
 
 def run_command(command, env=None):
-    print(color_text(f"Running command: {command}", OKBLUE + BOLD))
+    redacted_command = command.replace(DATABASE_PASSWORD, "****")
+    print(color_text(f"Running command: {redacted_command}", OKBLUE + BOLD))
     result = subprocess.run(
         command, shell=True, env=env, capture_output=True, text=True
     )
     if result.returncode != 0:
-        print(color_text(f"Command failed: {command}", FAIL))
+        print(color_text(f"Command failed: {redacted_command}", FAIL))
         print(result.stderr)
         sys.exit(result.returncode)
     return result.stdout
@@ -64,6 +65,7 @@ def load_env_variables(env_file):
 def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
+    api_gateway_region = "us-west2"
     cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
     api_config_file = "peeps-web-service.yml"
     api_gateway_name = "peeps-web-service-api-gateway"
@@ -75,6 +77,8 @@ def main():
 
     # Load environment variables from .env file
     env_vars = load_env_variables(env_file)
+    global DATABASE_PASSWORD
+    DATABASE_PASSWORD = env_vars.get("DATABASE_PASSWORD", "")
 
     # Find the service account key file
     key_file = find_key_file()
@@ -151,7 +155,7 @@ def main():
         f"gcloud api-gateway gateways create {api_gateway_name}-gateway "
         f"--api={api_gateway_name} "
         f"--api-config={api_id} "
-        f"--location={region} "
+        f"--location={api_gateway_region} "
         f"--project={project_id}"
     )
 
@@ -159,7 +163,7 @@ def main():
     print(color_text("Retrieving API Gateway URL...", OKCYAN))
     gateway_info = run_command(
         f"gcloud api-gateway gateways describe {api_gateway_name}-gateway "
-        f"--location={region} "
+        f"--location={api_gateway_region} "
         f"--project={project_id}"
     )
 
