@@ -11,6 +11,7 @@ The backend API for Hephaestus.
 - PostgreSQL for local DB config if you want to run it locally
 - pnpm package manager
 
+
 ## DB
 
 We are using PostgreSQL for the Database.

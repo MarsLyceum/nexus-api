@@ -6,13 +6,13 @@ provider "google" {
 }
 
 resource "google_cloud_run_service" "default" {
-  name     = "hephaestus-api"
+  name     = "peeps-web-service"
   location = "us-west1"
 
   template {
     spec {
       containers {
-        image = "gcr.io/hephaestus-418809/hephaestus-api:latest"
+        image = "gcr.io/hephaestus-418809/peeps-web-service:latest"
 
         ports {
           container_port = 4000

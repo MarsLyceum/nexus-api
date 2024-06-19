@@ -8,7 +8,7 @@ paths:
     post:
       operationId: graphqlPost
       x-google-backend:
-        address: https://hephaestus-api-iwesf7iypq-uw.a.run.app
+        address: https://peeps-web-service-iwesf7iypq-uw.a.run.app
       security:
         - auth0_jwt: []
       responses:
