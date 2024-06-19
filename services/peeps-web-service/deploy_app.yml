@@ -1,53 +1,102 @@
-- name: Deploy Docker image to Google Cloud Run using gcloud CLI
+---
+- name: Deploy Peeps Web Service
   hosts: localhost
   gather_facts: no
+  vars:
+    project_id: "hephaestus-418809"
+    region: "us-west1"
+    api_gateway_region: "us-west2"
+    cloud_sql_instance: "hephaestus-418809:us-west1:user-api"
+    api_config_file: "peeps-web-service.yml"
+    api_gateway_name: "peeps-web-service-api-gateway"
+    api_id: "peeps-web-service-api"
+    api_config_id: "{{ api_id }}-config"
+    service_name: "peeps-web-service"
+    env_file: "{{ lookup('env', 'PWD') }}/.env"
+    key_file: "{{ lookup('first_found', params=['./terraform/hephaestus-418809-*.json']) }}"
   tasks:
-      - name: Find the service account key file
-        ansible.builtin.find:
-            paths: '{{ playbook_dir }}/terraform'
-            patterns: 'hephaestus-418809-*.json'
-        register: key_file
+    - name: Check if the .env file exists
+      stat:
+        path: "{{ env_file }}"
+      register: env_file_stat
+    - name: Fail if the .env file does not exist
+      fail:
+        msg: ".env file not found"
+      when: not env_file_stat.stat.exists
 
-      - name: Fail if no key file is found
-        ansible.builtin.fail:
-            msg: 'No service account key file found'
-        when: key_file.matched == 0
+    - name: Load environment variables from .env file
+      include_vars:
+        file: "{{ env_file }}"
+      no_log: true
 
-      - name: Set the key file path
-        set_fact:
-            key_file_path: '{{ key_file.files[0].path }}'
-        when: key_file.matched > 0
+    - name: Check if the key file exists
+      stat:
+        path: "{{ key_file }}"
+      register: key_file_stat
+    - name: Fail if the key file does not exist
+      fail:
+        msg: "No service account key file found"
+      when: not key_file_stat.stat.exists
 
-      - name: Configure Docker to use gcloud as a credential helper
-        ansible.builtin.shell: |
-            gcloud auth configure-docker --quiet
+    - name: Set environment variable for Google Application Credentials
+      set_fact:
+        google_application_credentials: "{{ key_file }}"
 
-      - name: Authenticate gcloud with a service account
-        ansible.builtin.shell: |
-            gcloud auth activate-service-account --key-file={{ key_file_path }}
-        environment:
-            GOOGLE_APPLICATION_CREDENTIALS: '{{ key_file_path }}'
+    - name: Authenticate gcloud with the service account
+      command: gcloud auth activate-service-account --key-file={{ key_file }}
+      environment:
+        GOOGLE_APPLICATION_CREDENTIALS: "{{ google_application_credentials }}"
+    
+    - name: Set the Google Cloud project
+      command: gcloud config set project {{ project_id }}
+    
+    - name: Enable required APIs
+      command: gcloud services enable run.googleapis.com apigateway.googleapis.com --project={{ project_id }}
 
-      - name: Build latest docker
-        ansible.builtin.shell:
-            cmd: docker build -t gcr.io/hephaestus-418809/hephaestus-api:latest .
-        environment:
-            DOCKER_BUILDKIT: 1
+    - name: Build Docker image
+      command: docker build -t gcr.io/{{ project_id }}/{{ service_name }}:latest .
+      environment:
+        DOCKER_BUILDKIT: "1"
+    
+    - name: Push Docker image
+      command: docker push gcr.io/{{ project_id }}/{{ service_name }}:latest
 
-      - name: Push latest docker
-        ansible.builtin.shell:
-            cmd: docker push gcr.io/hephaestus-418809/hephaestus-api:latest
-        environment:
-            GOOGLE_APPLICATION_CREDENTIALS: '{{ key_file_path }}'
+    - name: Deploy to Cloud Run
+      command: >
+        gcloud run deploy {{ service_name }}
+        --image=gcr.io/{{ project_id }}/{{ service_name }}:latest
+        --region={{ region }}
+        --platform=managed
+        --add-cloudsql-instances {{ cloud_sql_instance }}
+        --project={{ project_id }}
+        --set-env-vars "INSTANCE_CONNECTION_NAME={{ cloud_sql_instance }},{{ lookup('env', 'INSTANCE_CONNECTION_NAME') }},DATABASE_PASSWORD={{ lookup('env', 'DATABASE_PASSWORD') }}"
 
-      - name: Deploy to Cloud Run using gcloud
-        ansible.builtin.command:
-            cmd: gcloud run deploy hephaestus-api --image=gcr.io/hephaestus-418809/hephaestus-api:latest --region=us-west1 --platform=managed --allow-unauthenticated --project=hephaestus-418809 --add-cloudsql-instances hephaestus-418809:us-west1:user-api
-        environment:
-            GOOGLE_APPLICATION_CREDENTIALS: '{{ key_file_path }}'
+    - name: Create new API configuration
+      command: >
+        gcloud api-gateway api-configs create {{ api_config_id }}
+        --api={{ api_gateway_name }}
+        --openapi-spec={{ api_config_file }}
+        --project={{ project_id }}
+      ignore_errors: yes
 
-      - name: Enable unauthenticated calls
-        ansible.builtin.command:
-            cmd: gcloud run services add-iam-policy-binding hephaestus-api --member="allUsers" --role="roles/run.invoker" --region=us-west1
-        environment:
-            GOOGLE_APPLICATION_CREDENTIALS: '{{ key_file_path }}'
+    - name: Check if gateway exists
+      command: gcloud api-gateway gateways list --project={{ project_id }} --location={{ api_gateway_region }}
+      register: gateway_list
+
+    - name: Create gateway if it does not exist
+      command: >
+        gcloud api-gateway gateways create {{ api_gateway_name }}
+        --api={{ api_id }}
+        --api-config={{ api_config_id }}
+        --location={{ api_gateway_region }}
+        --project={{ project_id }}
+      when: "{{ api_gateway_name }} not in gateway_list.stdout"
+
+    - name: Retrieve API Gateway URL
+      command: gcloud api-gateway gateways describe {{ api_gateway_name }} --location={{ api_gateway_region }} --project={{ project_id }}
+      register: gateway_info
+
+    - name: Print API Gateway URL
+      debug:
+        msg: "API Gateway URL: https://{{ gateway_info.stdout_lines | select('search', 'defaultHostname') | list | first | regex_replace('.*: ', '') }}"
+      when: gateway_info.stdout_lines | select('search', 'defaultHostname') | list | length > 0

@@ -96,6 +96,51 @@ def check_api_config_usage(project_id, api_gateway_name, api_config_id):
         return False
 
 
+def check_api_config_exists(project_id, api_id, api_config_id):
+    command = (
+        f"gcloud api-gateway api-configs describe {api_config_id} "
+        f"--api={api_id} "
+        f"--project={project_id}"
+    )
+    try:
+        run_command(command)
+        print(color_text(f"API config {api_config_id} exists.", OKGREEN))
+        return True
+    except RuntimeError as e:
+        if "NOT_FOUND" in str(e):
+            print(
+                color_text(
+                    f"API config {api_config_id} does not exist.", WARNING
+                )
+            )
+            return False
+        else:
+            raise
+
+
+def check_gateway_exists(project_id, location, gateway_name):
+    command = f"gcloud api-gateway gateways list --project={project_id} --location={location}"
+    gateways = run_command(command)
+    if gateway_name in gateways:
+        print(color_text(f"Gateway {gateway_name} already exists.", OKGREEN))
+        return True
+    else:
+        print(color_text(f"Gateway {gateway_name} does not exist.", WARNING))
+        return False
+
+
+def create_gateway(project_id, location, gateway_name, api_id, api_config_id):
+    command = (
+        f"gcloud api-gateway gateways create {gateway_name} "
+        f"--api={api_id} "
+        f"--api-config={api_config_id} "
+        f"--location={location} "
+        f"--project={project_id}"
+    )
+    run_command(command)
+    print(color_text(f"Gateway {gateway_name} created.", OKGREEN))
+
+
 def main():
     # Project and service configuration
     project_id = "hephaestus-418809"
@@ -105,7 +150,7 @@ def main():
     api_config_file = "peeps-web-service.yml"
     api_gateway_name = "peeps-web-service-api-gateway"
     api_id = "peeps-web-service-api"
-    new_api_config_id = f"{api_id}-config"
+    api_config_id = f"{api_id}-config"
     service_name = "peeps-web-service"
 
     # Find and load environment variables
@@ -170,61 +215,82 @@ def main():
         f'--set-env-vars INSTANCE_CONNECTION_NAME="{cloud_sql_instance}",{env_var_flags}'
     )
 
-    # Retrieve and print the Cloud Run URL
-    print(color_text("Retrieving Cloud Run URL...", OKCYAN))
-    cloud_run_info = run_command(
-        f"gcloud run services describe {service_name} "
-        f"--region={region} "
-        f"--format='value(status.url)'"
-    )
-    print(color_text(f"Cloud Run URL: {cloud_run_info}", OKGREEN))
+    # # Retrieve and print the Cloud Run URL
+    # print(color_text("Retrieving Cloud Run URL...", OKCYAN))
+    # cloud_run_info = run_command(
+    #     f"gcloud run services describe {service_name} "
+    #     f"--region={region} "
+    #     f"--format='value(status.url)'"
+    # )
+    # print(color_text(f"Cloud Run URL: {cloud_run_info}", OKGREEN))
 
     # Create or update the API configuration
     print(color_text("Creating new API configuration...", OKCYAN))
     create_command = (
-        f"gcloud api-gateway api-configs create {new_api_config_id} "
+        f"gcloud api-gateway api-configs create {api_config_id} "
         f"--api={api_gateway_name} "
         f"--openapi-spec={api_config_file} "
         f"--project={project_id}"
     )
-    delete_command = (
-        f"gcloud api-gateway api-configs delete {new_api_config_id} "
-        f"--api={api_gateway_name} "
-        f"--project={project_id} "
-        f"--quiet"
-    )
+    # delete_command = (
+    #     f"gcloud api-gateway api-configs delete {api_config_id} "
+    #     f"--api={api_gateway_name} "
+    #     f"--project={project_id} "
+    #     f"--quiet"
+    # )
 
-    if check_api_config_usage(project_id, api_gateway_name, new_api_config_id):
+    try:
+        run_command(create_command)
+    except Exception:
         print(
-            color_text("API config is currently in use, updating...", OKCYAN)
-        )
-        try:
-            run_command(
-                f"gcloud api-gateway gateways update {api_gateway_name} "
-                f"--api-config={new_api_config_id} "
-                f"--location={api_gateway_region} "
-                f"--project={project_id}"
+            color_text(
+                "Gateway config already exists",
+                WARNING,
             )
-        except RuntimeError as e:
-            if "NOT_FOUND" in str(e):
-                print(
-                    color_text(
-                        "Gateway not found. Creating a new gateway...",
-                        WARNING,
-                    )
-                )
-                run_command(
-                    f"gcloud api-gateway gateways create {api_gateway_name} "
-                    f"--api={api_gateway_name} "
-                    f"--api-config={new_api_config_id} "
-                    f"--location={api_gateway_region} "
-                    f"--project={project_id}"
-                )
-            else:
-                raise
-    else:
-        run_command_with_retry(
-            create_command, "ALREADY_EXISTS", delete_command
+        )
+
+    # if check_api_config_usage(project_id, api_gateway_name, api_config_id):
+    #     print(
+    #         color_text("API config is currently in use, updating...", OKCYAN)
+    #     )
+    #     try:
+    #         run_command(
+    #             f"gcloud api-gateway gateways update {api_gateway_name} "
+    #             f"--api-config={api_config_id} "
+    #             f"--location={api_gateway_region} "
+    #             f"--project={project_id}"
+    #         )
+    #     except RuntimeError as e:
+    #         if "NOT_FOUND" in str(e):
+    #             print(
+    #                 color_text(
+    #                     "Gateway not found. Creating a new gateway...",
+    #                     WARNING,
+    #                 )
+    #             )
+    #             run_command(
+    #                 f"gcloud api-gateway gateways create {api_gateway_name} "
+    #                 f"--api={api_gateway_name} "
+    #                 f"--api-config={api_config_id} "
+    #                 f"--location={api_gateway_region} "
+    #                 f"--project={project_id}"
+    #             )
+    #         else:
+    #             raise
+    # else:
+    #     run_command_with_retry(
+    #         create_command, "ALREADY_EXISTS", delete_command
+    #     )
+
+    if not check_gateway_exists(
+        project_id, api_gateway_region, api_gateway_name
+    ):
+        create_gateway(
+            project_id,
+            api_gateway_region,
+            api_gateway_name,
+            api_id,
+            api_config_id,
         )
 
     # Retrieve and print the API Gateway URL
