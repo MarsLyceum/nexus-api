@@ -269,7 +269,7 @@ def create_api(
         )
         print(color_text(f"API {api_id} already exists.", OKGREEN))
     except NotFound:
-        api = apigateway_v1.types.Api(
+        api = apigateway_v1.Api(
             display_name=api_id,
         )
         client.create_api(

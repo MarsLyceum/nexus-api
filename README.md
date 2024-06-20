@@ -19,6 +19,7 @@ The backend API for Hephaestus.
   - google-cloud-api-gateway
   - google-cloud-storage
   - google-cloud-run
+  - docker
 
 
 ## DB

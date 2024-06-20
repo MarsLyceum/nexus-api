@@ -9,7 +9,7 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createServer } from 'node:http';
 import cors from 'cors';
-import express, { Request, Response, NextFunction, json } from 'express';
+import express, { json } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { PubSub } from 'graphql-subscriptions';
 
