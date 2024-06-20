@@ -7,6 +7,9 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Service zip
+service.zip
+
 # Service Account Key
 hephaestus-418809-*.json
 terraform/hephaestus-418809-*.json*
