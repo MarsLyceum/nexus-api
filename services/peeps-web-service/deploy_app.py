@@ -31,15 +31,34 @@ def find_key_file():
 
 # Function to run a command in the shell
 def run_command(command, env=None):
-    print(color_text(f"Running command: {command}", OKBLUE + BOLD))
+    redacted_command = command.replace(DATABASE_PASSWORD, "****")
+    print(color_text(f"Running command: {redacted_command}", OKBLUE + BOLD))
     result = subprocess.run(
         command, shell=True, env=env, capture_output=True, text=True
     )
     if result.returncode != 0:
-        print(color_text(f"Command failed: {command}", FAIL))
+        print(color_text(f"Command failed: {redacted_command}", FAIL))
         print(result.stderr)
         raise RuntimeError(result.stderr)
     return result.stdout
+
+
+# Function to run a command with a retry mechanism
+def run_command_with_retry(command, error_message, retry_command, env=None):
+    try:
+        return run_command(command, env)
+    except RuntimeError as e:
+        if error_message in str(e):
+            print(
+                color_text(
+                    "Resource already exists. Deleting and recreating...",
+                    WARNING,
+                )
+            )
+            run_command(retry_command, env)
+            return run_command(command, env)
+        else:
+            raise
 
 
 # Function to find the .env file in the directory tree
@@ -127,23 +146,33 @@ def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
     api_gateway_region = "us-west2"
+    cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
     api_config_file = "peeps-web-service.yml"
     api_gateway_name = "peeps-web-service-api-gateway"
     api_id = "peeps-web-service-api"
     api_config_id = f"{api_id}-config"
-    service_name = "peeps-function"
-    entry_point = "main_function"
-    runtime = "python310"
+    service_name = "peeps-web-service"
 
     # Find and load environment variables
     env_file = find_env_file()
     print(color_text(f"Using .env file: {env_file}", OKGREEN))
     env_vars = load_env_variables(env_file)
+    global DATABASE_PASSWORD
+    DATABASE_PASSWORD = env_vars.get("DATABASE_PASSWORD", "")
 
     # Find the service account key file
     key_file = find_key_file()
     print(color_text(f"Using key file: {key_file}", OKGREEN))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
+
+    # Configure Docker to use gcloud as a credential helper
+    print(
+        color_text(
+            "Configuring Docker to use gcloud as a credential helper...",
+            OKCYAN,
+        )
+    )
+    run_command("gcloud auth configure-docker --quiet")
 
     # Authenticate gcloud with the service account
     print(
@@ -157,41 +186,59 @@ def main():
     # Enable required APIs
     print(color_text("Enabling required APIs...", OKCYAN))
     run_command(
-        f"gcloud services enable cloudfunctions.googleapis.com apigateway.googleapis.com --project={project_id}"
+        f"gcloud services enable run.googleapis.com apigateway.googleapis.com --project={project_id}"
     )
 
-    # Deploy the function to Google Cloud Functions
+    # Build and push the Docker image
+    print(color_text("Building Docker image...", OKCYAN))
+    env = os.environ.copy()
+    env["DOCKER_BUILDKIT"] = "1"
+    run_command(
+        f"docker build -t gcr.io/{project_id}/{service_name}:latest .",
+        env=env,
+    )
+    print(color_text("Pushing Docker image...", OKCYAN))
+    run_command(f"docker push gcr.io/{project_id}/{service_name}:latest")
+
+    # Deploy the service to Cloud Run
     env_var_flags = ",".join(
         [f"{key}={value}" for key, value in env_vars.items()]
     )
-    print(color_text("Deploying to Google Cloud Functions...", OKCYAN))
+    print(color_text("Deploying to Cloud Run...", OKCYAN))
     run_command(
-        f"gcloud functions deploy {service_name} "
-        f"--entry-point={entry_point} "
-        f"--runtime={runtime} "
-        f"--trigger-http "
+        f"gcloud run deploy {service_name} "
+        f"--image=gcr.io/{project_id}/{service_name}:latest "
         f"--region={region} "
-        f"--set-env-vars {env_var_flags} "
-        f"--project={project_id}"
+        f"--platform=managed "
+        f"--add-cloudsql-instances {cloud_sql_instance} "
+        f"--project={project_id} "
+        f'--set-env-vars INSTANCE_CONNECTION_NAME="{cloud_sql_instance}",{env_var_flags}'
     )
 
-    # Retrieve and print the function URL
-    print(color_text("Retrieving Cloud Function URL...", OKCYAN))
-    function_info = run_command(
-        f"gcloud functions describe {service_name} "
-        f"--region={region} "
-        f"--format='value(httpsTrigger.url)'"
-    )
-    print(color_text(f"Cloud Function URL: {function_info}", OKGREEN))
+    # # Retrieve and print the Cloud Run URL
+    # print(color_text("Retrieving Cloud Run URL...", OKCYAN))
+    # cloud_run_info = run_command(
+    #     f"gcloud run services describe {service_name} "
+    #     f"--region={region} "
+    #     f"--format='value(status.url)'"
+    # )
+    # print(color_text(f"Cloud Run URL: {cloud_run_info}", OKGREEN))
 
     # Create or update the API configuration
     print(color_text("Creating new API configuration...", OKCYAN))
     create_command = (
         f"gcloud api-gateway api-configs create {api_config_id} "
-        f"--api={api_id} "
+        f"--api={api_gateway_name} "
         f"--openapi-spec={api_config_file} "
         f"--project={project_id}"
     )
+    # delete_command = (
+    #     f"gcloud api-gateway api-configs delete {api_config_id} "
+    #     f"--api={api_gateway_name} "
+    #     f"--project={project_id} "
+    #     f"--quiet"
+    # )
+
     try:
         run_command(create_command)
     except Exception:
@@ -201,6 +248,39 @@ def main():
                 WARNING,
             )
         )
+
+    # if check_api_config_usage(project_id, api_gateway_name, api_config_id):
+    #     print(
+    #         color_text("API config is currently in use, updating...", OKCYAN)
+    #     )
+    #     try:
+    #         run_command(
+    #             f"gcloud api-gateway gateways update {api_gateway_name} "
+    #             f"--api-config={api_config_id} "
+    #             f"--location={api_gateway_region} "
+    #             f"--project={project_id}"
+    #         )
+    #     except RuntimeError as e:
+    #         if "NOT_FOUND" in str(e):
+    #             print(
+    #                 color_text(
+    #                     "Gateway not found. Creating a new gateway...",
+    #                     WARNING,
+    #                 )
+    #             )
+    #             run_command(
+    #                 f"gcloud api-gateway gateways create {api_gateway_name} "
+    #                 f"--api={api_gateway_name} "
+    #                 f"--api-config={api_config_id} "
+    #                 f"--location={api_gateway_region} "
+    #                 f"--project={project_id}"
+    #             )
+    #         else:
+    #             raise
+    # else:
+    #     run_command_with_retry(
+    #         create_command, "ALREADY_EXISTS", delete_command
+    #     )
 
     if not check_gateway_exists(
         project_id, api_gateway_region, api_gateway_name
