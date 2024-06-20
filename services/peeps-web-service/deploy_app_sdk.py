@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from docker.errors import DockerException
 import subprocess
 import time
+import datetime
 
 # ANSI escape sequences for colors
 HEADER = "\033[95m"
@@ -222,18 +223,33 @@ def create_or_update_api_config(
             )
         )
 
-    client.create_api_config(
-        parent=parent,
-        api_config=api_config,
-        api_config_id=api_config_id,
-    )
-    print(color_text(f"API Config {api_config_id} created.", OKGREEN))
+    start_time = datetime.datetime.now()
+    max_duration = datetime.timedelta(minutes=10)
+    while True:
+        try:
+            client.create_api_config(
+                parent=parent,
+                api_config=api_config,
+                api_config_id=api_config_id,
+            )
+            print(color_text(f"API Config {api_config_id} created.", OKGREEN))
+            break
+        except Exception as e:
+            print(color_text(f"Error creating API Config: {e}", WARNING))
+            elapsed_time = datetime.datetime.now() - start_time
+            if elapsed_time > max_duration:
+                print(color_text("Max duration reached. Exiting...", FAIL))
+                raise RuntimeError(
+                    "Failed to create API Config within the allowed time frame."
+                )
+            print(color_text("Retrying in 5 seconds...", WARNING))
+            time.sleep(5)  # wait for 5 seconds before retrying
 
 
-def create_api(
+def create_api_gateway_service(
     client: apigateway_v1.ApiGatewayServiceClient, project_id: str, api_id: str
 ) -> None:
-    """Create an API if it doesn't exist."""
+    """Create an API if it doesn't exist and wait until it is created."""
     api_name = f"projects/{project_id}/locations/global/apis/{api_id}"
     try:
         existing_api = client.get_api(name=api_name)
@@ -264,7 +280,21 @@ def create_api(
         api=api,
         api_id=api_id,
     )
-    print(color_text(f"Created API {api_id}.", OKGREEN))
+    print(color_text(f"Waiting for API {api_id} to be created...", OKCYAN))
+
+    # Wait until the API is successfully created
+    while True:
+        try:
+            client.get_api(name=api_name)
+            print(color_text(f"API {api_id} is now active.", OKGREEN))
+            break
+        except NotFound:
+            print(
+                color_text(
+                    f"Waiting for API {api_id} to be created...", WARNING
+                )
+            )
+            time.sleep(5)  # wait for 5 seconds before checking again
 
 
 def create_gateway(
@@ -372,7 +402,7 @@ def main():
     region = "us-west1"
     api_gateway_region = "us-west2"
     cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
-    api_config_file = "peeps-web-service.yml"
+    api_config_file = os.path.join(os.getcwd(), "peeps-web-service.yml")
     api_gateway_name = "peeps-web-service-api-gateway"
     service_name = "peeps-web-service"
     api_id = "peeps-web-service-api"
@@ -418,7 +448,7 @@ def main():
     )
 
     print(color_text("Creating new API...", OKCYAN))
-    create_api(api_gateway_client, project_id, api_id)
+    create_api_gateway_service(api_gateway_client, project_id, api_id)
 
     # Create or update the API configuration
     create_or_update_api_config(
