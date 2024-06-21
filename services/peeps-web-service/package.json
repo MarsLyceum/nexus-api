@@ -8,8 +8,6 @@
         "start:watch": "nodemon src/index.ts --watch",
         "build": "python ./test-build.py",
         "deploy": "python deploy_app_sdk.py",
-        "deploy_python": "python deploy_app.py",
-        "deploy_ansible": "ansible-playbook deploy_peeps_web_service.yml",
         "print_token": "gcloud auth print-identity-token",
         "typeorm": "typeorm-ts-node-commonjs",
         "typecheck": "tsc --noEmit",
