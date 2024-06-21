@@ -6,9 +6,6 @@ from gcp_microservice_management import (
     load_env_variables,
     find_key_file,
     deploy_to_cloud_run,
-    create_api_gateway_service,
-    create_or_update_api_config,
-    create_gateway,
     color_text,
     run_command,
     OKCYAN,
@@ -19,13 +16,8 @@ from gcp_microservice_management import (
 def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
-    api_gateway_region = "us-west2"
     cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
-    api_config_file = os.path.join(os.getcwd(), "peeps-web-service.yml")
-    api_gateway_name = "peeps-web-service-api-gateway"
     service_name = "peeps-web-service"
-    api_id = "peeps-web-service-api"
-    api_config_id = f"{api_id}-config"
 
     env_file = find_env_file()
     print(color_text(f"Using .env file: {env_file}", OKGREEN))
@@ -35,12 +27,8 @@ def main():
 
     key_file = find_key_file()
     print(color_text(f"Using key file: {key_file}", OKGREEN))
-    credentials = Credentials.from_service_account_file(key_file)
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
 
-    api_gateway_client = apigateway_v1.ApiGatewayServiceClient(
-        credentials=credentials
-    )
 
     print(
         color_text("Authenticating gcloud with a service account...", OKCYAN)
@@ -60,23 +48,6 @@ def main():
     deploy_to_cloud_run(
         project_id, region, service_name, cloud_sql_instance, env_vars
     )
-
-    # print(color_text("Creating new API...", OKCYAN))
-    # create_api_gateway_service(api_gateway_client, project_id, api_id)
-
-    # print('create_or_update_api_config args:', api_gateway_client, project_id, api_id, api_config_id, api_config_file)
-    # create_or_update_api_config(
-    #     api_gateway_client, project_id, api_id, api_config_id, api_config_file
-    # )
-
-    # create_gateway(
-    #     api_gateway_client,
-    #     project_id,
-    #     api_gateway_region,
-    #     api_gateway_name,
-    #     api_id,
-    #     api_config_id,
-    # )
 
 
 if __name__ == "__main__":
