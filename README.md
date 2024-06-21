@@ -10,6 +10,7 @@ The backend API for Hephaestus.
 - Docker
 - PostgreSQL for local DB config if you want to run it locally
 - pnpm package manager
+- Poetry Python package manager
 - The following Python packages:
   - google-cloud-functions
   - google-cloud-deploy
@@ -20,6 +21,8 @@ The backend API for Hephaestus.
   - google-cloud-storage
   - google-cloud-run
   - docker
+  - setuptools
+  - gcp-microservice-management (our custom package)
 
 
 ## DB

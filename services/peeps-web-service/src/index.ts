@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
 import 'reflect-metadata';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
@@ -12,6 +9,8 @@ import cors from 'cors';
 import express, { json } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { PubSub } from 'graphql-subscriptions';
+import { expressjwt, GetVerificationKey } from 'express-jwt';
+import jwksRsa from 'jwks-rsa';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { resolvers } from './resolvers/index';
@@ -38,9 +37,22 @@ app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE req
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
+// JWT authentication middleware
+const authenticateJWT = expressjwt({
+    secret: jwksRsa.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json'
+    }) as GetVerificationKey,
+    audience: 'JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8',
+    issuer: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/',
+    algorithms: ['RS256'],
+    credentialsRequired: false,
+});
+
+app.use(authenticateJWT);
+
 async function startServer() {
     const apolloServer = new ApolloServer({
         schema,
@@ -91,7 +103,9 @@ async function startServer() {
         json(),
         expressMiddleware(apolloServer, {
             context: async ({ req }) => {
-                return { pubsub };
+                // Extract user from JWT if it exists
+                const user = req.auth || null;
+                return { pubsub, user };
             },
         })
     );
