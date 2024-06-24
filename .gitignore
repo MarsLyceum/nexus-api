@@ -11,6 +11,7 @@ lerna-debug.log*
 service.zip
 
 # Service Account Key
+service-account-keys
 hephaestus-418809-*.json
 terraform/hephaestus-418809-*.json*
 

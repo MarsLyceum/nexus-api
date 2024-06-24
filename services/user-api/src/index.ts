@@ -1,21 +1,19 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { ParsedQs } from 'qs';
-import { createUser, getUser, updateUser, deleteUser } from './src/handlers';
-import { User, UserIdParam } from './src/RequestTypes';
+import cors from 'cors';
+import { createUser, getUser, updateUser, deleteUser } from './handlers';
+import { User, UserIdParam } from './RequestTypes';
 
 const app = express();
-const API_KEY = 'YOUR_API_KEY'; // Replace with your actual API key
 
 app.use(express.json()); // Middleware to parse JSON bodies
 
-// Middleware to check API key
-// eslint-disable-next-line consistent-return
-app.use((req, res, next) => {
-    if (req.headers['x-api-key'] !== API_KEY) {
-        return res.status(403).send('Forbidden');
-    }
-    next();
-});
+// Middleware to handle CORS
+app.use(cors());
+
+const port = process.env.PORT || '4000';
+app.set('port', port);
+
 
 // Helper function to wrap async route handlers
 const asyncHandler =
@@ -40,6 +38,7 @@ const asyncHandler =
         fn(req, res, next).catch(next);
     };
 
+// Define routes
 app.post(
     '/user',
     asyncHandler<unknown, unknown, User, ParsedQs>((req, res) =>
@@ -65,4 +64,19 @@ app.delete(
     )
 );
 
-export const api = app;
+// Health check route
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+

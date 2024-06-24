@@ -1,6 +1,4 @@
 import os
-from google.oauth2.service_account import Credentials
-from google.cloud import apigateway_v1
 from gcp_microservice_management import (
     find_env_file,
     load_env_variables,
@@ -17,7 +15,7 @@ def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
     cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
-    service_name = "peeps-web-service"
+    service_name = "user-api"
 
     env_file = find_env_file()
     print(color_text(f"Using .env file: {env_file}", OKGREEN))
@@ -25,7 +23,7 @@ def main():
     global DATABASE_PASSWORD
     DATABASE_PASSWORD = env_vars.get("DATABASE_PASSWORD", "")
 
-    key_file = find_key_file()
+    key_file = find_key_file("../../service-account-keys", "hephaestus-418809-*.json")
     print(color_text(f"Using key file: {key_file}", OKGREEN))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
 

@@ -25,7 +25,7 @@ def main():
     global DATABASE_PASSWORD
     DATABASE_PASSWORD = env_vars.get("DATABASE_PASSWORD", "")
 
-    key_file = find_key_file()
+    key_file = find_key_file("../../service-account-keys", "hephaestus-418809-*.json")
     print(color_text(f"Using key file: {key_file}", OKGREEN))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
 
