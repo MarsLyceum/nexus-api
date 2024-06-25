@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 
-import { User } from 'user-api-client';
+import { UserEntity } from 'user-api-client';
 import { isRunningInCloudRun } from './isRunningInCloudRun';
 import { DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD } from '../config';
 
@@ -24,7 +24,7 @@ export function createAppDataSource(): DataSource {
         ...hostSettings,
         synchronize: false,
         logging: true,
-        entities: [User],
+        entities: [UserEntity],
         migrations: ['migrations/**/*.js'],
         subscribers: [],
     });

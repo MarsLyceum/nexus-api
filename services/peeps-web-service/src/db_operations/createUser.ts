@@ -1,5 +1,4 @@
-import { User as UserDbModel } from 'user-api-client';
-import { User } from '../user_management';
+import { UserEntity, User } from 'user-api-client';
 import { RegisterUserPayload } from '../payloads';
 
 export async function createUser({
@@ -13,14 +12,14 @@ export async function createUser({
     let foundUser;
     try {
         foundUser =
-            (await dataSource.manager.findOne(UserDbModel, {
+            (await dataSource.manager.findOne(UserEntity, {
                 where: { email },
             })) ?? undefined;
     } catch (error_: unknown) {
         error = error_;
     }
     if (!foundUser || error) {
-        const dbUser = new UserDbModel();
+        const dbUser = new UserEntity();
         dbUser.email = email;
         dbUser.firstName = firstName ?? '';
         dbUser.lastName = lastName ?? '';
