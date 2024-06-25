@@ -6,21 +6,28 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "deploy": "python deploy.py",
-    "clean-pnpm": "python clean_pnpm.py"
+    "clean-pnpm": "python clean_pnpm.py",
+    "cloud_sql_proxy": "cloud-sql-proxy hephaestus-418809:us-west1:user-api --port=5434",
+    "typeorm:migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d ./src/db_connection/createAppDataSource.ts",
+    "typeorm:migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d ./src/db_connection/createAppDataSource.ts"
   },
   "keywords": [],
   "author": "Mars Lyceum Inc.",
   "dependencies": {
+    "user-api-client": "workspace:*",
     "@google-cloud/api-gateway": "^3.3.0",
     "@google-cloud/common": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^20.14.2",
     "@types/qs": "^6.9.15",
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "qs": "^6.12.1",
+    "reflect-metadata": "^0.2.2",
     "ts-node": "^10.9.2",
+    "typeorm": "^0.3.20",
     "typescript": "^5.4.5",
     "yargs": "^17.7.2"
   }

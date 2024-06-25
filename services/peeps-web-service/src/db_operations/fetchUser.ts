@@ -1,4 +1,4 @@
-import { initializeDataSource } from './initializeDataSource';
+import { initializeDataSource } from '../../../user-api/src/database/initializeDataSource';
 import { User as UserDbModel } from '../db_models/User';
 import { User } from '../user_management';
 

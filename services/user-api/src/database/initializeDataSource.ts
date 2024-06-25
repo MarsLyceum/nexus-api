@@ -1,4 +1,4 @@
-import { createAppDataSource } from '../db_connection/createAppDataSource';
+import { createAppDataSource } from './createAppDataSource';
 
 export async function initializeDataSource() {
     const dataSource = createAppDataSource();

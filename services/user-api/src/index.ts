@@ -14,7 +14,6 @@ app.use(cors());
 const port = process.env.PORT || '4000';
 app.set('port', port);
 
-
 // Helper function to wrap async route handlers
 const asyncHandler =
     <
@@ -45,18 +44,21 @@ app.post(
         createUser(req, res)
     )
 );
+
 app.get(
     '/user/:id',
     asyncHandler<UserIdParam, unknown, unknown, ParsedQs>((req, res) =>
         getUser(req, res)
     )
 );
+
 app.put(
     '/user/:id',
     asyncHandler<UserIdParam, unknown, User, ParsedQs>((req, res) =>
         updateUser(req, res)
     )
 );
+
 app.delete(
     '/user/:id',
     asyncHandler<UserIdParam, unknown, unknown, ParsedQs>((req, res) =>
@@ -70,7 +72,7 @@ app.get('/health', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
 });
@@ -79,4 +81,3 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-

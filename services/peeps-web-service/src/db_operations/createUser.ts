@@ -1,6 +1,5 @@
-import { User as UserDbModel } from '../db_models/User';
-import { initializeDataSource } from './initializeDataSource';
-import { User, createAppUser } from '../user_management';
+import { User as UserDbModel } from 'user-api-client';
+import { User } from '../user_management';
 import { RegisterUserPayload } from '../payloads';
 
 export async function createUser({
@@ -29,8 +28,8 @@ export async function createUser({
 
         const savedDbUser = await dataSource.manager.save(dbUser);
 
-        return createAppUser(savedDbUser);
+        return savedDbUser;
     }
 
-    return undefined;
+    return foundUser;
 }

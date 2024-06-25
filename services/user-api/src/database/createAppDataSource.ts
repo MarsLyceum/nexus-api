@@ -1,24 +1,15 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 
-import { User } from '../db_models/User';
+import { User } from 'user-api-client';
 import { isRunningInCloudRun } from './isRunningInCloudRun';
 import { DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD } from '../config';
 
 export function createAppDataSource(): DataSource {
     const cloudDb = isRunningInCloudRun();
-    const sqlProxy = true;
-    const localDbSettings = sqlProxy
-        ? {
-              url: `postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@127.0.0.1:5434/${DATABASE_NAME}`,
-          }
-        : {
-              host: 'localhost',
-              PORT: 5432,
-              database: 'postgres',
-              username: 'postgres',
-              //   password: decryptDbPassword(cloudDb),
-          };
+    const localDbSettings = {
+        url: `postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@127.0.0.1:5434/${DATABASE_NAME}`,
+    };
     const hostSettings = cloudDb
         ? {
               host: '/cloudsql/hephaestus-418809:us-west1:user-api',
@@ -27,10 +18,6 @@ export function createAppDataSource(): DataSource {
               password: process.env.DATABASE_PASSWORD,
           }
         : localDbSettings;
-    // : 'localhost';
-    // const DB_USER = cloudDb ? 'hephaestus-db' : 'postgres';
-    // const DB_USER = cloudDb ? 'hephaestus-db'
-
 
     return new DataSource({
         type: 'postgres',
@@ -38,9 +25,9 @@ export function createAppDataSource(): DataSource {
         synchronize: false,
         logging: true,
         entities: [User],
-        migrations: ["migrations/**/*.js"],
+        migrations: ['migrations/**/*.js'],
         subscribers: [],
     });
 }
 
-export const DATA_SOURCE = createAppDataSource()
+export const DATA_SOURCE = createAppDataSource();
