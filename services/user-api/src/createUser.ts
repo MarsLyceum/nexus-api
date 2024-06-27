@@ -1,4 +1,4 @@
-import { UserEntity, User, RegisterUserPayload } from 'user-api-client';
+import { UserEntity, User, CreateUserPayload } from 'user-api-client';
 
 import { initializeDataSource } from './database/initializeDataSource';
 
@@ -7,7 +7,7 @@ export async function createUser({
     firstName,
     lastName,
     phoneNumber,
-}: RegisterUserPayload): Promise<User | undefined> {
+}: CreateUserPayload): Promise<User | undefined> {
     const dataSource = await initializeDataSource();
     let error;
     let foundUser;

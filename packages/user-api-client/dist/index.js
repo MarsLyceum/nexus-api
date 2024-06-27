@@ -18,3 +18,4 @@ require("reflect-metadata");
 __exportStar(require("./entities"), exports);
 __exportStar(require("./models"), exports);
 __exportStar(require("./payloads"), exports);
+__exportStar(require("./schemas"), exports);

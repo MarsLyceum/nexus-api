@@ -1,12 +1,12 @@
 import { UserEntity, User } from 'user-api-client';
-import { RegisterUserPayload } from '../payloads';
+import { CreateUserPayload } from '../payloads';
 
 export async function createUser({
     email,
     firstName,
     lastName,
     phoneNumber,
-}: RegisterUserPayload): Promise<User | undefined> {
+}: CreateUserPayload): Promise<User | undefined> {
     const dataSource = await initializeDataSource();
     let error;
     let foundUser;

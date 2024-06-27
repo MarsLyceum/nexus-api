@@ -1,8 +1,23 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { ParsedQs } from 'qs';
 import cors from 'cors';
+import {
+    DeleteUserParams,
+    GetUserParams,
+    UpdateUserParams,
+    UpdateUserPayload,
+    CreateUserPayload,
+    createUserPayloadSchema,
+    getUserParamsSchema,
+    updateUserParamsSchema,
+    updateUserPayloadSchema,
+    deleteUserParamsSchema,
+} from 'user-api-client';
 import { createUser, getUser, updateUser, deleteUser } from './handlers';
-import { User, UserIdParam } from './RequestTypes';
+import {
+    validatePayload,
+    validateParams,
+} from './middleware/validationMiddleware';
 
 const app = express();
 
@@ -40,28 +55,33 @@ const asyncHandler =
 // Define routes
 app.post(
     '/user',
-    asyncHandler<unknown, unknown, User, ParsedQs>((req, res) =>
+    validatePayload(createUserPayloadSchema),
+    asyncHandler<unknown, unknown, CreateUserPayload, ParsedQs>((req, res) =>
         createUser(req, res)
     )
 );
 
 app.get(
-    '/user/:id',
-    asyncHandler<UserIdParam, unknown, unknown, ParsedQs>((req, res) =>
+    '/user/:email',
+    validateParams(getUserParamsSchema),
+    asyncHandler<GetUserParams, unknown, unknown, ParsedQs>((req, res) =>
         getUser(req, res)
     )
 );
 
 app.put(
-    '/user/:id',
-    asyncHandler<UserIdParam, unknown, User, ParsedQs>((req, res) =>
-        updateUser(req, res)
+    '/user/:email',
+    validateParams(updateUserParamsSchema),
+    validatePayload(updateUserPayloadSchema),
+    asyncHandler<UpdateUserParams, unknown, UpdateUserPayload, ParsedQs>(
+        (req, res) => updateUser(req, res)
     )
 );
 
 app.delete(
-    '/user/:id',
-    asyncHandler<UserIdParam, unknown, unknown, ParsedQs>((req, res) =>
+    '/user/:email',
+    validateParams(deleteUserParamsSchema),
+    asyncHandler<DeleteUserParams, unknown, unknown, ParsedQs>((req, res) =>
         deleteUser(req, res)
     )
 );

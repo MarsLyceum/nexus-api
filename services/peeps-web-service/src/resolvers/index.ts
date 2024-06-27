@@ -2,11 +2,11 @@ import { PubSub } from 'graphql-subscriptions';
 
 import { createUser } from '../db_operations/createUser';
 import { fetchUser } from '../db_operations/fetchUser';
-import { RegisterUserPayload, FetchUserPayload } from '../payloads';
+import { CreateUserPayload, FetchUserPayload } from '../payloads';
 
 export const resolvers = {
     Mutation: {
-        registerUser: async (_: never, payload: RegisterUserPayload) => {
+        registerUser: async (_: never, payload: CreateUserPayload) => {
             const user = await createUser(payload);
 
             return user;
