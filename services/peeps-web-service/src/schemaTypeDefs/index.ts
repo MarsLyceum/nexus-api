@@ -15,6 +15,7 @@ export const schemaTypeDefs = `#graphql
                   phoneNumber: String!
                 ): User
   }
+
   type Query {
     fetchUser(email: String!): User
   }

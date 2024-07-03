@@ -10,6 +10,8 @@ lerna-debug.log*
 # Service zip
 service.zip
 
+dist/
+
 # Service Account Key
 service-account-keys
 hephaestus-418809-*.json
@@ -62,7 +64,6 @@ __pycache__/
 
 # Private Keys
 **/*.pem
-
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

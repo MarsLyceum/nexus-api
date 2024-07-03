@@ -1,23 +1,42 @@
 import { Request, Response } from 'express';
-
 import {
-    User,
+    UserEntity,
     CreateUserPayload,
     GetUserParams,
     UpdateUserParams,
     UpdateUserPayload,
     DeleteUserParams,
 } from 'user-api-client';
+import { initializeDataSource } from './database';
 
 export const createUser = async (
     req: Request<unknown, unknown, CreateUserPayload>,
     res: Response
-    // eslint-disable-next-line @typescript-eslint/require-await
 ) => {
     try {
         const { email, firstName, lastName, phoneNumber } = req.body;
-        // TODO: Add logic to create a user in the database
-        res.status(201).json({ id: 'newly-created-id', name, email });
+
+        const dataSource = await initializeDataSource();
+
+        const foundUser =
+            (await dataSource.manager.findOne(UserEntity, {
+                where: { email },
+            })) ?? undefined;
+
+        if (foundUser) {
+            res.status(400).json({ message: 'User already exists' });
+        } else {
+            const newUser = dataSource.manager.create(UserEntity, {
+                email,
+                firstName,
+                lastName,
+                phoneNumber,
+            });
+
+            await dataSource.manager.save(newUser);
+
+            res.status(201).json(newUser);
+        }
     } catch (error) {
         res.status(500).send((error as Error).message);
     }
@@ -27,14 +46,21 @@ export const createUser = async (
 export const getUser = async (req: Request<GetUserParams>, res: Response) => {
     try {
         const { email } = req.params;
-        // TODO: Add logic to retrieve a user from the database
+
         if (!email) {
+            res.status(400).send('Email parameter is missing');
+            return;
+        }
+
+        const dataSource = await initializeDataSource();
+        const user = await dataSource.manager.findOne(UserEntity, {
+            where: { email },
+        });
+
+        if (!user) {
             res.status(404).send('User not found');
         } else {
-            res.json({
-                email,
-                name: 'Sample Name',
-            });
+            res.status(200).json(user);
         }
     } catch (error) {
         res.status(500).send((error as Error).message);
@@ -49,8 +75,25 @@ export const updateUser = async (
     try {
         const { email: emailToUpdate } = req.params;
         const { firstName, lastName, phoneNumber, email } = req.body;
-        // TODO: Add logic to update a user in the database
-        res.json({ id: userId, name, email });
+
+        const dataSource = await initializeDataSource();
+        const user = await dataSource.manager.findOne(UserEntity, {
+            where: { email: emailToUpdate },
+        });
+
+        if (!user) {
+            res.status(404).send('User not found');
+            return;
+        }
+
+        user.firstName = firstName ?? user.firstName;
+        user.lastName = lastName ?? user.lastName;
+        user.phoneNumber = phoneNumber ?? user.phoneNumber;
+        user.email = email ?? user.email;
+
+        await dataSource.manager.save(user);
+
+        res.status(200).json(user);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }
@@ -58,12 +101,30 @@ export const updateUser = async (
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export const deleteUser = async (
-    req: Request<UpdateUserParams>,
+    req: Request<DeleteUserParams>,
     res: Response
+    // eslint-disable-next-line consistent-return
 ) => {
     try {
         const { email } = req.params;
-        // TODO: Add logic to delete a user from the database
+
+        if (!email) {
+            res.status(400).send('Email parameter is missing');
+            return;
+        }
+
+        const dataSource = await initializeDataSource();
+        const user = await dataSource.manager.findOne(UserEntity, {
+            where: { email },
+        });
+
+        if (!user) {
+            res.status(404).send('User not found');
+            return;
+        }
+
+        await dataSource.manager.remove(user);
+
         res.status(204).send();
     } catch (error) {
         res.status(500).send((error as Error).message);
