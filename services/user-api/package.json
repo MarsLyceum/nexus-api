@@ -6,6 +6,8 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "deploy": "python deploy.py",
+    "build": "python ../../scripts/test-build.py",
+    "docker-shell": "python ../../scripts/test-docker-shell.py && docker run --name local-test-container -it local-test sh",
     "clean-pnpm": "python clean_pnpm.py",
     "cloud_sql_proxy": "cloud-sql-proxy hephaestus-418809:us-west1:user-api --port=5434",
     "typeorm:migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d ./src/db_connection/createAppDataSource.ts",

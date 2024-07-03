@@ -39,7 +39,7 @@ def main():
     env = os.environ.copy()
     env["DOCKER_BUILDKIT"] = "1"
     run_command(
-        f"docker build -t gcr.io/{project_id}/{service_name}:latest --progress=plain .",
+        f"docker build -f {os.getcwd()}/Dockerfile -t gcr.io/{project_id}/{service_name}:latest --progress=plain ../..",
         env=env,
     )
     print(color_text("Pushing Docker image...", OKCYAN))

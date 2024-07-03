@@ -1,5 +1,6 @@
 import subprocess
 import time
+import os
 
 
 def run_command(command):
@@ -30,7 +31,7 @@ def highlight_logs(logs):
 # Build the Docker image
 print("Building Docker image...")
 build_status, build_output, build_error = run_command(
-    "docker build -t local-test ."
+    f"docker build -f {os.getcwd()}/Dockerfile -t local-test ../.."
 )
 print(build_output)
 if build_status != 0:
