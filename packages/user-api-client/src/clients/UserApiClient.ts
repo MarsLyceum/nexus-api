@@ -1,41 +1,55 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { CreateUserPayload, UpdateUserPayload } from '../payloads';
+import {
+    CreateUserResponse,
+    GetUserResponse,
+    UpdateUserResponse,
+} from '../responses';
 
 export class UserApiClient {
     private baseURL = 'https://user-api-iwesf7iypq-uw.a.run.app';
 
     // eslint-disable-next-line class-methods-use-this
-    private async query<T, K extends AxiosResponse<T, unknown>>(
-        request: Promise<K>
-    ): Promise<T> {
+    private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {
         try {
             const response = await request;
             return response.data;
         } catch (error) {
-            // Handle error centrally
-            console.error('User API error:', error);
-            throw error;
+            if (axios.isAxiosError(error)) {
+                // Handle Axios errors specifically
+                console.error('Axios error:', error.message);
+                throw error;
+            } else {
+                // Handle other errors
+                console.error('Unexpected error:', error);
+                throw new Error('An unexpected error occurred');
+            }
         }
     }
 
     // Get a single user by ID
-    async getUser(email: string) {
+    async getUser(email: string): Promise<GetUserResponse> {
         return this.query(axios.get(`${this.baseURL}/user/${email}`));
     }
 
     // Create a new user
-    async createUser(createUserPayload: CreateUserPayload) {
+    async createUser(
+        createUserPayload: CreateUserPayload
+    ): Promise<CreateUserResponse> {
         return this.query(axios.post(this.baseURL, createUserPayload));
     }
 
     // Update a user
-    async updateUser(email: string, data: UpdateUserPayload) {
+    async updateUser(
+        email: string,
+        data: UpdateUserPayload
+    ): Promise<UpdateUserResponse> {
         return this.query(axios.put(`${this.baseURL}/${email}`, data));
     }
 
     // Delete a user
-    async deleteUser(email: string) {
+    async deleteUser(email: string): Promise<undefined> {
         return this.query(axios.delete(`${this.baseURL}/${email}`));
     }
 }
