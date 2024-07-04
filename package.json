@@ -12,6 +12,7 @@
         "lerna:build": "npx lerna run build",
         "lerna:clean-pnpm": "npx lerna run clean-pnpm",
         "cloud_sql_proxy": "cloud-sql-proxy hephaestus-418809:us-west1:user-api --port=5434",
+        "authenticate_proxy": "gcloud auth application-default login",
         "lerna:migration:check": "npx lerna run typeorm:migration:check",
         "prettier:write": "pnpm prettier --write \"**/src/**/*.{js,ts,jsx,tsx,json,css,scss,md}\" --ignore-path .prettierignore",
         "prettier:watch": "chokidar \"**/src/**/*.{js,ts,jsx,tsx,json,css,scss,md}\" -i \"**/node_modules/**\" -c \"pnpm run prettier:write\""
