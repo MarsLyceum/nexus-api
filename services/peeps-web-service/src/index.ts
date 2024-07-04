@@ -43,7 +43,8 @@ const authenticateJWT = expressjwt({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json'
+        jwksUri:
+            'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json',
     }) as GetVerificationKey,
     audience: 'JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8',
     issuer: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/',

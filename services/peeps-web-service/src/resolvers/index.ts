@@ -4,11 +4,9 @@ import {
     UserApiClient,
     CreateUserPayload,
     CreateUserResponse,
+    GetUserResponse,
     GetUserParams,
 } from 'user-api-client';
-// import { createUser } from '../db_operations/createUser';
-// import { fetchUser } from '../db_operations/fetchUser';
-// import { CreateUserPayload, FetchUserPayload } from '../payloads';
 
 export const resolvers = {
     Mutation: {
@@ -27,7 +25,10 @@ export const resolvers = {
         },
     },
     Query: {
-        fetchUser: async (_: never, { email }: GetUserParams) => {
+        fetchUser: async (
+            _: never,
+            { email }: GetUserParams
+        ): Promise<GetUserResponse> => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
             const client = new UserApiClient();
 
