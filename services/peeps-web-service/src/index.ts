@@ -6,7 +6,7 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createServer } from 'node:http';
 import cors from 'cors';
-import express, { json } from 'express';
+import express, { Application, json } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
@@ -15,46 +15,57 @@ import jwksRsa from 'jwks-rsa';
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { resolvers } from './resolvers/index';
 
-const pubsub = new PubSub();
-const app = express();
-const httpServer = createServer(app);
-const schema = makeExecutableSchema({
-    typeDefs: schemaTypeDefs,
-    resolvers,
-});
+declare module 'express-serve-static-core' {
+    interface Request {
+        auth?: any; // Adjust the type as needed (e.g., `User` or a specific interface)
+    }
+}
 
-const corsSetting = {
-    origin: 'http://localhost:8081', // Or '*' for all origins
-};
+export async function createService(
+    port: string | number = process.env.PORT || '4000'
+): Promise<{
+    app: Application;
+    start: () => Promise<void>;
+    stop: () => Promise<void>;
+}> {
+    const pubsub = new PubSub();
+    const app = express();
+    const httpServer = createServer(app);
+    const schema = makeExecutableSchema({
+        typeDefs: schemaTypeDefs,
+        resolvers,
+    });
 
-app.use(
-    // enable cors for local development
-    cors(corsSetting)
-);
+    const corsSetting = {
+        origin: 'http://localhost:8081', // Or '*' for all origins
+    };
 
-app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
+    app.use(
+        // enable cors for local development
+        cors(corsSetting)
+    );
 
-const port = process.env.PORT || '4000';
-app.set('port', port);
+    app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
 
-// JWT authentication middleware
-const authenticateJWT = expressjwt({
-    secret: jwksRsa.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri:
-            'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json',
-    }) as GetVerificationKey,
-    audience: 'JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8',
-    issuer: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/',
-    algorithms: ['RS256'],
-    credentialsRequired: false,
-});
+    app.set('port', port);
 
-app.use(authenticateJWT);
+    // JWT authentication middleware
+    const authenticateJWT = expressjwt({
+        secret: jwksRsa.expressJwtSecret({
+            cache: true,
+            rateLimit: true,
+            jwksRequestsPerMinute: 5,
+            jwksUri:
+                'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json',
+        }) as GetVerificationKey,
+        audience: 'JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8',
+        issuer: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/',
+        algorithms: ['RS256'],
+        credentialsRequired: false,
+    });
 
-async function startServer() {
+    app.use(authenticateJWT);
+
     const apolloServer = new ApolloServer({
         schema,
         plugins: [
@@ -111,9 +122,30 @@ async function startServer() {
         })
     );
 
-    httpServer.listen(port, () => {
-        console.log(`Server started on http://localhost:${port}/graphql`);
-    });
+    async function start() {
+        return new Promise<void>((resolve) => {
+            httpServer.listen(port, () => {
+                console.log(
+                    `Server started on http://localhost:${port}/graphql`
+                );
+                resolve();
+            });
+        });
+    }
+
+    async function stop() {
+        return new Promise<void>((resolve, reject) => {
+            httpServer.close((error) => {
+                if (error) {
+                    console.error('Failed to stop server:', error);
+                    reject(error);
+                } else {
+                    console.log(`Server on port ${port} stopped.`);
+                    resolve();
+                }
+            });
+        });
+    }
 
     async function publishGreetings() {
         await pubsub.publish('GREETINGS', {
@@ -126,9 +158,6 @@ async function startServer() {
             console.error('Failed to publish greetings:', error);
         });
     }, 5000);
-}
 
-// eslint-disable-next-line no-void
-void startServer().catch((error) => {
-    console.error('Failed to start server:', error);
-});
+    return { app, start, stop };
+}

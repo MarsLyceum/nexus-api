@@ -30,6 +30,13 @@ module.exports = {
         project: './tsconfig.json',
     },
     rules: {
+        'no-restricted-syntax': [
+            'error',
+            {
+                selector: 'ForInStatement',
+                message: 'for...in loops are not allowed.',
+            },
+        ],
         'unicorn/prefer-top-level-await': 'off',
         'import/extensions': 'off',
         'react/jsx-boolean-value': 'error',
