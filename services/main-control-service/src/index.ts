@@ -13,11 +13,16 @@ import 'reflect-metadata';
 // import jwksRsa from 'jwks-rsa';
 
 import { createService as createServicePeepsWebService } from 'peeps-web-service/src/index';
+import { createService as createServiceUserApi } from 'user-api/src/index';
 
 async function main() {
     const peepsWebService = createServicePeepsWebService(4000);
+    const userApi = createServiceUserApi(4001);
 
-    const services = [{ name: 'Peeps Web Service', instance: peepsWebService }];
+    const services = [
+        { name: 'Peeps Web Service', instance: peepsWebService },
+        { name: 'User API', instance: userApi },
+    ];
 
     try {
         console.log('Starting all services...');
