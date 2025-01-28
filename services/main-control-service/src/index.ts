@@ -12,8 +12,8 @@ import 'reflect-metadata';
 // import { expressjwt, GetVerificationKey } from 'express-jwt';
 // import jwksRsa from 'jwks-rsa';
 
-import { createService as createServicePeepsWebService } from 'peeps-web-service/src/index';
-import { createService as createServiceUserApi } from 'user-api/src/index';
+import { createService as createServicePeepsWebService } from 'peeps-web-service/src/service';
+import { createService as createServiceUserApi } from 'user-api/src/service';
 
 async function main() {
     const peepsWebService = createServicePeepsWebService(4000);

@@ -1,163 +1,19 @@
-#!/usr/bin/env node
+// index.ts
 
-import 'reflect-metadata';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { createServer } from 'node:http';
-import cors from 'cors';
-import express, { Application, json } from 'express';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { PubSub } from 'graphql-subscriptions';
-import { expressjwt, GetVerificationKey } from 'express-jwt';
-import jwksRsa from 'jwks-rsa';
+import { createService } from './service';
 
-import { schemaTypeDefs } from './schemaTypeDefs';
-import { resolvers } from './resolvers/index';
+(async () => {
+    const { start } = await createService();
+    await start();
+})().catch((error: unknown) => {
+    console.error('Error starting the Peeps Web service:', error);
 
-declare module 'express-serve-static-core' {
-    interface Request {
-        auth?: any; // Adjust the type as needed (e.g., `User` or a specific interface)
-    }
-}
-
-export async function createService(
-    port: string | number = process.env.PORT || '4000'
-): Promise<{
-    app: Application;
-    start: () => Promise<void>;
-    stop: () => Promise<void>;
-}> {
-    const pubsub = new PubSub();
-    const app = express();
-    const httpServer = createServer(app);
-    const schema = makeExecutableSchema({
-        typeDefs: schemaTypeDefs,
-        resolvers,
-    });
-
-    const corsSetting = {
-        origin: 'http://localhost:8081', // Or '*' for all origins
-    };
-
-    app.use(
-        // enable cors for local development
-        cors(corsSetting)
-    );
-
-    app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
-
-    app.set('port', port);
-
-    // JWT authentication middleware
-    const authenticateJWT = expressjwt({
-        secret: jwksRsa.expressJwtSecret({
-            cache: true,
-            rateLimit: true,
-            jwksRequestsPerMinute: 5,
-            jwksUri:
-                'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json',
-        }) as GetVerificationKey,
-        audience: 'JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8',
-        issuer: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/',
-        algorithms: ['RS256'],
-        credentialsRequired: false,
-    });
-
-    app.use(authenticateJWT);
-
-    const apolloServer = new ApolloServer({
-        schema,
-        plugins: [
-            ApolloServerPluginDrainHttpServer({
-                httpServer,
-            }),
-        ],
-    });
-
-    await apolloServer.start();
-
-    // SSE endpoint
-    app.get('/graphql/stream', (req, res) => {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-
-        const asyncIterator = pubsub.asyncIterator<{ greetings: string }>(
-            'GREETINGS'
-        );
-
-        const onData = async () => {
-            try {
-                // eslint-disable-next-line no-restricted-syntax
-                for await (const data of asyncIterator as AsyncIterableIterator<{
-                    greetings: string;
-                }>) {
-                    res.write(`data: ${JSON.stringify(data)}\n\n`);
-                }
-            } catch (error) {
-                console.error('Failed to stream data:', error);
-            }
-        };
-
-        onData();
-
-        req.on('close', () => {
-            if (asyncIterator.return) {
-                asyncIterator.return();
-            }
-        });
-    });
-
-    app.post(
-        '/graphql',
-        cors<cors.CorsRequest>(corsSetting),
-        json(),
-        expressMiddleware(apolloServer, {
-            context: async ({ req }) => {
-                // Extract user from JWT if it exists
-                const user = req.auth || null;
-                return { pubsub, user };
-            },
-        })
-    );
-
-    async function start() {
-        return new Promise<void>((resolve) => {
-            httpServer.listen(port, () => {
-                console.log(
-                    `Server started on http://localhost:${port}/graphql`
-                );
-                resolve();
-            });
-        });
-    }
-
-    async function stop() {
-        return new Promise<void>((resolve, reject) => {
-            httpServer.close((error) => {
-                if (error) {
-                    console.error('Failed to stop server:', error);
-                    reject(error);
-                } else {
-                    console.log(`Server on port ${port} stopped.`);
-                    resolve();
-                }
-            });
-        });
-    }
-
-    async function publishGreetings() {
-        await pubsub.publish('GREETINGS', {
-            greetings: 'Hello every 5 seconds',
-        });
-    }
-
-    setInterval(() => {
-        publishGreetings().catch((error) => {
-            console.error('Failed to publish greetings:', error);
-        });
-    }, 5000);
-
-    return { app, start, stop };
-}
+    // Safely handle 'error':
+    const errorObj =
+        error instanceof Error
+            ? new Error(`Server failed to start: ${error.message}`)
+            : new Error(
+                  `Server failed to start with unknown error: ${String(error)}`
+              );
+    throw errorObj;
+});
