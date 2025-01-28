@@ -16,7 +16,6 @@ from gcp_microservice_management import (
 def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
-    cloud_sql_instance = "hephaestus-418809:us-west1:user-api"
     service_name = "peeps-web-service"
 
     env_file = find_env_file()
