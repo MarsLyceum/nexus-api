@@ -12,17 +12,14 @@ export function createAppDataSource(): DataSource {
     };
     const hostSettings = cloudDb
         ? {
-              host: '/cloudsql/hephaestus-418809:us-west1:user-api',
-              database: process.env.DATABASE_NAME ?? 'postgres',
-              username: process.env.DATABASE_USERNAME ?? 'postgres',
-              password: process.env.DATABASE_PASSWORD,
+              url: `postgresql://postgres:${DATABASE_PASSWORD}@db.zrgnvlobrohtrrqeajhy.supabase.co:5432/postgres`,
           }
         : localDbSettings;
 
     return new DataSource({
         type: 'postgres',
         ...hostSettings,
-        synchronize: false,
+        synchronize: true,
         logging: true,
         entities: [UserEntity],
         migrations: ['migrations/**/*.js'],
