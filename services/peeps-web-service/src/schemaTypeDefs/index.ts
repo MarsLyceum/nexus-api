@@ -73,8 +73,6 @@ export const schemaTypeDefs = `#graphql
     groupId: String!
     role: GroupRole!
     joinedAt: String!  # ISO date string
-    # Optionally, you could include a nested group reference if needed:
-    # group: Group!
   }
 
   enum GroupChannelType {
@@ -88,7 +86,6 @@ export const schemaTypeDefs = `#graphql
     name: String!
     type: GroupChannelType!
     createdAt: String!  # ISO date string
-    # Optionally, you could include a nested group reference if needed:
-    # group: Group!
+    groupId: String!
   }
 `;

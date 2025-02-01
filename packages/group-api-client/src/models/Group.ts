@@ -5,7 +5,6 @@ export type GroupMember = {
     groupId: string;
     role: GroupRole;
     joinedAt: Date;
-    group: Group;
 };
 
 export type GroupChannel = {
@@ -13,7 +12,7 @@ export type GroupChannel = {
     name: string;
     type: 'text' | 'voice';
     createdAt: Date;
-    group: Group;
+    groupId: string;
 };
 
 export type Group = {

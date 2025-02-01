@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
-import type { GroupEntity } from './GroupEntity';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { GroupRole } from '../models';
 
 @Entity('GroupMember')
@@ -18,10 +17,4 @@ export class GroupMemberEntity {
 
     @Column({ type: 'timestamp' })
     joinedAt!: Date;
-
-    // Define the many-to-one relationship with Group.
-    // Note that we use a string reference ('Group') so that we avoid runtime cycles.
-    @ManyToOne('Group', 'members', { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'groupId' })
-    group!: GroupEntity;
 }
