@@ -1,7 +1,7 @@
 export const schemaTypeDefs = `#graphql
 
   type User {
-    id: Int!
+    id: String!
     email: String!
     firstName: String!
     lastName: String!

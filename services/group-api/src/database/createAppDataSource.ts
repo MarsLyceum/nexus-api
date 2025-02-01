@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 
-import { UserEntity } from 'user-api-client';
 import {
     GroupEntity,
     GroupMemberEntity,
@@ -17,14 +16,9 @@ export function createAppDataSource(): DataSource {
     return new DataSource({
         type: 'postgres',
         ...hostSettings,
-        synchronize: false,
+        synchronize: true,
         logging: true,
-        entities: [
-            UserEntity,
-            GroupEntity,
-            GroupMemberEntity,
-            GroupChannelEntity,
-        ],
+        entities: [GroupEntity, GroupMemberEntity, GroupChannelEntity],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],
     });
