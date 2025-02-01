@@ -4,6 +4,7 @@ import {
     UpdateGroupPayload,
     CreateGroupResponse,
     GetGroupResponse,
+    GetUserGroupsResponse,
     UpdateGroupResponse,
 } from 'group-api-client';
 
@@ -16,6 +17,14 @@ export const groupResolvers = {
             const client = new GroupApiClient();
             const group = await client.getGroup(id);
             return group;
+        },
+        fetchUserGroups: async (
+            _: unknown,
+            { email }: { email: string }
+        ): Promise<GetUserGroupsResponse> => {
+            const client = new GroupApiClient();
+            const groups = await client.getUserGroups(email);
+            return groups;
         },
     },
     Mutation: {

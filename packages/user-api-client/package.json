@@ -15,7 +15,6 @@
     "joi": "^17.13.3",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.20",
-    "typescript": "^5.5.2",
-    "group-api-client": "workspace:*"
+    "typescript": "^5.5.2"
   }
 }

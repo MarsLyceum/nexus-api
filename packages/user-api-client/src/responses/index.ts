@@ -1,13 +1,7 @@
-type DbUser = {
-    id: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string;
-};
+import { User } from '../models';
 
-export type CreateUserResponse = DbUser;
+export type CreateUserResponse = User;
 
-export type GetUserResponse = DbUser;
+export type GetUserResponse = User;
 
-export type UpdateUserResponse = DbUser;
+export type UpdateUserResponse = User;

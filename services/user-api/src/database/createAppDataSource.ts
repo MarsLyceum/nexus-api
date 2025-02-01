@@ -2,11 +2,6 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 
 import { UserEntity } from 'user-api-client';
-import {
-    GroupEntity,
-    GroupMemberEntity,
-    GroupChannelEntity,
-} from 'group-api-client';
 import { DATABASE_PASSWORD } from '../config';
 
 export function createAppDataSource(): DataSource {
@@ -19,12 +14,7 @@ export function createAppDataSource(): DataSource {
         ...hostSettings,
         synchronize: false,
         logging: true,
-        entities: [
-            UserEntity,
-            GroupEntity,
-            GroupMemberEntity,
-            GroupChannelEntity,
-        ],
+        entities: [UserEntity],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],
     });

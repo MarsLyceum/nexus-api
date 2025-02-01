@@ -64,3 +64,7 @@ export const updateGroupPayloadSchema = Joi.object({
 export const getGroupParamsSchema = groupIdentifierSchema;
 export const deleteGroupParamsSchema = groupIdentifierSchema;
 export const updateGroupParamsSchema = groupIdentifierSchema;
+
+export const getUserGroupsParamsSchema = Joi.object({
+    email: Joi.string().email().required(),
+});

@@ -5,6 +5,7 @@ import {
     CreateGroupResponse,
     GetGroupResponse,
     UpdateGroupResponse,
+    GetUserGroupsResponse,
 } from '../responses';
 
 export class GroupApiClient {
@@ -30,6 +31,10 @@ export class GroupApiClient {
 
     async getGroup(id: string): Promise<GetGroupResponse> {
         return this.query(axios.get(`${this.baseURL}/group/${id}`));
+    }
+
+    async getUserGroups(email: string): Promise<GetUserGroupsResponse> {
+        return this.query(axios.get(`${this.baseURL}/user-groups/${email}`));
     }
 
     async createGroup(

@@ -8,6 +8,8 @@ import {
     UpdateGroupParams,
     UpdateGroupPayload,
     DeleteGroupParams,
+    // Import the GetUserGroupsParams type
+    GetUserGroupsParams,
 } from 'group-api-client';
 import { initializeDataSource } from './database';
 
@@ -72,22 +74,20 @@ export const createGroup = async (
         res.status(500).send((error as Error).message);
     }
 };
+
 /**
  * Handler to retrieve a group by its identifier.
  * Expects a route parameter with the group id.
  */
 export const getGroup = async (req: Request<GetGroupParams>, res: Response) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const { id } = req.params;
         if (!id) {
             res.status(400).send('Group id parameter is missing');
             return;
         }
         const dataSource = await initializeDataSource();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const group = await dataSource.manager.findOne(GroupEntity, {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { id },
             relations: ['members', 'channels'], // include related members and channels
         });
@@ -113,15 +113,11 @@ export const updateGroup = async (
     res: Response
 ) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const { id } = req.params;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const payload = req.body;
         const dataSource = await initializeDataSource();
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const group = await dataSource.manager.findOne(GroupEntity, {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { id },
         });
         if (!group) {
@@ -137,7 +133,6 @@ export const updateGroup = async (
             group.createdByUserEmail = payload.createdByUserEmail;
         }
         if (payload.createdAt !== undefined) {
-            // Convert the ISO string to a Date.
             group.createdAt = new Date(payload.createdAt);
         }
         if (payload.members !== undefined) {
@@ -183,6 +178,39 @@ export const deleteGroup = async (
 
         await dataSource.manager.remove(group);
         res.status(204).send();
+    } catch (error) {
+        res.status(500).send((error as Error).message);
+    }
+};
+
+/**
+ * Handler to retrieve all groups that a user is a member of.
+ * Expects a parameter with:
+ *  - email: string
+ *
+ * This handler queries the GroupMember table (joined with Group) to return a list of groups.
+ */
+export const getUserGroups = async (
+    req: Request<GetUserGroupsParams>,
+    res: Response
+) => {
+    try {
+        const { email } = req.params;
+        if (!email) {
+            res.status(400).send('Email parameter is missing');
+            return;
+        }
+        const dataSource = await initializeDataSource();
+
+        // Use QueryBuilder to join GroupEntity with its members and filter by userEmail.
+        const groups = await dataSource.manager
+            .createQueryBuilder(GroupEntity, 'group')
+            .leftJoinAndSelect('group.members', 'member')
+            .leftJoinAndSelect('group.channels', 'channel')
+            .where('member.userEmail = :email', { email })
+            .getMany();
+
+        res.status(200).json(groups);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }

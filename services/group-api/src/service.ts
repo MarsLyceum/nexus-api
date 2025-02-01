@@ -6,6 +6,7 @@ import cors from 'cors';
 import {
     DeleteGroupParams,
     GetGroupParams,
+    GetUserGroupsParams,
     UpdateGroupParams,
     UpdateGroupPayload,
     CreateGroupPayload,
@@ -14,9 +15,16 @@ import {
     updateGroupParamsSchema,
     updateGroupPayloadSchema,
     deleteGroupParamsSchema,
+    getUserGroupsParamsSchema,
 } from 'group-api-client';
 
-import { createGroup, getGroup, updateGroup, deleteGroup } from './handlers';
+import {
+    createGroup,
+    getGroup,
+    updateGroup,
+    deleteGroup,
+    getUserGroups,
+} from './handlers';
 
 import {
     validatePayload,
@@ -79,6 +87,14 @@ export async function createService(
         validateParams(getGroupParamsSchema),
         asyncHandler<GetGroupParams, unknown, unknown, ParsedQs>((req, res) =>
             getGroup(req, res)
+        )
+    );
+
+    app.get(
+        '/user-groups/:email',
+        validateParams(getUserGroupsParamsSchema),
+        asyncHandler<GetUserGroupsParams, unknown, unknown, ParsedQs>(
+            (req, res) => getUserGroups(req, res)
         )
     );
 
