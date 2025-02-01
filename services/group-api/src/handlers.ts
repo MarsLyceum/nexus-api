@@ -48,7 +48,7 @@ export const createGroup = async (
             userEmail: createdByUserEmail,
             role: 'owner',
             joinedAt: new Date(),
-            group: newGroup, // establish the relation to the new group
+            groupId: newGroup.id, // establish the relation to the new group
         });
 
         // Save the group member.
@@ -59,7 +59,7 @@ export const createGroup = async (
             name: 'general',
             type: 'text',
             createdAt: new Date(),
-            group: newGroup, // establish the relation to the new group
+            groupId: newGroup.id, // establish the relation to the new group
         });
 
         // Save the default channel.
