@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    JoinColumn,
+} from 'typeorm';
 // Use a type-only import for Group.
+import type { GroupEntity } from './GroupEntity';
 
 @Entity('GroupChannel')
 export class GroupChannelEntity {
@@ -14,6 +21,11 @@ export class GroupChannelEntity {
 
     @Column()
     createdAt!: Date;
+
+    // Use a string reference for the relation to Group.
+    @ManyToOne('Group', 'channels', { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'groupId' })
+    group!: GroupEntity;
 
     @Column({ type: 'uuid' })
     groupId!: string;
