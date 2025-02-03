@@ -39,6 +39,10 @@ export const schemaTypeDefs = `#graphql
     # Group queries
     fetchGroup(id: String!): Group
     fetchUserGroups(userId: String!): [Group!]!
+    fetchChannelMessages(
+      channelId: String!
+      offset: Int
+    ): [GroupChannelMessage!]!
   }
 
   type Subscription {

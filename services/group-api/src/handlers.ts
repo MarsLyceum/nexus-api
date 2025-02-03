@@ -6,6 +6,8 @@ import {
     GroupChannelMessageEntity,
     CreateGroupPayload,
     CreateGroupChannelMessagePayload,
+    GetChannelMessagesParams,
+    GetChannelMessagesQueryParams,
     GetGroupParams,
     UpdateGroupParams,
     UpdateGroupPayload,
@@ -236,13 +238,6 @@ export const deleteGroup = async (
     }
 };
 
-/**
- * Handler to retrieve all groups that a user is a member of.
- * Expects a parameter with:
- *  - email: string
- *
- * This handler queries the GroupMember table (joined with Group) to return a list of groups.
- */
 export const getUserGroups = async (
     req: Request<GetUserGroupsParams>,
     res: Response
@@ -265,6 +260,43 @@ export const getUserGroups = async (
             .getMany();
 
         res.status(200).json(groups);
+    } catch (error) {
+        res.status(500).send((error as Error).message);
+    }
+};
+
+export const getChannelMessages = async (
+    req: Request<
+        GetChannelMessagesParams,
+        unknown,
+        unknown,
+        GetChannelMessagesQueryParams
+    >,
+    res: Response
+) => {
+    try {
+        const { channelId } = req.params;
+        const { offset: offsetQuery } = req.query;
+        const offset = Number.parseInt(offsetQuery || '0', 10);
+        const limit = 100;
+
+        if (!channelId) {
+            res.status(400).send('Channel ID parameter is missing');
+            return;
+        }
+        const dataSource = await initializeDataSource();
+
+        // Use the repository to fetch messages for the given channel.
+        // Order by postedAt descending so that the most recent messages are returned first.
+        const messages = await dataSource.manager
+            .createQueryBuilder(GroupChannelMessageEntity, 'message')
+            .where('message.channelId = :channelId', { channelId })
+            .orderBy('message.postedAt', 'DESC')
+            .skip(offset)
+            .take(limit)
+            .getMany();
+
+        res.status(200).json(messages);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }

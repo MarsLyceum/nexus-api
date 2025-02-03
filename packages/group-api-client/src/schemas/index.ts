@@ -95,3 +95,13 @@ export const getUserGroupsParamsSchema = Joi.object({
         .guid({ version: ['uuidv4'] })
         .required(),
 });
+
+export const getChannelMessagesParamsSchema = Joi.object({
+    channelId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
+export const getChannelMessagesQueryParamsSchema = Joi.object({
+    offset: Joi.number(),
+});

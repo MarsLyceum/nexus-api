@@ -7,6 +7,8 @@ import {
     DeleteGroupParams,
     GetGroupParams,
     GetUserGroupsParams,
+    GetChannelMessagesParams,
+    GetChannelMessagesQueryParams,
     UpdateGroupParams,
     UpdateGroupPayload,
     CreateGroupPayload,
@@ -18,11 +20,14 @@ import {
     updateGroupPayloadSchema,
     deleteGroupParamsSchema,
     getUserGroupsParamsSchema,
+    getChannelMessagesParamsSchema,
+    getChannelMessagesQueryParamsSchema,
 } from 'group-api-client';
 
 import {
     createGroup,
     createGroupChannelMessage,
+    getChannelMessages,
     getGroup,
     updateGroup,
     deleteGroup,
@@ -32,6 +37,7 @@ import {
 import {
     validatePayload,
     validateParams,
+    validateQueryParams,
 } from './middleware/validationMiddleware';
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -111,6 +117,19 @@ export async function createService(
         asyncHandler<GetUserGroupsParams, unknown, unknown, ParsedQs>(
             (req, res) => getUserGroups(req, res)
         )
+    );
+
+    // GET /channels/:channelId/messages?offset=0
+    app.get(
+        '/channels/:channelId/messages',
+        validateParams(getChannelMessagesParamsSchema),
+        validateQueryParams(getChannelMessagesQueryParamsSchema),
+        asyncHandler<
+            GetChannelMessagesParams,
+            unknown,
+            unknown,
+            GetChannelMessagesQueryParams
+        >((req, res) => getChannelMessages(req, res))
     );
 
     // Update a group by id

@@ -11,6 +11,7 @@ import {
     GetGroupResponse,
     UpdateGroupResponse,
     GetUserGroupsResponse,
+    GetChannelMessagesResponse,
 } from '../responses';
 
 export class GroupApiClient {
@@ -40,6 +41,17 @@ export class GroupApiClient {
 
     async getUserGroups(userId: string): Promise<GetUserGroupsResponse> {
         return this.query(axios.get(`${this.baseURL}/user-groups/${userId}`));
+    }
+
+    async getChannelMessages(
+        channelId: string,
+        offset: number
+    ): Promise<GetChannelMessagesResponse> {
+        return this.query(
+            axios.get(
+                `${this.baseURL}/channels/${channelId}/messages?offset=${offset}`
+            )
+        );
     }
 
     async createGroup(

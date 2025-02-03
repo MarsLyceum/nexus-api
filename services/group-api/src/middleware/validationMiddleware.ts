@@ -24,3 +24,17 @@ export const validateParams =
         }
         next();
     };
+
+export const validateQueryParams =
+    (schema: ObjectSchema) =>
+    // eslint-disable-next-line consistent-return
+    (req: Request, res: Response, next: NextFunction) => {
+        const { error, value } = schema.validate(req.query);
+        if (error) {
+            // Return a 400 error with the validation details.
+            return res.status(400).json({ error: error.details });
+        }
+        // Optionally, update req.query with the validated value.
+        req.query = value;
+        next();
+    };

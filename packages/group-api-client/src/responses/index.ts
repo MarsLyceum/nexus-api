@@ -8,4 +8,6 @@ export type GetGroupResponse = Group;
 
 export type GetUserGroupsResponse = Group[];
 
+export type GetChannelMessagesResponse = GroupChannelMessage[];
+
 export type UpdateGroupResponse = Group;

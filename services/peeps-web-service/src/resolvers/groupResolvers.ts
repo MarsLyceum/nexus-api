@@ -5,6 +5,7 @@ import {
     CreateGroupResponse,
     GetGroupResponse,
     GetUserGroupsResponse,
+    GetChannelMessagesResponse,
     UpdateGroupResponse,
 } from 'group-api-client';
 
@@ -25,6 +26,14 @@ export const groupResolvers = {
             const client = new GroupApiClient();
             const groups = await client.getUserGroups(userId);
             return groups;
+        },
+        fetchChannelMessages: async (
+            _: unknown,
+            { channelId, offset }: { channelId: string; offset: number }
+        ): Promise<GetChannelMessagesResponse> => {
+            const client = new GroupApiClient();
+            const messages = await client.getChannelMessages(channelId, offset);
+            return messages;
         },
     },
     Mutation: {
