@@ -58,6 +58,7 @@ export const schemaTypeDefs = `#graphql
     description: String
     members: [GroupMember!]!
     channels: [GroupChannel!]!
+    avatarFilePath: String
   }
 
   enum GroupRole {

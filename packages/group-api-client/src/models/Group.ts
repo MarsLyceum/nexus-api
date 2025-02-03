@@ -25,4 +25,5 @@ export type Group = {
     members: GroupMember[];
     channels: GroupChannel[];
     description?: string;
+    avatarFilePath?: string;
 };

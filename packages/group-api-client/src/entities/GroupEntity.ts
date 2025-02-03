@@ -27,4 +27,7 @@ export class GroupEntity {
 
     @OneToMany('GroupChannel', 'group', { cascade: true })
     channels!: GroupChannelEntity[];
+
+    @Column({ length: 100, nullable: true })
+    avatarFilePath?: string;
 }
