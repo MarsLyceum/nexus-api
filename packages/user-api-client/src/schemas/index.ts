@@ -16,6 +16,7 @@ const userIdentifierSchema = Joi.object({
 
 const userProfileSchema = Joi.object({
     email: Joi.string().email().required(),
+    username: Joi.string().required(),
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     phoneNumber: Joi.string().required(),

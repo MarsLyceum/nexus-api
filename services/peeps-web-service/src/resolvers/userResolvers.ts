@@ -34,7 +34,9 @@ export const userResolvers = {
             { email }: GetUserByEmailParams
         ): Promise<GetUserResponse> => {
             const client = new UserApiClient();
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
             const user = await client.getUserByEmail(email);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return user;
         },
     },
