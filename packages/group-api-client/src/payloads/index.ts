@@ -1,7 +1,13 @@
 import { Group } from '../models';
 
+export type CreateGroupChannelMessagePayload = {
+    postedByUserId: string;
+    channelId: string;
+    content: string;
+};
+
 export type CreateGroupPayload = {
-    createdByUserEmail: string;
+    createdByUserId: string;
     name: string;
 };
 
@@ -10,7 +16,7 @@ export type GetGroupParams = {
 };
 
 export type GetUserGroupsParams = {
-    email: string;
+    userId: string;
 };
 
 export type UpdateGroupParams = GetGroupParams;

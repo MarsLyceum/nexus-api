@@ -10,7 +10,9 @@ import {
     UpdateGroupParams,
     UpdateGroupPayload,
     CreateGroupPayload,
+    CreateGroupChannelMessagePayload,
     createGroupPayloadSchema,
+    createGroupChannelMessagePayloadSchema,
     getGroupParamsSchema,
     updateGroupParamsSchema,
     updateGroupPayloadSchema,
@@ -20,6 +22,7 @@ import {
 
 import {
     createGroup,
+    createGroupChannelMessage,
     getGroup,
     updateGroup,
     deleteGroup,
@@ -81,6 +84,18 @@ export async function createService(
         )
     );
 
+    // Create a new group channel message
+    app.post(
+        '/group-channel-message',
+        validatePayload(createGroupChannelMessagePayloadSchema),
+        asyncHandler<
+            unknown,
+            unknown,
+            CreateGroupChannelMessagePayload,
+            ParsedQs
+        >((req, res) => createGroupChannelMessage(req, res))
+    );
+
     // Get a group by id
     app.get(
         '/group/:id',
@@ -91,7 +106,7 @@ export async function createService(
     );
 
     app.get(
-        '/user-groups/:email',
+        '/user-groups/:userId',
         validateParams(getUserGroupsParamsSchema),
         asyncHandler<GetUserGroupsParams, unknown, unknown, ParsedQs>(
             (req, res) => getUserGroups(req, res)

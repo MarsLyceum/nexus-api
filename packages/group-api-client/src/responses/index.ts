@@ -1,4 +1,6 @@
-import { Group } from '../models';
+import { Group, GroupChannelMessage } from '../models';
+
+export type CreateGroupChannelMessageResponse = GroupChannelMessage;
 
 export type CreateGroupResponse = Group;
 

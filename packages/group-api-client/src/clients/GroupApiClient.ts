@@ -1,8 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { CreateGroupPayload, UpdateGroupPayload } from '../payloads';
+import {
+    CreateGroupPayload,
+    UpdateGroupPayload,
+    CreateGroupChannelMessagePayload,
+} from '../payloads';
 import {
     CreateGroupResponse,
+    CreateGroupChannelMessageResponse,
     GetGroupResponse,
     UpdateGroupResponse,
     GetUserGroupsResponse,
@@ -33,14 +38,27 @@ export class GroupApiClient {
         return this.query(axios.get(`${this.baseURL}/group/${id}`));
     }
 
-    async getUserGroups(email: string): Promise<GetUserGroupsResponse> {
-        return this.query(axios.get(`${this.baseURL}/user-groups/${email}`));
+    async getUserGroups(userId: string): Promise<GetUserGroupsResponse> {
+        return this.query(axios.get(`${this.baseURL}/user-groups/${userId}`));
     }
 
     async createGroup(
         createGroupPayload: CreateGroupPayload
     ): Promise<CreateGroupResponse> {
-        return this.query(axios.post(this.baseURL, createGroupPayload));
+        return this.query(
+            axios.post(`${this.baseURL}/group`, createGroupPayload)
+        );
+    }
+
+    async createGroupChannelMessage(
+        createGroupChannelMessagePayload: CreateGroupChannelMessagePayload
+    ): Promise<CreateGroupChannelMessageResponse> {
+        return this.query(
+            axios.post(
+                `${this.baseURL}/group-channel-message`,
+                createGroupChannelMessagePayload
+            )
+        );
     }
 
     async updateGroup(

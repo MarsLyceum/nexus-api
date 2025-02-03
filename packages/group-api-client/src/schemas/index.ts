@@ -14,11 +14,23 @@ export const groupIdentifierSchema = Joi.object({
  * Note: We reference users by their email addresses.
  */
 export const groupMemberSchema = Joi.object({
-    userEmail: Joi.string().email().required(),
+    userId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
     role: Joi.string()
         .valid('owner', 'admin', 'moderator', 'member')
         .required(),
     joinedAt: Joi.date().iso().required(),
+});
+
+export const groupChannelMessageSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required(),
+    postedAt: Joi.date().iso().required(),
+    edited: Joi.boolean().required(),
+    channelId: Joi.string().required(),
 });
 
 /**
@@ -31,6 +43,7 @@ export const groupChannelSchema = Joi.object({
     name: Joi.string().max(100).required(),
     type: Joi.string().valid('text', 'voice').required(),
     createdAt: Joi.date().iso().required(),
+    messages: Joi.array().items(groupChannelMessageSchema),
 });
 
 /**
@@ -42,10 +55,22 @@ export const groupChannelSchema = Joi.object({
  */
 export const createGroupPayloadSchema = Joi.object({
     name: Joi.string().max(100).required(),
-    createdByUserEmail: Joi.string().email().required(),
+    createdByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
     description: Joi.string().optional(),
-    members: Joi.array().items(groupMemberSchema).optional(),
-    channels: Joi.array().items(groupChannelSchema).optional(),
+    members: Joi.array().items(groupMemberSchema),
+    channels: Joi.array().items(groupChannelSchema),
+});
+
+export const createGroupChannelMessagePayloadSchema = Joi.object({
+    channelId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required(),
 });
 
 /**
@@ -66,5 +91,7 @@ export const deleteGroupParamsSchema = groupIdentifierSchema;
 export const updateGroupParamsSchema = groupIdentifierSchema;
 
 export const getUserGroupsParamsSchema = Joi.object({
-    email: Joi.string().email().required(),
+    userId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
 });

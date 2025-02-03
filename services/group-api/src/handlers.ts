@@ -3,7 +3,9 @@ import {
     GroupEntity,
     GroupMemberEntity,
     GroupChannelEntity,
+    GroupChannelMessageEntity,
     CreateGroupPayload,
+    CreateGroupChannelMessagePayload,
     GetGroupParams,
     UpdateGroupParams,
     UpdateGroupPayload,
@@ -16,7 +18,7 @@ import { initializeDataSource } from './database';
 /**
  * Handler to create a new group.
  * Expects a payload with:
- *  - createdByUserEmail: string
+ *  - createdByUserId: string
  *  - name: string
  *
  * This handler creates the group, adds the creator as the sole member with the role "owner",
@@ -27,13 +29,13 @@ export const createGroup = async (
     res: Response
 ) => {
     try {
-        const { name, createdByUserEmail } = req.body;
+        const { name, createdByUserId } = req.body;
         const dataSource = await initializeDataSource();
 
         // Create a new Group instance.
         const newGroup = dataSource.manager.create(GroupEntity, {
             name,
-            createdByUserEmail,
+            createdByUserId,
             createdAt: new Date(),
             members: [], // initialize with an empty array; we'll add the owner below
             channels: [], // initialize with an empty array; we'll add the default channel below
@@ -45,7 +47,7 @@ export const createGroup = async (
 
         // Create a GroupMember record for the creator with role "owner".
         const groupMember = dataSource.manager.create(GroupMemberEntity, {
-            userEmail: createdByUserEmail,
+            userId: createdByUserId,
             role: 'owner',
             joinedAt: new Date(),
             group: newGroup, // establish the relation to the new group
@@ -60,6 +62,7 @@ export const createGroup = async (
             type: 'text',
             createdAt: new Date(),
             group: newGroup, // establish the relation to the new group
+            messages: [],
         });
 
         // Save the default channel.
@@ -70,6 +73,56 @@ export const createGroup = async (
         newGroup.channels = [generalChannel];
 
         res.status(201).json(newGroup);
+    } catch (error) {
+        res.status(500).send((error as Error).message);
+    }
+};
+
+export const createGroupChannelMessage = async (
+    req: Request<unknown, unknown, CreateGroupChannelMessagePayload>,
+    res: Response
+) => {
+    try {
+        const { channelId, content, postedByUserId } = req.body;
+        const dataSource = await initializeDataSource();
+
+        const groupChannel = await dataSource.manager.findOne(
+            GroupChannelEntity,
+            {
+                where: { id: channelId },
+                relations: ['group', 'messages'],
+            }
+        );
+
+        if (!groupChannel) {
+            res.status(404).json({ error: 'Invalid channel id' });
+            return;
+        }
+
+        // Create a new Group instance.
+        const newGroupChannelMessage = dataSource.manager.create(
+            GroupChannelMessageEntity,
+            {
+                content,
+                channelId,
+                postedByUserId,
+                postedAt: new Date(),
+                edited: false,
+                channel: groupChannel,
+            }
+        );
+
+        // Save the group so it gets a generated ID.
+        await dataSource.manager.save(newGroupChannelMessage);
+
+        groupChannel.messages = [
+            ...groupChannel.messages,
+            newGroupChannelMessage,
+        ];
+
+        await dataSource.manager.save(groupChannel);
+
+        res.status(201).json(newGroupChannelMessage);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }
@@ -129,8 +182,8 @@ export const updateGroup = async (
         if (payload.name !== undefined) {
             group.name = payload.name;
         }
-        if (payload.createdByUserEmail !== undefined) {
-            group.createdByUserEmail = payload.createdByUserEmail;
+        if (payload.createdByUserId !== undefined) {
+            group.createdByUserId = payload.createdByUserId;
         }
         if (payload.createdAt !== undefined) {
             group.createdAt = new Date(payload.createdAt);
@@ -195,9 +248,9 @@ export const getUserGroups = async (
     res: Response
 ) => {
     try {
-        const { email } = req.params;
-        if (!email) {
-            res.status(400).send('Email parameter is missing');
+        const { userId } = req.params;
+        if (!userId) {
+            res.status(400).send('User ID parameter is missing');
             return;
         }
         const dataSource = await initializeDataSource();
@@ -207,7 +260,8 @@ export const getUserGroups = async (
             .createQueryBuilder(GroupEntity, 'group')
             .leftJoinAndSelect('group.members', 'member')
             .leftJoinAndSelect('group.channels', 'channel')
-            .where('member.userEmail = :email', { email })
+            .leftJoinAndSelect('channel.messages', 'message')
+            .where('member.userId = :userId', { userId })
             .getMany();
 
         res.status(200).json(groups);

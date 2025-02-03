@@ -1,11 +1,21 @@
 export type GroupRole = 'owner' | 'admin' | 'moderator' | 'member';
 
 export type GroupMember = {
-    userEmail: string;
+    userId: string;
     groupId: string;
     role: GroupRole;
     joinedAt: Date;
     group: Group;
+};
+
+export type GroupChannelMessage = {
+    id: string;
+    content: string;
+    postedAt: Date;
+    edited: boolean;
+    channel: GroupChannel;
+    channelId: string;
+    postedByUserId: string;
 };
 
 export type GroupChannel = {
@@ -13,6 +23,7 @@ export type GroupChannel = {
     name: string;
     type: 'text' | 'voice';
     createdAt: Date;
+    messages: GroupChannelMessage[];
     groupId: string;
     group: Group;
 };
@@ -20,7 +31,7 @@ export type GroupChannel = {
 export type Group = {
     id: string;
     name: string;
-    createdByUserEmail: string;
+    createdByUserId: string;
     createdAt: Date;
     members: GroupMember[];
     channels: GroupChannel[];

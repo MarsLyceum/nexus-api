@@ -20,7 +20,7 @@ export const schemaTypeDefs = `#graphql
     # Group mutations
     createGroup(
       name: String!
-      createdByUserEmail: String!
+      createdByUserId: String!
       description: String
     ): Group
 
@@ -38,7 +38,7 @@ export const schemaTypeDefs = `#graphql
 
     # Group queries
     fetchGroup(id: String!): Group
-    fetchUserGroups(email: String!): [Group!]!
+    fetchUserGroups(userId: String!): [Group!]!
   }
 
   type Subscription {
@@ -53,7 +53,7 @@ export const schemaTypeDefs = `#graphql
   type Group {
     id: String!
     name: String!
-    createdByUserEmail: String!
+    createdByUserId: String!
     createdAt: String!  # ISO date string
     description: String
     members: [GroupMember!]!
@@ -70,7 +70,7 @@ export const schemaTypeDefs = `#graphql
 
   # A member of a group.
   type GroupMember {
-    userEmail: String!
+    userId: String!
     groupId: String!
     role: GroupRole!
     joinedAt: String!  # ISO date string
@@ -81,6 +81,16 @@ export const schemaTypeDefs = `#graphql
     voice
   }
 
+  type GroupChannelMessage {
+      id: String!
+      content: String!
+      postedAt: String!
+      edited: Boolean!
+      channel: GroupChannel!
+      channelId: String!
+      postedByUserId: String!
+  }
+
   # A communication channel within a group.
   type GroupChannel {
     id: String!
@@ -88,5 +98,6 @@ export const schemaTypeDefs = `#graphql
     type: GroupChannelType!
     createdAt: String!  # ISO date string
     groupId: String!
+    messages: [GroupChannelMessage!]!
   }
 `;

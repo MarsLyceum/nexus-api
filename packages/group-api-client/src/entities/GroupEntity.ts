@@ -12,8 +12,8 @@ export class GroupEntity {
     name!: string;
 
     // Store the creator's email.
-    @Column({ length: 100 })
-    createdByUserEmail!: string;
+    @Column({ type: 'uuid' })
+    createdByUserId!: string;
 
     @Column()
     createdAt!: Date;

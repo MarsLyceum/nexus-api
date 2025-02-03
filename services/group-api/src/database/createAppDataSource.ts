@@ -5,6 +5,7 @@ import {
     GroupEntity,
     GroupMemberEntity,
     GroupChannelEntity,
+    GroupChannelMessageEntity,
 } from 'group-api-client';
 import { DATABASE_PASSWORD } from '../config';
 
@@ -18,7 +19,12 @@ export function createAppDataSource(): DataSource {
         ...hostSettings,
         synchronize: true,
         logging: true,
-        entities: [GroupEntity, GroupMemberEntity, GroupChannelEntity],
+        entities: [
+            GroupEntity,
+            GroupMemberEntity,
+            GroupChannelEntity,
+            GroupChannelMessageEntity,
+        ],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],
     });

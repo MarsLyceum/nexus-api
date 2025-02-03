@@ -20,10 +20,10 @@ export const groupResolvers = {
         },
         fetchUserGroups: async (
             _: unknown,
-            { email }: { email: string }
+            { userId }: { userId: string }
         ): Promise<GetUserGroupsResponse> => {
             const client = new GroupApiClient();
-            const groups = await client.getUserGroups(email);
+            const groups = await client.getUserGroups(userId);
             return groups;
         },
     },
