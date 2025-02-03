@@ -35,6 +35,7 @@ export const schemaTypeDefs = `#graphql
 
   type Query {
     fetchUser(userId: String!): User
+    fetchUserByEmail(email: String!): User
 
     # Group queries
     fetchGroup(id: String!): Group

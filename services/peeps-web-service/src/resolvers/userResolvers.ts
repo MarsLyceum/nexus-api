@@ -5,6 +5,7 @@ import {
     CreateUserResponse,
     GetUserResponse,
     GetUserParams,
+    GetUserByEmailParams,
 } from 'user-api-client';
 
 export const userResolvers = {
@@ -25,6 +26,15 @@ export const userResolvers = {
         ): Promise<GetUserResponse> => {
             const client = new UserApiClient();
             const user = await client.getUser(userId);
+            return user;
+        },
+
+        fetchUserByEmail: async (
+            _: never,
+            { email }: GetUserByEmailParams
+        ): Promise<GetUserResponse> => {
+            const client = new UserApiClient();
+            const user = await client.getUserByEmail(email);
             return user;
         },
     },
