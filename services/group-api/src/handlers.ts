@@ -12,8 +12,8 @@ import {
     UpdateGroupParams,
     UpdateGroupPayload,
     DeleteGroupParams,
-    // Import the GetUserGroupsParams type
     GetUserGroupsParams,
+    CreateGroupChannelPayload,
 } from 'group-api-client';
 import { initializeDataSource } from './database';
 
@@ -75,6 +75,43 @@ export const createGroup = async (
         newGroup.channels = [generalChannel];
 
         res.status(201).json(newGroup);
+    } catch (error) {
+        res.status(500).send((error as Error).message);
+    }
+};
+
+export const createGroupChannel = async (
+    req: Request<unknown, unknown, CreateGroupChannelPayload>,
+    res: Response
+) => {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const { name, groupId } = req.body;
+        const dataSource = await initializeDataSource();
+
+        const group = await dataSource.manager.findOne(GroupEntity, {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            where: { id: groupId },
+        });
+
+        if (!group) {
+            res.status(404).send('Group not found');
+        }
+
+        // Create a default "general" text channel.
+        const channel = dataSource.manager.create(GroupChannelEntity, {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            name,
+            type: 'text',
+            createdAt: new Date(),
+            group: group!,
+            messages: [],
+        });
+
+        // Save the default channel.
+        await dataSource.manager.save(channel);
+
+        res.status(201).json(channel);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }

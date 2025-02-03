@@ -13,6 +13,11 @@ export type CreateGroupPayload = {
     name: string;
 };
 
+export type CreateGroupChannelPayload = {
+    groupId: string;
+    name: string;
+};
+
 export type GetGroupParams = {
     id: string;
 };

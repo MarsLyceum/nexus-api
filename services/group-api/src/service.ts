@@ -12,8 +12,10 @@ import {
     UpdateGroupParams,
     UpdateGroupPayload,
     CreateGroupPayload,
+    CreateGroupChannelPayload,
     CreateGroupChannelMessagePayload,
     createGroupPayloadSchema,
+    createGroupChannelPayloadSchema,
     createGroupChannelMessagePayloadSchema,
     getGroupParamsSchema,
     updateGroupParamsSchema,
@@ -26,6 +28,7 @@ import {
 
 import {
     createGroup,
+    createGroupChannel,
     createGroupChannelMessage,
     getChannelMessages,
     getGroup,
@@ -87,6 +90,14 @@ export async function createService(
         validatePayload(createGroupPayloadSchema),
         asyncHandler<unknown, unknown, CreateGroupPayload, ParsedQs>(
             (req, res) => createGroup(req, res)
+        )
+    );
+
+    app.post(
+        '/channel',
+        validatePayload(createGroupChannelPayloadSchema),
+        asyncHandler<unknown, unknown, CreateGroupChannelPayload, ParsedQs>(
+            (req, res) => createGroupChannel(req, res)
         )
     );
 

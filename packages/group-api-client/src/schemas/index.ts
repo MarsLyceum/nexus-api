@@ -63,6 +63,13 @@ export const createGroupPayloadSchema = Joi.object({
     channels: Joi.array().items(groupChannelSchema),
 });
 
+export const createGroupChannelPayloadSchema = Joi.object({
+    name: Joi.string().max(100).required(),
+    groupId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
 export const createGroupChannelMessagePayloadSchema = Joi.object({
     channelId: Joi.string()
         .guid({ version: ['uuidv4'] })
