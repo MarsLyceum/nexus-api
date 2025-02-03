@@ -9,7 +9,9 @@ import {
 } from '../payloads';
 
 const userIdentifierSchema = Joi.object({
-    email: Joi.string().email().required(),
+    userId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
 });
 
 const userProfileSchema = Joi.object({
@@ -24,6 +26,10 @@ export const createUserPayloadSchema: ObjectSchema<CreateUserPayload> =
 
 export const getUserParamsSchema: ObjectSchema<GetUserParams> =
     userIdentifierSchema as ObjectSchema<GetUserParams>;
+
+export const getUserByEmailParamsSchema = Joi.object({
+    email: Joi.string().email().required(),
+});
 
 export const deleteUserParamsSchema: ObjectSchema<DeleteUserParams> =
     userIdentifierSchema as ObjectSchema<DeleteUserParams>;

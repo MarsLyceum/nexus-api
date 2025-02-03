@@ -5,16 +5,24 @@ import cors from 'cors';
 import {
     DeleteUserParams,
     GetUserParams,
+    GetUserByEmailParams,
     UpdateUserParams,
     UpdateUserPayload,
     CreateUserPayload,
     createUserPayloadSchema,
     getUserParamsSchema,
+    getUserByEmailParamsSchema,
     updateUserParamsSchema,
     updateUserPayloadSchema,
     deleteUserParamsSchema,
 } from 'user-api-client';
-import { createUser, getUser, updateUser, deleteUser } from './handlers';
+import {
+    createUser,
+    getUser,
+    updateUser,
+    deleteUser,
+    getUserByEmail,
+} from './handlers';
 import {
     validatePayload,
     validateParams,
@@ -71,15 +79,23 @@ export async function createService(
     );
 
     app.get(
-        '/user/:email',
+        '/user/:userId',
         validateParams(getUserParamsSchema),
         asyncHandler<GetUserParams, unknown, unknown, ParsedQs>((req, res) =>
             getUser(req, res)
         )
     );
 
+    app.get(
+        '/user-by-email/:email',
+        validateParams(getUserByEmailParamsSchema),
+        asyncHandler<GetUserByEmailParams, unknown, unknown, ParsedQs>(
+            (req, res) => getUserByEmail(req, res)
+        )
+    );
+
     app.put(
-        '/user/:email',
+        '/user/:userId',
         validateParams(updateUserParamsSchema),
         validatePayload(updateUserPayloadSchema),
         asyncHandler<UpdateUserParams, unknown, UpdateUserPayload, ParsedQs>(
@@ -88,7 +104,7 @@ export async function createService(
     );
 
     app.delete(
-        '/user/:email',
+        '/user/:userId',
         validateParams(deleteUserParamsSchema),
         asyncHandler<DeleteUserParams, unknown, unknown, ParsedQs>((req, res) =>
             deleteUser(req, res)

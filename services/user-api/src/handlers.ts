@@ -3,6 +3,7 @@ import {
     UserEntity,
     CreateUserPayload,
     GetUserParams,
+    GetUserByEmailParams,
     UpdateUserParams,
     UpdateUserPayload,
     DeleteUserParams,
@@ -42,8 +43,35 @@ export const createUser = async (
     }
 };
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export const getUser = async (req: Request<GetUserParams>, res: Response) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            res.status(400).send('User ID parameter is missing');
+            return;
+        }
+
+        const dataSource = await initializeDataSource();
+        const user = await dataSource.manager.findOne(UserEntity, {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            where: { id: userId },
+        });
+
+        if (!user) {
+            res.status(404).send('User not found');
+        } else {
+            res.status(200).json(user);
+        }
+    } catch (error) {
+        res.status(500).send((error as Error).message);
+    }
+};
+
+export const getUserByEmail = async (
+    req: Request<GetUserByEmailParams>,
+    res: Response
+) => {
     try {
         const { email } = req.params;
 
@@ -54,6 +82,7 @@ export const getUser = async (req: Request<GetUserParams>, res: Response) => {
 
         const dataSource = await initializeDataSource();
         const user = await dataSource.manager.findOne(UserEntity, {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { email },
         });
 
@@ -73,12 +102,13 @@ export const updateUser = async (
     // eslint-disable-next-line @typescript-eslint/require-await
 ) => {
     try {
-        const { email: emailToUpdate } = req.params;
+        const { userId } = req.params;
         const { firstName, lastName, phoneNumber, email } = req.body;
 
         const dataSource = await initializeDataSource();
         const user = await dataSource.manager.findOne(UserEntity, {
-            where: { email: emailToUpdate },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            where: { id: userId },
         });
 
         if (!user) {
@@ -106,16 +136,17 @@ export const deleteUser = async (
     // eslint-disable-next-line consistent-return
 ) => {
     try {
-        const { email } = req.params;
+        const { userId } = req.params;
 
-        if (!email) {
-            res.status(400).send('Email parameter is missing');
+        if (!userId) {
+            res.status(400).send('User ID parameter is missing');
             return;
         }
 
         const dataSource = await initializeDataSource();
         const user = await dataSource.manager.findOne(UserEntity, {
-            where: { email },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            where: { id: userId },
         });
 
         if (!user) {

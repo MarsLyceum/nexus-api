@@ -6,6 +6,10 @@ export type CreateUserPayload = {
 };
 
 export type GetUserParams = {
+    userId: string;
+};
+
+export type GetUserByEmailParams = {
     email: string;
 };
 

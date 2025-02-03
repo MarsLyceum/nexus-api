@@ -28,9 +28,12 @@ export class UserApiClient {
         }
     }
 
-    // Get a single user by ID
-    async getUser(email: string): Promise<GetUserResponse> {
-        return this.query(axios.get(`${this.baseURL}/user/${email}`));
+    async getUser(userId: string): Promise<GetUserResponse> {
+        return this.query(axios.get(`${this.baseURL}/user/${userId}`));
+    }
+
+    async getUserByEmail(email: string): Promise<GetUserResponse> {
+        return this.query(axios.get(`${this.baseURL}/user-by-email/${email}`));
     }
 
     // Create a new user
@@ -42,14 +45,14 @@ export class UserApiClient {
 
     // Update a user
     async updateUser(
-        email: string,
+        userId: string,
         data: UpdateUserPayload
     ): Promise<UpdateUserResponse> {
-        return this.query(axios.put(`${this.baseURL}/${email}`, data));
+        return this.query(axios.put(`${this.baseURL}/${userId}`, data));
     }
 
     // Delete a user
-    async deleteUser(email: string): Promise<undefined> {
-        return this.query(axios.delete(`${this.baseURL}/${email}`));
+    async deleteUser(userId: string): Promise<undefined> {
+        return this.query(axios.delete(`${this.baseURL}/${userId}`));
     }
 }

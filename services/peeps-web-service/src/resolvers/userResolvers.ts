@@ -21,10 +21,10 @@ export const userResolvers = {
     Query: {
         fetchUser: async (
             _: never,
-            { email }: GetUserParams
+            { userId }: GetUserParams
         ): Promise<GetUserResponse> => {
             const client = new UserApiClient();
-            const user = await client.getUser(email);
+            const user = await client.getUser(userId);
             return user;
         },
     },
