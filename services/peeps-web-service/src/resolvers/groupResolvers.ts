@@ -53,8 +53,27 @@ export const groupResolvers = {
             payload: CreateGroupChannelMessagePayload
         ): Promise<CreateGroupChannelMessageResponse> => {
             const client = new GroupApiClient();
-            // Rename the variable to "message" since it returns a message object.
-            const message = await client.createGroupChannelMessage(payload);
+
+            let sanitizedPayload: CreateGroupChannelMessagePayload;
+
+            // If it's a post message, sanitize post-specific fields.
+            if (payload.messageType === 'post') {
+                sanitizedPayload = {
+                    ...payload,
+                    flair: payload.flair === '' ? undefined : payload.flair,
+                    domain: payload.domain === '' ? undefined : payload.domain,
+                    thumbnail:
+                        payload.thumbnail === ''
+                            ? undefined
+                            : payload.thumbnail,
+                };
+            } else {
+                // For a regular message, simply use the payload as-is.
+                sanitizedPayload = payload;
+            }
+
+            const message =
+                await client.createGroupChannelMessage(sanitizedPayload);
             return message;
         },
 
@@ -78,15 +97,14 @@ export const groupResolvers = {
     // __resolveType on the GroupChannelMessage interface
     GroupChannelMessage: {
         __resolveType(obj: any) {
-            // If messageType is provided, use it.
+            // Use messageType if provided.
             if (obj.messageType === 'post') {
                 return 'PostMessage';
             }
             if (obj.messageType === 'message') {
                 return 'RegularMessage';
             }
-            // If messageType is missing, infer from other properties.
-            // For example, post messages have upvotes, commentsCount, or shareCount.
+            // Otherwise, infer based on extra fields.
             if (
                 Object.prototype.hasOwnProperty.call(obj, 'upvotes') ||
                 Object.prototype.hasOwnProperty.call(obj, 'commentsCount') ||
@@ -94,7 +112,6 @@ export const groupResolvers = {
             ) {
                 return 'PostMessage';
             }
-            // Otherwise, assume it's a regular message.
             return 'RegularMessage';
         },
     },
