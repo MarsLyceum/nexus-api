@@ -18,8 +18,8 @@ export class GroupChannelEntity {
     @Column({ length: 100 })
     name!: string;
 
-    @Column({ type: 'enum', enum: ['text', 'voice'] })
-    type!: 'text' | 'voice';
+    @Column({ type: 'enum', enum: ['text', 'voice', 'feed'] })
+    type!: 'text' | 'voice' | 'feed';
 
     @Column()
     createdAt!: Date;

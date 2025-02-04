@@ -21,7 +21,7 @@ export type GroupChannelMessage = {
 export type GroupChannel = {
     id: string;
     name: string;
-    type: 'text' | 'voice';
+    type: 'text' | 'voice' | 'feed';
     createdAt: Date;
     messages: GroupChannelMessage[];
     groupId: string;
