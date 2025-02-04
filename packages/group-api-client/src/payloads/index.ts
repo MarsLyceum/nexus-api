@@ -1,12 +1,33 @@
 import { ParsedQs } from 'qs';
-
 import { Group, ChannelType } from '../models';
 
-export type CreateGroupChannelMessagePayload = {
+/**
+ * Create a channel message payload.
+ * We define two variants:
+ *  - Regular message: just content.
+ *  - Post message: includes extra post fields.
+ */
+export type CreateGroupChannelRegularMessagePayload = {
     postedByUserId: string;
     channelId: string;
     content: string;
+    messageType: 'message'; // regular message discriminator
 };
+
+export type CreateGroupChannelPostMessagePayload = {
+    postedByUserId: string;
+    channelId: string;
+    content: string;
+    messageType: 'post'; // discriminator value for posts
+    title: string;
+    flair?: string;
+    domain?: string;
+    thumbnail?: string;
+};
+
+export type CreateGroupChannelMessagePayload =
+    | CreateGroupChannelRegularMessagePayload
+    | CreateGroupChannelPostMessagePayload;
 
 export type CreateGroupPayload = {
     createdByUserId: string;

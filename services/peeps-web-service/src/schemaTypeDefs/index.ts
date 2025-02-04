@@ -1,6 +1,8 @@
 export const schemaTypeDefs = `#graphql
 
-
+  ###########################
+  # Basic User and Group Types
+  ###########################
   type User {
     id: String!
     email: String!
@@ -29,7 +31,12 @@ export const schemaTypeDefs = `#graphql
       postedByUserId: String!
       channelId: String!
       content: String!
-    ): GroupChannelMessage
+      messageType: MessageType!
+      title: String
+      flair: String
+      domain: String
+      thumbnail: String
+    ): GroupChannelMessageUnion
 
     updateGroup(
       id: String!
@@ -50,16 +57,16 @@ export const schemaTypeDefs = `#graphql
     fetchChannelMessages(
       channelId: String!
       offset: Int
-    ): [GroupChannelMessage!]!
+    ): [GroupChannelMessageUnion!]!
   }
 
   type Subscription {
     greetings: String
   }
 
-  ##############################################
+  ###########################
   # Group API Types
-  ##############################################
+  ###########################
 
   # A group represents a collection of members and channels.
   type Group {
@@ -94,15 +101,57 @@ export const schemaTypeDefs = `#graphql
     feed
   }
 
-  type GroupChannelMessage {
+  enum MessageType {
+    message
+    post
+  }
+
+  ###########################
+  # Message Types
+  ###########################
+
+  # An interface representing the common fields of any channel message.
+  interface GroupChannelMessage {
       id: String!
       content: String!
       postedAt: String!
       edited: Boolean!
-      channel: GroupChannel!
       channelId: String!
       postedByUserId: String!
+      messageType: MessageType!
   }
+
+  # A regular message implements the interface.
+  type RegularMessage implements GroupChannelMessage {
+      id: String!
+      content: String!
+      postedAt: String!
+      edited: Boolean!
+      channelId: String!
+      postedByUserId: String!
+      messageType: MessageType!  # always "message"
+  }
+
+  # A post message implements the interface and adds extra fields.
+  type PostMessage implements GroupChannelMessage {
+      id: String!
+      content: String!
+      postedAt: String!
+      edited: Boolean!
+      channelId: String!
+      postedByUserId: String!
+      messageType: MessageType!  # always "post"
+      title: String!
+      flair: String
+      domain: String
+      thumbnail: String
+      upvotes: Int!
+      commentsCount: Int!
+      shareCount: Int!
+  }
+
+  # A union that can be either a regular message or a post message.
+  union GroupChannelMessageUnion = RegularMessage | PostMessage
 
   # A communication channel within a group.
   type GroupChannel {
@@ -111,6 +160,6 @@ export const schemaTypeDefs = `#graphql
     type: GroupChannelType!
     createdAt: String!  # ISO date string
     groupId: String!
-    messages: [GroupChannelMessage!]!
+    messages: [GroupChannelMessageUnion!]!
   }
 `;

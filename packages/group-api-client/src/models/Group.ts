@@ -1,3 +1,50 @@
+// Discriminated union for messages
+
+export type BaseGroupChannelMessage = {
+    id: string;
+    content: string;
+    postedAt: Date;
+    edited: boolean;
+    channel: GroupChannel;
+    channelId: string;
+    postedByUserId: string;
+};
+
+export type GroupChannelRegularMessage = BaseGroupChannelMessage & {
+    messageType: 'message'; // for regular messages
+};
+
+export type GroupChannelPostMessage = BaseGroupChannelMessage & {
+    messageType: 'post'; // discriminator value for posts
+    title: string;
+    flair?: string;
+    domain?: string;
+    thumbnail?: string;
+    upvotes: number;
+    commentsCount: number;
+    shareCount: number;
+};
+
+export type GroupChannelMessage =
+    | GroupChannelRegularMessage
+    | GroupChannelPostMessage;
+
+// New type for post comments (reflecting GroupChannelPostCommentEntity)
+export type GroupChannelPostComment = {
+    id: string;
+    content: string;
+    postedAt: Date;
+    edited: boolean;
+    postedByUserId: string;
+    // Reference to the parent post (GroupChannelPostMessage)
+    postId: string;
+    // For threaded replies, optional parent comment id
+    parentCommentId?: string | null;
+    // Nested replies
+    children?: GroupChannelPostComment[];
+    upvotes: number;
+};
+
 export type GroupRole = 'owner' | 'admin' | 'moderator' | 'member';
 export type ChannelType = 'text' | 'voice' | 'feed';
 
@@ -9,21 +56,12 @@ export type GroupMember = {
     group: Group;
 };
 
-export type GroupChannelMessage = {
-    id: string;
-    content: string;
-    postedAt: Date;
-    edited: boolean;
-    channel: GroupChannel;
-    channelId: string;
-    postedByUserId: string;
-};
-
 export type GroupChannel = {
     id: string;
     name: string;
     type: ChannelType;
     createdAt: Date;
+    // The messages on a channel can be either regular messages or posts.
     messages: GroupChannelMessage[];
     groupId: string;
     group: Group;

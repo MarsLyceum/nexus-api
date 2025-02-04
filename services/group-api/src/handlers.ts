@@ -4,6 +4,7 @@ import {
     GroupMemberEntity,
     GroupChannelEntity,
     GroupChannelMessageEntity,
+    GroupChannelPostEntity,
     CreateGroupPayload,
     CreateGroupChannelMessagePayload,
     GetChannelMessagesParams,
@@ -39,8 +40,8 @@ export const createGroup = async (
             name,
             createdByUserId,
             createdAt: new Date(),
-            members: [], // initialize with an empty array; we'll add the owner below
-            channels: [], // initialize with an empty array; we'll add the default channel below
+            members: [], // will add the owner below
+            channels: [], // will add the default channel below
             description: undefined,
         });
 
@@ -52,7 +53,7 @@ export const createGroup = async (
             userId: createdByUserId,
             role: 'owner',
             joinedAt: new Date(),
-            group: newGroup, // establish the relation to the new group
+            group: newGroup,
         });
 
         // Save the group member.
@@ -63,7 +64,7 @@ export const createGroup = async (
             name: 'general',
             type: 'text',
             createdAt: new Date(),
-            group: newGroup, // establish the relation to the new group
+            group: newGroup,
             messages: [],
         });
 
@@ -85,31 +86,28 @@ export const createGroupChannel = async (
     res: Response
 ) => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const { name, groupId, type } = req.body;
         const dataSource = await initializeDataSource();
 
         const group = await dataSource.manager.findOne(GroupEntity, {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { id: groupId },
         });
 
         if (!group) {
             res.status(404).send('Group not found');
+            return;
         }
 
-        // Create a default "general" text channel.
+        // Create a new channel.
         const channel = dataSource.manager.create(GroupChannelEntity, {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             name,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             type,
             createdAt: new Date(),
-            group: group!,
+            group: group,
             messages: [],
         });
 
-        // Save the default channel.
+        // Save the channel.
         await dataSource.manager.save(channel);
 
         res.status(201).json(channel);
@@ -118,18 +116,24 @@ export const createGroupChannel = async (
     }
 };
 
+/**
+ * Handler to create a channel message.
+ * Now supports two types:
+ *   - Regular message (messageType: 'message')
+ *   - Post message (messageType: 'post') with additional post fields.
+ */
 export const createGroupChannelMessage = async (
     req: Request<unknown, unknown, CreateGroupChannelMessagePayload>,
     res: Response
 ) => {
     try {
-        const { channelId, content, postedByUserId } = req.body;
         const dataSource = await initializeDataSource();
 
+        // Retrieve the channel.
         const groupChannel = await dataSource.manager.findOne(
             GroupChannelEntity,
             {
-                where: { id: channelId },
+                where: { id: req.body.channelId },
                 relations: ['group', 'messages'],
             }
         );
@@ -139,30 +143,65 @@ export const createGroupChannelMessage = async (
             return;
         }
 
-        // Create a new Group instance.
-        const newGroupChannelMessage = dataSource.manager.create(
-            GroupChannelMessageEntity,
-            {
+        let newMessage: GroupChannelMessageEntity | GroupChannelPostEntity;
+
+        // Check the payload type discriminator.
+        if (req.body.messageType === 'post') {
+            // Destructure extra fields for a post message.
+            const {
+                content,
+                channelId,
+                postedByUserId,
+                title,
+                flair,
+                domain,
+                thumbnail,
+            } = req.body as Extract<
+                CreateGroupChannelMessagePayload,
+                { messageType: 'post' }
+            >;
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            newMessage = dataSource.manager.create(GroupChannelPostEntity, {
                 content,
                 channelId,
                 postedByUserId,
                 postedAt: new Date(),
                 edited: false,
                 channel: groupChannel,
-            }
-        );
+                title,
+                flair,
+                domain,
+                thumbnail,
+                upvotes: 0,
+                commentsCount: 0,
+                shareCount: 0,
+            });
+        } else {
+            // Otherwise, create a regular message.
+            const { content, channelId, postedByUserId } = req.body as Extract<
+                CreateGroupChannelMessagePayload,
+                { messageType: 'message' }
+            >;
 
-        // Save the group so it gets a generated ID.
-        await dataSource.manager.save(newGroupChannelMessage);
+            newMessage = dataSource.manager.create(GroupChannelMessageEntity, {
+                content,
+                channelId,
+                postedByUserId,
+                postedAt: new Date(),
+                edited: false,
+                channel: groupChannel,
+            });
+        }
 
-        groupChannel.messages = [
-            ...groupChannel.messages,
-            newGroupChannelMessage,
-        ];
+        // Save the new message.
+        await dataSource.manager.save(newMessage);
 
+        // Optionally, update the channel's messages array.
+        groupChannel.messages = [...groupChannel.messages, newMessage];
         await dataSource.manager.save(groupChannel);
 
-        res.status(201).json(newGroupChannelMessage);
+        res.status(201).json(newMessage);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }
@@ -182,7 +221,7 @@ export const getGroup = async (req: Request<GetGroupParams>, res: Response) => {
         const dataSource = await initializeDataSource();
         const group = await dataSource.manager.findOne(GroupEntity, {
             where: { id },
-            relations: ['members', 'channels'], // include related members and channels
+            relations: ['members', 'channels'],
         });
 
         if (!group) {
@@ -218,25 +257,16 @@ export const updateGroup = async (
             return;
         }
 
-        // Update provided fields from the payload.
-        if (payload.name !== undefined) {
-            group.name = payload.name;
-        }
-        if (payload.createdByUserId !== undefined) {
+        // Update provided fields.
+        if (payload.name !== undefined) group.name = payload.name;
+        if (payload.createdByUserId !== undefined)
             group.createdByUserId = payload.createdByUserId;
-        }
-        if (payload.createdAt !== undefined) {
+        if (payload.createdAt !== undefined)
             group.createdAt = new Date(payload.createdAt);
-        }
-        if (payload.members !== undefined) {
-            group.members = payload.members;
-        }
-        if (payload.channels !== undefined) {
-            group.channels = payload.channels;
-        }
-        if (payload.description !== undefined) {
+        if (payload.members !== undefined) group.members = payload.members;
+        if (payload.channels !== undefined) group.channels = payload.channels;
+        if (payload.description !== undefined)
             group.description = payload.description;
-        }
 
         await dataSource.manager.save(group);
         res.status(200).json(group);
@@ -288,7 +318,6 @@ export const getUserGroups = async (
         }
         const dataSource = await initializeDataSource();
 
-        // Use QueryBuilder to join GroupEntity with its members and filter by userEmail.
         const groups = await dataSource.manager
             .createQueryBuilder(GroupEntity, 'group')
             .leftJoinAndSelect('group.members', 'member')
@@ -324,8 +353,7 @@ export const getChannelMessages = async (
         }
         const dataSource = await initializeDataSource();
 
-        // Use the repository to fetch messages for the given channel.
-        // Order by postedAt descending so that the most recent messages are returned first.
+        // Fetch messages for the channel.
         const messages = await dataSource.manager
             .createQueryBuilder(GroupChannelMessageEntity, 'message')
             .where('message.channelId = :channelId', { channelId })

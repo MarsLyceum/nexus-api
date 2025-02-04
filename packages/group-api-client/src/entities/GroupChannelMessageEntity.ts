@@ -4,24 +4,28 @@ import {
     Column,
     ManyToOne,
     JoinColumn,
+    CreateDateColumn,
+    TableInheritance,
 } from 'typeorm';
-// Use a type-only import for Group.
 import type { GroupChannelEntity } from './GroupChannelEntity';
 
 @Entity('GroupChannelMessage')
+@TableInheritance({ column: { type: 'varchar', name: 'messageType' } })
 export class GroupChannelMessageEntity {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
+    // All messages have content, postedAt, and an author.
     @Column({ type: 'text' })
     content!: string;
 
-    @Column()
+    @CreateDateColumn()
     postedAt!: Date;
 
-    @Column()
+    @Column({ default: false })
     edited!: boolean;
 
+    // Reference to the channel where this message was posted.
     @ManyToOne('GroupChannel', 'messages', { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'channelId' })
     channel!: GroupChannelEntity;
@@ -29,6 +33,7 @@ export class GroupChannelMessageEntity {
     @Column({ type: 'uuid' })
     channelId!: string;
 
+    // The user who posted this message.
     @Column({ type: 'uuid' })
     postedByUserId!: string;
 }

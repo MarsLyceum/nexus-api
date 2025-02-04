@@ -11,7 +11,7 @@ export const groupIdentifierSchema = Joi.object({
 
 /**
  * Schema for a group member.
- * Note: We reference users by their email addresses.
+ * Note: We reference users by their UUIDs.
  */
 export const groupMemberSchema = Joi.object({
     userId: Joi.string()
@@ -23,15 +23,46 @@ export const groupMemberSchema = Joi.object({
     joinedAt: Joi.date().iso().required(),
 });
 
-export const groupChannelMessageSchema = Joi.object({
-    id: Joi.string()
-        .guid({ version: ['uuidv4'] })
-        .required(),
-    content: Joi.string().required(),
-    postedAt: Joi.date().iso().required(),
-    edited: Joi.boolean().required(),
-    channelId: Joi.string().required(),
-});
+/**
+ * Schema for a group channel message.
+ * This uses an alternatives schema to support both regular messages
+ * (messageType: 'message') and post messages (messageType: 'post').
+ */
+export const groupChannelMessageSchema = Joi.alternatives().try(
+    // Regular message
+    Joi.object({
+        id: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        content: Joi.string().required(),
+        postedAt: Joi.date().iso().required(),
+        edited: Joi.boolean().required(),
+        channelId: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        messageType: Joi.string().valid('message').required(),
+    }),
+    // Post message
+    Joi.object({
+        id: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        content: Joi.string().required(),
+        postedAt: Joi.date().iso().required(),
+        edited: Joi.boolean().required(),
+        channelId: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        messageType: Joi.string().valid('post').required(),
+        title: Joi.string().max(200).required(),
+        flair: Joi.string().max(50).optional(),
+        domain: Joi.string().optional(),
+        thumbnail: Joi.string().optional(),
+        upvotes: Joi.number().default(0),
+        commentsCount: Joi.number().default(0),
+        shareCount: Joi.number().default(0),
+    })
+);
 
 /**
  * Schema for a group channel.
@@ -50,7 +81,7 @@ export const groupChannelSchema = Joi.object({
  * Schema for the payload to create a new group.
  * Expects:
  * - a group name,
- * - the creator's email,
+ * - the creator's UUID,
  * - and optional description, members, and channels.
  */
 export const createGroupPayloadSchema = Joi.object({
@@ -71,15 +102,38 @@ export const createGroupChannelPayloadSchema = Joi.object({
         .required(),
 });
 
-export const createGroupChannelMessagePayloadSchema = Joi.object({
-    channelId: Joi.string()
-        .guid({ version: ['uuidv4'] })
-        .required(),
-    postedByUserId: Joi.string()
-        .guid({ version: ['uuidv4'] })
-        .required(),
-    content: Joi.string().required(),
-});
+/**
+ * Schema for the payload to create a new group channel message.
+ * This schema handles both the regular message and the post message variants.
+ */
+export const createGroupChannelMessagePayloadSchema = Joi.alternatives().try(
+    // Regular message payload
+    Joi.object({
+        channelId: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        postedByUserId: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        content: Joi.string().required(),
+        messageType: Joi.string().valid('message').required(),
+    }),
+    // Post message payload with extra fields.
+    Joi.object({
+        channelId: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        postedByUserId: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .required(),
+        content: Joi.string().required(),
+        messageType: Joi.string().valid('post').required(),
+        title: Joi.string().max(200).required(),
+        flair: Joi.string().max(50).optional(),
+        domain: Joi.string().optional(),
+        thumbnail: Joi.string().optional(),
+    })
+);
 
 /**
  * Schema for the payload to update an existing group.
