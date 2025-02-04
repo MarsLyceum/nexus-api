@@ -53,8 +53,9 @@ export const groupResolvers = {
             payload: CreateGroupChannelMessagePayload
         ): Promise<CreateGroupChannelMessageResponse> => {
             const client = new GroupApiClient();
-            const group = await client.createGroupChannelMessage(payload);
-            return group;
+            // Rename the variable to "message" since it returns a message object.
+            const message = await client.createGroupChannelMessage(payload);
+            return message;
         },
 
         updateGroup: async (
@@ -72,6 +73,29 @@ export const groupResolvers = {
         ): Promise<undefined> => {
             const client = new GroupApiClient();
             return await client.deleteGroup(id);
+        },
+    },
+    // __resolveType on the GroupChannelMessage interface
+    GroupChannelMessage: {
+        __resolveType(obj: any) {
+            // If messageType is provided, use it.
+            if (obj.messageType === 'post') {
+                return 'PostMessage';
+            }
+            if (obj.messageType === 'message') {
+                return 'RegularMessage';
+            }
+            // If messageType is missing, infer from other properties.
+            // For example, post messages have upvotes, commentsCount, or shareCount.
+            if (
+                Object.prototype.hasOwnProperty.call(obj, 'upvotes') ||
+                Object.prototype.hasOwnProperty.call(obj, 'commentsCount') ||
+                Object.prototype.hasOwnProperty.call(obj, 'shareCount')
+            ) {
+                return 'PostMessage';
+            }
+            // Otherwise, assume it's a regular message.
+            return 'RegularMessage';
         },
     },
 };
