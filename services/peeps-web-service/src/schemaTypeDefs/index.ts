@@ -25,6 +25,12 @@ export const schemaTypeDefs = `#graphql
       description: String
     ): Group
 
+    createGroupChannelMessage(
+      postedByUserId: String!
+      channelId: String!
+      content: String!
+    ): GroupChannelMessage
+
     updateGroup(
       id: String!
       name: String

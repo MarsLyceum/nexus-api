@@ -7,6 +7,8 @@ import {
     GetUserGroupsResponse,
     GetChannelMessagesResponse,
     UpdateGroupResponse,
+    CreateGroupChannelMessagePayload,
+    CreateGroupChannelMessageResponse,
 } from 'group-api-client';
 
 export const groupResolvers = {
@@ -45,6 +47,16 @@ export const groupResolvers = {
             const group = await client.createGroup(payload);
             return group;
         },
+
+        createGroupChannelMessage: async (
+            _: unknown,
+            payload: CreateGroupChannelMessagePayload
+        ): Promise<CreateGroupChannelMessageResponse> => {
+            const client = new GroupApiClient();
+            const group = await client.createGroupChannelMessage(payload);
+            return group;
+        },
+
         updateGroup: async (
             _: unknown,
             args: { id: string; data: UpdateGroupPayload }
@@ -53,6 +65,7 @@ export const groupResolvers = {
             const group = await client.updateGroup(args.id, args.data);
             return group;
         },
+
         deleteGroup: async (
             _: unknown,
             { id }: { id: string }
