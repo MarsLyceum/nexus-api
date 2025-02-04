@@ -1,6 +1,6 @@
 import { ParsedQs } from 'qs';
 
-import { Group } from '../models';
+import { Group, ChannelType } from '../models';
 
 export type CreateGroupChannelMessagePayload = {
     postedByUserId: string;
@@ -15,6 +15,7 @@ export type CreateGroupPayload = {
 
 export type CreateGroupChannelPayload = {
     groupId: string;
+    type: ChannelType;
     name: string;
 };
 

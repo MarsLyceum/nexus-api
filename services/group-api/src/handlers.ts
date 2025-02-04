@@ -86,7 +86,7 @@ export const createGroupChannel = async (
 ) => {
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const { name, groupId } = req.body;
+        const { name, groupId, type } = req.body;
         const dataSource = await initializeDataSource();
 
         const group = await dataSource.manager.findOne(GroupEntity, {
@@ -102,7 +102,8 @@ export const createGroupChannel = async (
         const channel = dataSource.manager.create(GroupChannelEntity, {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             name,
-            type: 'text',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            type,
             createdAt: new Date(),
             group: group!,
             messages: [],

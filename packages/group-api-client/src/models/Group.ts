@@ -1,4 +1,5 @@
 export type GroupRole = 'owner' | 'admin' | 'moderator' | 'member';
+export type ChannelType = 'text' | 'voice' | 'feed';
 
 export type GroupMember = {
     userId: string;
@@ -21,7 +22,7 @@ export type GroupChannelMessage = {
 export type GroupChannel = {
     id: string;
     name: string;
-    type: 'text' | 'voice' | 'feed';
+    type: ChannelType;
     createdAt: Date;
     messages: GroupChannelMessage[];
     groupId: string;
