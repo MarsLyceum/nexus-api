@@ -91,6 +91,7 @@ export const schemaTypeDefs = `#graphql
   enum GroupChannelType {
     text
     voice
+    feed
   }
 
   type GroupChannelMessage {
