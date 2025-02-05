@@ -6,6 +6,7 @@ import {
     OneToMany,
     JoinColumn,
     CreateDateColumn,
+    Index,
 } from 'typeorm';
 // Use a type‑only import to avoid a runtime dependency cycle.
 import type { GroupChannelPostEntity } from './GroupChannelPostEntity';
@@ -45,6 +46,7 @@ export class GroupChannelPostCommentEntity {
 
     // Store the post's id.
     @Column({ type: 'uuid' })
+    @Index()
     postId!: string;
 
     /**

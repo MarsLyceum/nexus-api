@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+    Entity,
+    Column,
+    PrimaryColumn,
+    ManyToOne,
+    JoinColumn,
+    Index,
+} from 'typeorm';
 import type { GroupEntity } from './GroupEntity';
 import { GroupRole } from '../models';
 
@@ -6,6 +13,7 @@ import { GroupRole } from '../models';
 export class GroupMemberEntity {
     // Use the user's email as one part of the composite primary key.
     @PrimaryColumn({ type: 'uuid' })
+    @Index()
     userId!: string;
 
     // Use the group's id as the other part of the composite primary key.

@@ -6,6 +6,7 @@ import {
     JoinColumn,
     CreateDateColumn,
     TableInheritance,
+    Index,
 } from 'typeorm';
 import type { GroupChannelEntity } from './GroupChannelEntity';
 
@@ -20,6 +21,7 @@ export class GroupChannelMessageEntity {
     content!: string;
 
     @CreateDateColumn()
+    @Index()
     postedAt!: Date;
 
     @Column({ default: false })
@@ -31,9 +33,14 @@ export class GroupChannelMessageEntity {
     channel!: GroupChannelEntity;
 
     @Column({ type: 'uuid' })
+    @Index()
     channelId!: string;
 
     // The user who posted this message.
     @Column({ type: 'uuid' })
     postedByUserId!: string;
+
+    // Expose the discriminator column as a property so that it gets returned in queries.
+    @Column({ name: 'messageType', type: 'varchar', nullable: false })
+    messageType!: string;
 }
