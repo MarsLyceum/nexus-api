@@ -1,3 +1,5 @@
+// handlers.ts
+
 import { Request, Response } from 'express';
 import {
     GroupEntity,
@@ -27,6 +29,7 @@ import { initializeDataSource } from './database';
  *
  * This handler creates the group, adds the creator as the sole member with the role "owner",
  * and creates a default "general" text channel.
+ * All operations are wrapped in a transaction.
  */
 export const createGroup = async (
     req: Request<unknown, unknown, CreateGroupPayload>,
@@ -36,45 +39,47 @@ export const createGroup = async (
         const { name, createdByUserId } = req.body;
         const dataSource = await initializeDataSource();
 
-        // Create a new Group instance.
-        const newGroup = dataSource.manager.create(GroupEntity, {
-            name,
-            createdByUserId,
-            createdAt: new Date(),
-            members: [], // will add the owner below
-            channels: [], // will add the default channel below
-            description: undefined,
-        });
+        // Wrap multiple writes in a transaction.
+        const newGroup = await dataSource.manager.transaction(
+            async (manager) => {
+                // Create a new Group instance.
+                const group = manager.create(GroupEntity, {
+                    name,
+                    createdByUserId,
+                    createdAt: new Date(),
+                    members: [], // will add the owner below
+                    channels: [], // will add the default channel below
+                    description: undefined,
+                });
+                await manager.save(group);
 
-        // Save the group so it gets a generated ID.
-        await dataSource.manager.save(newGroup);
+                // Create a GroupMember record for the creator with role "owner".
+                const groupMember = manager.create(GroupMemberEntity, {
+                    userId: createdByUserId,
+                    role: 'owner',
+                    joinedAt: new Date(),
+                    group,
+                });
+                await manager.save(groupMember);
 
-        // Create a GroupMember record for the creator with role "owner".
-        const groupMember = dataSource.manager.create(GroupMemberEntity, {
-            userId: createdByUserId,
-            role: 'owner',
-            joinedAt: new Date(),
-            group: newGroup,
-        });
+                // Create a default "general" text channel.
+                const generalChannel = manager.create(GroupChannelEntity, {
+                    name: 'general',
+                    type: 'text',
+                    createdAt: new Date(),
+                    group,
+                    messages: [],
+                });
+                await manager.save(generalChannel);
 
-        // Save the group member.
-        await dataSource.manager.save(groupMember);
+                // Update the group's members and channels arrays.
+                group.members = [groupMember];
+                group.channels = [generalChannel];
+                await manager.save(group);
 
-        // Create a default "general" text channel.
-        const generalChannel = dataSource.manager.create(GroupChannelEntity, {
-            name: 'general',
-            type: 'text',
-            createdAt: new Date(),
-            group: newGroup,
-            messages: [],
-        });
-
-        // Save the default channel.
-        await dataSource.manager.save(generalChannel);
-
-        // Update the group's members and channels arrays.
-        newGroup.members = [groupMember];
-        newGroup.channels = [generalChannel];
+                return group;
+            }
+        );
 
         res.status(201).json(newGroup);
     } catch (error) {
@@ -119,9 +124,10 @@ export const createGroupChannel = async (
 
 /**
  * Handler to create a channel message.
- * Now supports two types:
+ * Supports two types:
  *   - Regular message (messageType: 'message')
  *   - Post message (messageType: 'post') with additional post fields.
+ * All related operations are wrapped in a transaction.
  */
 export const createGroupChannelMessage = async (
     req: Request<unknown, unknown, CreateGroupChannelMessagePayload>,
@@ -130,86 +136,90 @@ export const createGroupChannelMessage = async (
     try {
         const dataSource = await initializeDataSource();
 
-        // Retrieve the channel.
-        const groupChannel = await dataSource.manager.findOne(
-            GroupChannelEntity,
-            {
-                where: { id: req.body.channelId },
-                relations: ['group', 'messages'],
+        // Wrap the operations in a transaction.
+        const newMessage = await dataSource.manager.transaction(
+            async (manager) => {
+                // Retrieve the channel within the transaction.
+                const groupChannel = await manager.findOne(GroupChannelEntity, {
+                    where: { id: req.body.channelId },
+                    relations: ['group', 'messages'],
+                });
+
+                if (!groupChannel) {
+                    // Throw an error to abort the transaction.
+                    throw new Error('Invalid channel id');
+                }
+
+                let message:
+                    | GroupChannelMessageMessageEntity
+                    | GroupChannelPostEntity;
+
+                // Check the payload type discriminator.
+                if (req.body.messageType === 'post') {
+                    const {
+                        content,
+                        channelId,
+                        postedByUserId,
+                        title,
+                        flair,
+                        domain,
+                        thumbnail,
+                    } = req.body as Extract<
+                        CreateGroupChannelMessagePayload,
+                        { messageType: 'post' }
+                    >;
+
+                    message = manager.create(GroupChannelPostEntity, {
+                        content,
+                        channelId,
+                        postedByUserId,
+                        postedAt: new Date(),
+                        edited: false,
+                        channel: groupChannel,
+                        title,
+                        flair,
+                        domain,
+                        thumbnail,
+                        upvotes: 0,
+                        commentsCount: 0,
+                        shareCount: 0,
+                    });
+                } else {
+                    const { content, channelId, postedByUserId } =
+                        req.body as Extract<
+                            CreateGroupChannelMessagePayload,
+                            { messageType: 'message' }
+                        >;
+
+                    message = manager.create(GroupChannelMessageMessageEntity, {
+                        content,
+                        channelId,
+                        postedByUserId,
+                        postedAt: new Date(),
+                        edited: false,
+                        channel: groupChannel,
+                    });
+                }
+
+                // Save the new message.
+                await manager.save(message);
+
+                // Optionally, update the channel's messages array.
+                groupChannel.messages = [...groupChannel.messages, message];
+                await manager.save(groupChannel);
+
+                return message;
             }
         );
 
-        if (!groupChannel) {
-            res.status(404).json({ error: 'Invalid channel id' });
-            return;
-        }
-
-        let newMessage:
-            | GroupChannelMessageMessageEntity
-            | GroupChannelPostEntity;
-
-        // Check the payload type discriminator.
-        if (req.body.messageType === 'post') {
-            // Destructure extra fields for a post message.
-            const {
-                content,
-                channelId,
-                postedByUserId,
-                title,
-                flair,
-                domain,
-                thumbnail,
-            } = req.body as Extract<
-                CreateGroupChannelMessagePayload,
-                { messageType: 'post' }
-            >;
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            newMessage = dataSource.manager.create(GroupChannelPostEntity, {
-                content,
-                channelId,
-                postedByUserId,
-                postedAt: new Date(),
-                edited: false,
-                channel: groupChannel,
-                title,
-                flair,
-                domain,
-                thumbnail,
-                upvotes: 0,
-                commentsCount: 0,
-                shareCount: 0,
-            });
-        } else {
-            // Otherwise, create a regular message.
-            const { content, channelId, postedByUserId } = req.body as Extract<
-                CreateGroupChannelMessagePayload,
-                { messageType: 'message' }
-            >;
-
-            newMessage = dataSource.manager.create(
-                GroupChannelMessageMessageEntity,
-                {
-                    content,
-                    channelId,
-                    postedByUserId,
-                    postedAt: new Date(),
-                    edited: false,
-                    channel: groupChannel,
-                }
-            );
-        }
-
-        // Save the new message.
-        await dataSource.manager.save(newMessage);
-
-        // Optionally, update the channel's messages array.
-        groupChannel.messages = [...groupChannel.messages, newMessage];
-        await dataSource.manager.save(groupChannel);
-
         res.status(201).json(newMessage);
     } catch (error) {
-        res.status(500).send((error as Error).message);
+        // If the error message is 'Invalid channel id', return 404.
+        if ((error as Error).message === 'Invalid channel id') {
+            res.status(404).json({ error: 'Invalid channel id' });
+        } else {
+            res.status(500).send((error as Error).message);
+        }
     }
 };
 
