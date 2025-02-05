@@ -8,6 +8,7 @@ import {
     GroupChannelMessageEntity,
     GroupChannelPostEntity,
     GroupChannelPostCommentEntity,
+    GroupChannelMessageMessageEntity,
 } from 'group-api-client';
 import { DATABASE_PASSWORD } from '../config';
 
@@ -28,6 +29,7 @@ export function createAppDataSource(): DataSource {
             GroupChannelMessageEntity,
             GroupChannelPostEntity,
             GroupChannelPostCommentEntity,
+            GroupChannelMessageMessageEntity,
         ],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],

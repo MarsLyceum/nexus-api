@@ -3,10 +3,11 @@ import {
     GroupEntity,
     GroupMemberEntity,
     GroupChannelEntity,
-    GroupChannelMessageEntity,
+    GroupChannelMessageMessageEntity,
     GroupChannelPostEntity,
     CreateGroupPayload,
     CreateGroupChannelMessagePayload,
+    GroupChannelMessageEntity,
     GetChannelMessagesParams,
     GetChannelMessagesQueryParams,
     GetGroupParams,
@@ -143,7 +144,9 @@ export const createGroupChannelMessage = async (
             return;
         }
 
-        let newMessage: GroupChannelMessageEntity | GroupChannelPostEntity;
+        let newMessage:
+            | GroupChannelMessageMessageEntity
+            | GroupChannelPostEntity;
 
         // Check the payload type discriminator.
         if (req.body.messageType === 'post') {
@@ -184,14 +187,17 @@ export const createGroupChannelMessage = async (
                 { messageType: 'message' }
             >;
 
-            newMessage = dataSource.manager.create(GroupChannelMessageEntity, {
-                content,
-                channelId,
-                postedByUserId,
-                postedAt: new Date(),
-                edited: false,
-                channel: groupChannel,
-            });
+            newMessage = dataSource.manager.create(
+                GroupChannelMessageMessageEntity,
+                {
+                    content,
+                    channelId,
+                    postedByUserId,
+                    postedAt: new Date(),
+                    edited: false,
+                    channel: groupChannel,
+                }
+            );
         }
 
         // Save the new message.
