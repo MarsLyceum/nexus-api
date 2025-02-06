@@ -25,6 +25,15 @@ export type CreateGroupChannelPostMessagePayload = {
     thumbnail?: string;
 };
 
+export type CreateGroupChannelPostCommentPayload = {
+    content: string;
+    postedByUserId: string;
+    postId: string;
+    parentCommentId?: string | null; // Optional for top-level comments
+    children?: CreateGroupChannelPostCommentPayload[]; // Nested replies
+    upvotes?: number; // Defaults to 0 if not provided
+};
+
 export type CreateGroupChannelMessagePayload =
     | CreateGroupChannelRegularMessagePayload
     | CreateGroupChannelPostMessagePayload;
@@ -50,6 +59,15 @@ export type GetUserGroupsParams = {
 
 export type GetChannelMessagesParams = {
     channelId: string;
+};
+
+export type GetPostCommentsParams = {
+    postId: string;
+};
+
+export type GetPostCommentsQueryParams = ParsedQs & {
+    offset?: string;
+    limit?: string;
 };
 
 export type GetChannelMessagesQueryParams = ParsedQs & {

@@ -1,4 +1,5 @@
 export const schemaTypeDefs = `#graphql
+
 ###########################
 # Basic User and Group Types
 ###########################
@@ -47,6 +48,10 @@ type Mutation {
   deleteGroup(id: String!): Boolean
 }
 
+###########################
+# Query Definitions
+###########################
+
 type Query {
   fetchUser(userId: String!): User
   fetchUserByEmail(email: String!): User
@@ -58,6 +63,13 @@ type Query {
     channelId: String!
     offset: Int
   ): [GroupChannelMessage!]!
+
+  # Fetch paginated post comments
+  fetchPostComments(
+    postId: String!
+    offset: Int
+    limit: Int
+  ): [GroupChannelPostComment!]!
 }
 
 type Subscription {
@@ -154,5 +166,23 @@ type GroupChannel {
   groupId: String!
   messages: [GroupChannelMessage!]!
 }
+
+###########################
+# Post Comments
+###########################
+
+# Represents a comment on a post.
+type GroupChannelPostComment {
+  id: String!
+  content: String!
+  postedAt: String!
+  edited: Boolean!
+  postedByUserId: String!
+  postId: String!
+  parentCommentId: String
+  upvotes: Int!
+  children: [GroupChannelPostComment!]!  # Fetches nested replies
+}
+
 
 `;

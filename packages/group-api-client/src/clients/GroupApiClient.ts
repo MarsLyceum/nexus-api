@@ -12,6 +12,7 @@ import {
     UpdateGroupResponse,
     GetUserGroupsResponse,
     GetChannelMessagesResponse,
+    GetPostCommentsResponse,
 } from '../responses';
 
 export class GroupApiClient {
@@ -50,6 +51,18 @@ export class GroupApiClient {
         return this.query(
             axios.get(
                 `${this.baseURL}/channels/${channelId}/messages?offset=${offset}`
+            )
+        );
+    }
+
+    async getPostComments(
+        postId: string,
+        offset: number,
+        limit: number
+    ): Promise<GetPostCommentsResponse> {
+        return this.query(
+            axios.get(
+                `${this.baseURL}/post/${postId}/comments?offset=${offset}&limit=${limit}`
             )
         );
     }

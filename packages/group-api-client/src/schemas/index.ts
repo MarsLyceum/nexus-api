@@ -164,6 +164,35 @@ export const getChannelMessagesParamsSchema = Joi.object({
         .required(),
 });
 
+export const getPostCommentsParamsSchema = Joi.object({
+    postId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
 export const getChannelMessagesQueryParamsSchema = Joi.object({
     offset: Joi.number(),
 });
+
+export const getPostCommentsQueryParamsSchema = Joi.object({
+    offset: Joi.number(),
+    limit: Joi.number(),
+});
+
+export const createGroupChannelPostCommentPayloadSchema = Joi.object({
+    content: Joi.string().required(), // Comment content is required
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(), // Must be a valid UUID
+    postId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(), // Must be a valid UUID referencing the post
+    parentCommentId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .allow(null)
+        .optional(), // Can be null if it's a top-level comment
+    upvotes: Joi.number().integer().min(0).default(0), // Must be a positive integer, defaults to 0
+    children: Joi.array()
+        .items(Joi.link('#createGroupChannelPostCommentPayloadSchema'))
+        .optional(), // Recursively validates nested replies
+}).id('createGroupChannelPostCommentPayloadSchema'); // Adds an ID for self-referencing

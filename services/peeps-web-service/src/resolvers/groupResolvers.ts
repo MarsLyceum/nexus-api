@@ -9,6 +9,7 @@ import {
     UpdateGroupResponse,
     CreateGroupChannelMessagePayload,
     CreateGroupChannelMessageResponse,
+    GetPostCommentsResponse,
 } from 'group-api-client';
 
 export const groupResolvers = {
@@ -36,6 +37,22 @@ export const groupResolvers = {
             const client = new GroupApiClient();
             const messages = await client.getChannelMessages(channelId, offset);
             return messages;
+        },
+        fetchPostComments: async (
+            _: unknown,
+            {
+                postId,
+                offset,
+                limit,
+            }: { postId: string; offset: number; limit: number }
+        ): Promise<GetPostCommentsResponse> => {
+            const client = new GroupApiClient();
+            const comments = await client.getPostComments(
+                postId,
+                offset,
+                limit
+            );
+            return comments;
         },
     },
     Mutation: {

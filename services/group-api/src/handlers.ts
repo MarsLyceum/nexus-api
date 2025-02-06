@@ -18,6 +18,10 @@ import {
     DeleteGroupParams,
     GetUserGroupsParams,
     CreateGroupChannelPayload,
+    GroupChannelPostCommentEntity,
+    CreateGroupChannelPostCommentPayload,
+    GetPostCommentsParams,
+    GetPostCommentsQueryParams,
 } from 'group-api-client';
 import { initializeDataSource } from './database';
 
@@ -379,6 +383,139 @@ export const getChannelMessages = async (
             .getMany();
 
         res.status(200).json(messages);
+    } catch (error) {
+        res.status(500).send((error as Error).message);
+    }
+};
+
+export const createGroupChannelPostComment = async (
+    req: Request<unknown, unknown, CreateGroupChannelPostCommentPayload>,
+    res: Response
+) => {
+    try {
+        const {
+            content,
+            postedByUserId,
+            postId,
+            parentCommentId = null,
+            upvotes = 0,
+        } = req.body;
+
+        const dataSource = await initializeDataSource();
+
+        // Start a transaction to ensure consistency
+        const newComment = await dataSource.manager.transaction(
+            async (manager) => {
+                // Ensure the post exists
+                const post = await manager.findOne(GroupChannelPostEntity, {
+                    where: { id: postId },
+                });
+
+                if (!post) {
+                    throw new Error('Post not found');
+                }
+
+                // If this is a reply, check that the parent comment exists
+                let parentComment: GroupChannelPostCommentEntity | null = null;
+                if (parentCommentId) {
+                    parentComment = await manager.findOne(
+                        GroupChannelPostCommentEntity,
+                        { where: { id: parentCommentId } }
+                    );
+
+                    if (!parentComment) {
+                        throw new Error('Parent comment not found');
+                    }
+                }
+
+                // Create the new comment
+                const comment = manager.create(GroupChannelPostCommentEntity, {
+                    content,
+                    postedByUserId,
+                    postedAt: new Date(),
+                    edited: false,
+                    post,
+                    postId,
+                    parentComment,
+                    parentCommentId,
+                    upvotes,
+                    children: [],
+                });
+
+                await manager.save(comment);
+
+                return comment;
+            }
+        );
+
+        res.status(201).json(newComment);
+    } catch (error) {
+        if ((error as Error).message === 'Post not found') {
+            res.status(404).json({ error: 'Post not found' });
+        } else if ((error as Error).message === 'Parent comment not found') {
+            res.status(404).json({ error: 'Parent comment not found' });
+        } else {
+            res.status(500).send((error as Error).message);
+        }
+    }
+};
+
+export const getGroupChannelPostComments = async (
+    req: Request<
+        GetPostCommentsParams,
+        unknown,
+        unknown,
+        GetPostCommentsQueryParams
+    >,
+    res: Response
+): Promise<void> => {
+    try {
+        const { postId } = req.params;
+        const offset = Number.parseInt(req.query.offset || '0', 10);
+        const limit = Number.parseInt(req.query.limit || '50', 10);
+
+        if (!postId) {
+            res.status(400).send('Post ID is required');
+            return;
+        }
+
+        const dataSource = await initializeDataSource();
+
+        // Fetch paginated top-level comments
+        const topLevelComments = await dataSource.manager
+            .createQueryBuilder(GroupChannelPostCommentEntity, 'comment')
+            .where('comment.postId = :postId', { postId })
+            .andWhere('comment.parentCommentId IS NULL') // Fetch only top-level comments
+            .orderBy('comment.postedAt', 'DESC')
+            .skip(offset)
+            .take(limit)
+            .getMany();
+
+        // Recursively fetch nested replies
+        const fetchReplies = async (parentCommentId: string) => {
+            const replies = await dataSource.manager.find(
+                GroupChannelPostCommentEntity,
+                {
+                    where: { parentCommentId },
+                    order: { postedAt: 'ASC' },
+                }
+            );
+
+            for (const reply of replies) {
+                reply.children = await fetchReplies(reply.id); // Recursively fetch nested replies
+            }
+
+            return replies;
+        };
+
+        // Attach nested replies to each top-level comment
+        for (const comment of topLevelComments) {
+            comment.children = await fetchReplies(comment.id);
+        }
+
+        res.status(200).json(topLevelComments);
+        // eslint-disable-next-line consistent-return, no-useless-return
+        return;
     } catch (error) {
         res.status(500).send((error as Error).message);
     }

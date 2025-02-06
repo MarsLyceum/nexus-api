@@ -23,7 +23,13 @@ import {
     deleteGroupParamsSchema,
     getUserGroupsParamsSchema,
     getChannelMessagesParamsSchema,
+    GetPostCommentsParams,
+    GetPostCommentsQueryParams,
+    getPostCommentsParamsSchema,
+    getPostCommentsQueryParamsSchema,
     getChannelMessagesQueryParamsSchema,
+    CreateGroupChannelPostCommentPayload,
+    createGroupChannelPostCommentPayloadSchema,
 } from 'group-api-client';
 
 import { applyCommonMiddleware } from 'common-middleware';
@@ -37,6 +43,8 @@ import {
     updateGroup,
     deleteGroup,
     getUserGroups,
+    createGroupChannelPostComment,
+    getGroupChannelPostComments,
 } from './handlers';
 
 import {
@@ -118,6 +126,17 @@ export async function createService(
         >((req, res) => createGroupChannelMessage(req, res))
     );
 
+    app.post(
+        '/comment',
+        validatePayload(createGroupChannelPostCommentPayloadSchema),
+        asyncHandler<
+            unknown,
+            unknown,
+            CreateGroupChannelPostCommentPayload,
+            ParsedQs
+        >((req, res) => createGroupChannelPostComment(req, res))
+    );
+
     // Get a group by id
     app.get(
         '/group/:id',
@@ -146,6 +165,19 @@ export async function createService(
             unknown,
             GetChannelMessagesQueryParams
         >((req, res) => getChannelMessages(req, res))
+    );
+
+    // GET /post/:postId/comments?offset=0&limit=10
+    app.get(
+        '/post/:postId/comments',
+        validateParams(getPostCommentsParamsSchema),
+        validateQueryParams(getPostCommentsQueryParamsSchema),
+        asyncHandler<
+            GetPostCommentsParams,
+            unknown,
+            unknown,
+            GetPostCommentsQueryParams
+        >((req, res) => getGroupChannelPostComments(req, res))
     );
 
     // Update a group by id

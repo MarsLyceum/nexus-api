@@ -1,4 +1,4 @@
-import { Group, GroupChannelMessage } from '../models';
+import { Group, GroupChannelMessage, GroupChannelPostComment } from '../models';
 
 export type CreateGroupChannelMessageResponse = GroupChannelMessage;
 
@@ -9,5 +9,7 @@ export type GetGroupResponse = Group;
 export type GetUserGroupsResponse = Group[];
 
 export type GetChannelMessagesResponse = GroupChannelMessage[];
+
+export type GetPostCommentsResponse = GroupChannelPostComment[];
 
 export type UpdateGroupResponse = Group;
