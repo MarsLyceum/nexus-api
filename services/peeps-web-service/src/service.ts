@@ -12,6 +12,8 @@ import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 
+import { applyCommonMiddleware } from 'common-middleware';
+
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { resolvers } from './resolvers/index';
 
@@ -44,6 +46,9 @@ export async function createService(
         // enable cors for local development
         cors(corsSetting)
     );
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    applyCommonMiddleware(app);
 
     app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
 

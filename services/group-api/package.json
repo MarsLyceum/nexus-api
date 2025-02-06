@@ -35,6 +35,7 @@
     "typescript": "^5.4.5",
     "user-api-client": "workspace:*",
     "group-api-client": "workspace:*",
+    "common-middleware": "workspace:*",
     "yargs": "^17.7.2"
   }
 }

@@ -29,6 +29,9 @@ importers:
       axios:
         specifier: ^1.6.8
         version: 1.7.2
+      common-middleware:
+        specifier: workspace:*
+        version: link:../../packages/common-middleware
       cors:
         specifier: ^2.8.5
         version: 2.8.5

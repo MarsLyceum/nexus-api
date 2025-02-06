@@ -26,6 +26,8 @@ import {
     getChannelMessagesQueryParamsSchema,
 } from 'group-api-client';
 
+import { applyCommonMiddleware } from 'common-middleware';
+
 import {
     createGroup,
     createGroupChannel,
@@ -56,6 +58,9 @@ export async function createService(
 
     app.use(express.json()); // Parse JSON bodies
     app.use(cors()); // Enable CORS
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    applyCommonMiddleware(app);
 
     app.set('port', port);
 

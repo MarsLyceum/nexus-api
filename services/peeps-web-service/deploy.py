@@ -45,7 +45,7 @@ def main():
     run_command(f"docker push gcr.io/{project_id}/{service_name}:latest")
 
     deploy_to_cloud_run(
-        project_id, region, service_name, env_vars
+        project_id, region, service_name, env_vars, force_recreate=True
     )
 
 

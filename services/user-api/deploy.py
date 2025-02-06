@@ -50,6 +50,7 @@ def main():
         region=region,
         service_name=service_name,
         env_vars=env_vars,  # Pass environment variables to Cloud Run
+        force_recreate=True
     )
 
 

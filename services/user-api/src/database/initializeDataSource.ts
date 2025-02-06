@@ -1,7 +1,7 @@
-import { createAppDataSource } from './createAppDataSource';
+import { DATA_SOURCE } from './createAppDataSource';
 
 export async function initializeDataSource() {
-    const dataSource = createAppDataSource();
+    const dataSource = DATA_SOURCE;
     try {
         if (!dataSource.isInitialized) {
             await dataSource.initialize();

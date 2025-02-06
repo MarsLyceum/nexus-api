@@ -80,6 +80,7 @@
         "typescript": "^5.4.5",
         "user-api-client": "workspace:*",
         "group-api-client": "workspace:*",
+        "common-middleware": "workspace:*",
         "ws": "^8.17.0",
         "yargs": "^17.7.2"
     },

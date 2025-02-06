@@ -1,0 +1,22 @@
+{
+  "name": "common-middleware",
+  "version": "1.0.0",
+  "description": "A package to hold various middleware used throughout the services",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "pnpm run build"
+  },
+  "author": "Mars Lyceum Inc.",
+  "dependencies": {
+    "@types/node": "^20.14.2",
+    "joi": "^17.13.3",
+    "reflect-metadata": "^0.2.2",
+    "uuid": "^11.0.5",
+    "winston": "^3.17.0",
+    "typeorm": "^0.3.20",
+    "typescript": "^5.5.2"
+  }
+}

@@ -17,6 +17,9 @@ export function createAppDataSource(): DataSource {
         entities: [UserEntity],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],
+        cache: {
+            duration: 60_000,
+        },
     });
 }
 

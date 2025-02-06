@@ -16,6 +16,9 @@ import {
     updateUserPayloadSchema,
     deleteUserParamsSchema,
 } from 'user-api-client';
+
+import { applyCommonMiddleware } from 'common-middleware';
+
 import {
     createUser,
     getUser,
@@ -43,6 +46,9 @@ export async function createService(
 
     // Middleware to handle CORS
     app.use(cors());
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    applyCommonMiddleware(app);
 
     app.set('port', port);
 

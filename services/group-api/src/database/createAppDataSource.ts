@@ -20,7 +20,7 @@ export function createAppDataSource(): DataSource {
     return new DataSource({
         type: 'postgres',
         ...hostSettings,
-        synchronize: true,
+        synchronize: false,
         logging: true,
         entities: [
             GroupEntity,
@@ -33,6 +33,9 @@ export function createAppDataSource(): DataSource {
         ],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],
+        cache: {
+            duration: 60_000,
+        },
     });
 }
 
