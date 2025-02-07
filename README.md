@@ -1,29 +1,35 @@
-# hephaestus_api
+# peeps_api
 
-The backend API for Hephaestus.
+The backend API for Peeps.
+
+## Docker
+
+On Windows Docker takes up a lot of space so periodically you have to clear
+the space by first pruning the volumes with `docker system prune -a --volumes`
+and then shrinking the docker wsl hard drive with
+`Optimize-VHD -Path "$env:LOCALAPPDATA\Docker\wsl\disk\docker_data.vhdx" -Mode Full`.
 
 ## Required Development Tools
 
-- Python 3 for build and deploy scripts
-- Terraform
-- GCloud CLI
-- Docker
-- PostgreSQL for local DB config if you want to run it locally
-- pnpm package manager
-- Poetry Python package manager
-- The following Python packages:
-  - google-cloud-functions
-  - google-cloud-deploy
-  - google-auth
-  - python-dotenv
-  - types-protobuf
-  - google-cloud-api-gateway
-  - google-cloud-storage
-  - google-cloud-run
-  - docker
-  - setuptools
-  - gcp-microservice-management (our custom package)
-
+-   Python 3 for build and deploy scripts
+-   Terraform
+-   GCloud CLI
+-   Docker
+-   PostgreSQL for local DB config if you want to run it locally
+-   pnpm package manager
+-   Poetry Python package manager
+-   The following Python packages:
+    -   google-cloud-functions
+    -   google-cloud-deploy
+    -   google-auth
+    -   python-dotenv
+    -   types-protobuf
+    -   google-cloud-api-gateway
+    -   google-cloud-storage
+    -   google-cloud-run
+    -   docker
+    -   setuptools
+    -   gcp-microservice-management (our custom package)
 
 ## DB
 
@@ -81,9 +87,11 @@ docker run -it --rm -p 4000:4000 local-test
 To test the WebSocket connection you can do the following:
 
 Connect with
+
 ```sh
 wscat -c ws://localhost:4000/graphql -s graphql-transport-ws
 ```
+
 or on Google Cloud Run with
 
 ```sh
@@ -91,11 +99,13 @@ wscat -c wss://hephaestus-api-iwesf7iypq-uw.a.run.app/graphql -s graphql-transpo
 ```
 
 Send the initialization message with
+
 ```sh
 {"type":"connection_init","payload":{"reconnect":true}}
 ```
 
 Send the GraphQL subscription message:
+
 ```sh
  {"id":"1","type":"subscribe","payload":{"query":"subscription OnGreeting { greetings }"}}
 ```
@@ -103,6 +113,7 @@ Send the GraphQL subscription message:
 To access the database you will need the credentials. If you want to run things
 such as TypeORM migrations or run the service locally and connect to the Cloud DB
 you will need to make a .env file and put the following information in it
+
 ```.env
 DATABASE_NAME=...
 DATABASE_USERNAME=...
@@ -116,6 +127,7 @@ you can get this information from David, make sure that you do not check it into
 Sometimes when running a service on Windows you will get this error:
 `listen EACCES: permission denied 0.0.0.0:4000` if this happens the solution
 is to stop and restart the Windows NAT driver service with [listen-eacces-permission-denied-in-windows](#https://stackoverflow.com/questions/59428844/listen-eacces-permission-denied-in-windows)
+
 ```sh
 net stop winnat
 net start winnat
