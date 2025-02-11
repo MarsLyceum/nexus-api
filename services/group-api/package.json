@@ -11,6 +11,7 @@
     "build": "python ../../scripts/test-build.py",
     "docker-shell": "python ../../scripts/test-docker-shell.py && docker run --name local-test-container -it local-test sh",
     "clean-pnpm": "python clean_pnpm.py",
+    "typecheck": "tsc --noEmit",
     "typeorm:migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d ./src/database/createAppDataSource.ts",
     "typeorm:schema:sync": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js schema:sync -d ./src/database/createAppDataSource.ts",
     "typeorm:migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d ./src/database/createAppDataSource.ts",
@@ -41,9 +42,8 @@
     "user-api-client": "workspace:*",
     "group-api-client": "workspace:*",
     "common-middleware": "workspace:*",
-    "yargs": "^17.7.2"
-  },
-  "devDependencies": {
+    "yargs": "^17.7.2",
     "@types/multer": "^1.4.12"
-  }
+  },
+  "devDependencies": {}
 }

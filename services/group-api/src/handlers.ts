@@ -333,6 +333,7 @@ export const updateGroup = async (
 /**
  * Handler to delete a group by its identifier.
  * Expects a route parameter with the group id.
+ * Also deletes the group avatar from Supabase Storage if it exists.
  */
 export const deleteGroup = async (
     req: Request<DeleteGroupParams>,
@@ -405,6 +406,20 @@ export const deleteGroup = async (
             // 3. Finally, delete the group.
             await manager.delete(GroupEntity, { id: group.id });
         });
+
+        // After the database transaction completes, delete the avatar from Supabase Storage if it exists.
+        if (group.avatarFilePath) {
+            const { error: storageError } = await supabaseClient.storage
+                .from('group-avatars')
+                .remove([group.avatarFilePath]);
+            if (storageError) {
+                console.error(
+                    'Error deleting group avatar from Supabase Storage:',
+                    storageError.message
+                );
+                // Optionally, you could return a 500 error here or simply log the error.
+            }
+        }
 
         res.status(204).send();
     } catch (error) {
