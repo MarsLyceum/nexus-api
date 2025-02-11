@@ -3,6 +3,13 @@ export const schemaTypeDefs = `#graphql
 ###########################
 # Basic User and Group Types
 ###########################
+scalar Upload
+
+type File {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+}
 
 type User {
   id: String!
@@ -25,7 +32,8 @@ type Mutation {
   createGroup(
     name: String!
     createdByUserId: String!
-    description: String
+    publicGroup: Boolean!
+    avatar: Upload!
   ): Group
 
   createGroupChannelMessage(
@@ -58,6 +66,7 @@ type Query {
 
   # Group queries
   fetchGroup(id: String!): Group
+  fetchPost(id: String!): PostMessage
   fetchUserGroups(userId: String!): [Group!]!
   fetchChannelMessages(
     channelId: String!

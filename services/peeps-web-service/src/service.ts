@@ -13,6 +13,7 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
+import { graphqlUploadExpress } from 'graphql-upload-minimal';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
@@ -118,6 +119,7 @@ export async function createService(
 
     app.post(
         '/graphql',
+        graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }),
         cors<cors.CorsRequest>(corsSetting),
         json(),
         expressMiddleware(apolloServer, {

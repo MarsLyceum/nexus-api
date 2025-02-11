@@ -33,6 +33,8 @@ import {
     getChannelMessagesQueryParamsSchema,
     CreateGroupChannelPostCommentPayload,
     createGroupChannelPostCommentPayloadSchema,
+    getPostParamsSchema,
+    GetPostParams,
 } from 'group-api-client';
 
 import { applyCommonMiddleware } from 'common-middleware';
@@ -48,6 +50,7 @@ import {
     getUserGroups,
     createGroupChannelPostComment,
     getGroupChannelPostComments,
+    getPost,
 } from './handlers';
 
 import { initializeDataSource } from './database';
@@ -150,6 +153,14 @@ export async function createService(
         validateParams(getGroupParamsSchema),
         asyncHandler<GetGroupParams, unknown, unknown, ParsedQs>((req, res) =>
             getGroup(req, res)
+        )
+    );
+
+    app.get(
+        '/post/:id',
+        validateParams(getPostParamsSchema),
+        asyncHandler<GetPostParams, unknown, unknown, ParsedQs>((req, res) =>
+            getPost(req, res)
         )
     );
 

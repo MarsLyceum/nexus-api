@@ -147,6 +147,7 @@ export const updateGroupPayloadSchema = Joi.object({
  * These are reused for GET, DELETE, and UPDATE operations.
  */
 export const getGroupParamsSchema = groupIdentifierSchema;
+export const getPostParamsSchema = groupIdentifierSchema;
 export const deleteGroupParamsSchema = groupIdentifierSchema;
 export const updateGroupParamsSchema = groupIdentifierSchema;
 

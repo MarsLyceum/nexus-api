@@ -13,12 +13,17 @@ export function createAppDataSource(): DataSource {
         type: 'postgres',
         ...hostSettings,
         synchronize: false,
+        migrationsRun: false,
         logging: true,
         entities: [UserEntity],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],
         cache: {
             duration: 60_000,
+        },
+        extra: {
+            max: 10, // Maximum number of connections in the pool
+            idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
         },
     });
 }

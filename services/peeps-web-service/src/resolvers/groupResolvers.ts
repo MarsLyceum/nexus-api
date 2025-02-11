@@ -1,3 +1,4 @@
+import { GraphQLUpload } from 'graphql-upload-minimal';
 import {
     GroupApiClient,
     CreateGroupPayload,
@@ -10,9 +11,12 @@ import {
     CreateGroupChannelMessagePayload,
     CreateGroupChannelMessageResponse,
     GetPostCommentsResponse,
+    GetPostResponse,
 } from 'group-api-client';
 
 export const groupResolvers = {
+    Upload: GraphQLUpload,
+
     Query: {
         fetchGroup: async (
             _: unknown,
@@ -21,6 +25,14 @@ export const groupResolvers = {
             const client = new GroupApiClient();
             const group = await client.getGroup(id);
             return group;
+        },
+        fetchPost: async (
+            _: unknown,
+            { id }: { id: string }
+        ): Promise<GetPostResponse> => {
+            const client = new GroupApiClient();
+            const post = await client.getPost(id);
+            return post;
         },
         fetchUserGroups: async (
             _: unknown,
@@ -58,8 +70,10 @@ export const groupResolvers = {
     Mutation: {
         createGroup: async (
             _: unknown,
-            payload: CreateGroupPayload
+            payload: CreateGroupPayload & { avatar: any }
         ): Promise<CreateGroupResponse> => {
+            if (payload.avatar) {
+            }
             const client = new GroupApiClient();
             const group = await client.createGroup(payload);
             return group;

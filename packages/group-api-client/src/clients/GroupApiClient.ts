@@ -1,7 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { getCorrelationId } from 'common-middleware';
-
 import {
     CreateGroupPayload,
     UpdateGroupPayload,
@@ -15,6 +13,7 @@ import {
     GetUserGroupsResponse,
     GetChannelMessagesResponse,
     GetPostCommentsResponse,
+    GetPostResponse,
 } from '../responses';
 
 export class GroupApiClient {
@@ -40,6 +39,10 @@ export class GroupApiClient {
 
     async getGroup(id: string): Promise<GetGroupResponse> {
         return this.query(axios.get(`${this.baseURL}/group/${id}`));
+    }
+
+    async getPost(id: string): Promise<GetPostResponse> {
+        return this.query(axios.get(`${this.baseURL}/post/${id}`));
     }
 
     async getUserGroups(userId: string): Promise<GetUserGroupsResponse> {

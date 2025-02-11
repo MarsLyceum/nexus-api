@@ -17,6 +17,8 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "form-data": "^4.0.1",
+        "graphql-upload-minimal": "^1.6.1",
         "@google-cloud/trace-agent": "^8.0.0",
         "@apollo/server": "^4.10.2",
         "@babel/cli": "^7.24.1",

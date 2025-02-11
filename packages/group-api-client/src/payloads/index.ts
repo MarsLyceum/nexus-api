@@ -54,6 +54,10 @@ export type GetGroupParams = {
     id: string;
 };
 
+export type GetPostParams = {
+    id: string;
+};
+
 export type GetUserGroupsParams = {
     userId: string;
 };
