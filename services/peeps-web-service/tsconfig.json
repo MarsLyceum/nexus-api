@@ -16,6 +16,8 @@
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "baseUrl": "./",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "outDir": "./dist",
+        "rootDir": "./src"
     }
 }

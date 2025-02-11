@@ -1,6 +1,8 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
+import { createClient } from '@supabase/supabase-js';
+import { In } from 'typeorm';
 import {
     GroupEntity,
     GroupMemberEntity,
@@ -25,6 +27,10 @@ import {
 } from 'group-api-client';
 import { initializeDataSource } from './database';
 
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
+const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
 /**
  * Handler to create a new group.
  * Expects a payload with:
@@ -42,6 +48,28 @@ export const createGroup = async (
     try {
         const { name, createdByUserId } = req.body;
         const dataSource = await initializeDataSource();
+        let avatarFilePath: string | undefined = undefined;
+
+        if (req.file) {
+            // Generate a unique file name (you can adjust the naming scheme)
+            avatarFilePath = `${Date.now()}`;
+
+            // Upload the file buffer to Supabase Storage.
+            const { error } = await supabaseClient.storage
+                .from('group-avatars')
+                .upload(avatarFilePath, req.file.buffer, {
+                    contentType: req.file.mimetype,
+                    upsert: false,
+                });
+
+            if (error) {
+                console.error(
+                    'Error uploading file to Supabase:',
+                    error.message
+                );
+                throw new Error('Failed to upload group avatar.');
+            }
+        }
 
         // Wrap multiple writes in a transaction.
         const newGroup = await dataSource.manager.transaction(
@@ -54,8 +82,10 @@ export const createGroup = async (
                     members: [], // will add the owner below
                     channels: [], // will add the default channel below
                     description: undefined,
+                    avatarFilePath,
                 });
                 await manager.save(group);
+                console.log(group);
 
                 // Create a GroupMember record for the creator with role "owner".
                 const groupMember = manager.create(GroupMemberEntity, {
@@ -76,10 +106,15 @@ export const createGroup = async (
                 });
                 await manager.save(generalChannel);
 
-                // Update the group's members and channels arrays.
-                group.members = [groupMember];
-                group.channels = [generalChannel];
-                await manager.save(group);
+                // Create a default "feed" feed channel.
+                const feedChannel = manager.create(GroupChannelEntity, {
+                    name: 'feed',
+                    type: 'feed',
+                    createdAt: new Date(),
+                    group,
+                    messages: [],
+                });
+                await manager.save(feedChannel);
 
                 return group;
             }
@@ -309,9 +344,14 @@ export const deleteGroup = async (
             res.status(400).send('Group id parameter is missing');
             return;
         }
+
         const dataSource = await initializeDataSource();
+
+        // Retrieve the group along with its channels.
+        // (Adjust relations as needed; here we assume that channels are loaded.)
         const group = await dataSource.manager.findOne(GroupEntity, {
             where: { id },
+            relations: ['channels'],
         });
 
         if (!group) {
@@ -319,9 +359,56 @@ export const deleteGroup = async (
             return;
         }
 
-        await dataSource.manager.remove(group);
+        // Run all deletions in a transaction.
+        await dataSource.manager.transaction(async (manager) => {
+            // 1. Remove associated channels and their messages.
+            const channels = await manager.find(GroupChannelEntity, {
+                where: { group: { id: group.id } },
+            });
+            const channelIds = channels.map((channel) => channel.id);
+
+            if (channelIds.length > 0) {
+                // a. Find all "post" messages in these channels.
+                const posts = await manager.find(GroupChannelPostEntity, {
+                    where: { channelId: In(channelIds) },
+                });
+                const postIds = posts.map((post) => post.id);
+
+                // b. Delete all comments for these posts.
+                if (postIds.length > 0) {
+                    await manager.delete(GroupChannelPostCommentEntity, {
+                        postId: In(postIds),
+                    });
+                }
+
+                // c. Delete all post messages in these channels.
+                await manager.delete(GroupChannelPostEntity, {
+                    channelId: In(channelIds),
+                });
+
+                // d. Delete all regular channel messages.
+                await manager.delete(GroupChannelMessageMessageEntity, {
+                    channelId: In(channelIds),
+                });
+
+                // e. Delete the channels themselves.
+                await manager.delete(GroupChannelEntity, {
+                    id: In(channelIds),
+                });
+            }
+
+            // 2. Delete all group members.
+            await manager.delete(GroupMemberEntity, {
+                group: { id: group.id },
+            });
+
+            // 3. Finally, delete the group.
+            await manager.delete(GroupEntity, { id: group.id });
+        });
+
         res.status(204).send();
     } catch (error) {
+        console.error('Error deleting group:', (error as Error).message);
         res.status(500).send((error as Error).message);
     }
 };

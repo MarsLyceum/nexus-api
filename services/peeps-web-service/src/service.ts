@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import '@google-cloud/trace-agent';
+
 import 'reflect-metadata';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';

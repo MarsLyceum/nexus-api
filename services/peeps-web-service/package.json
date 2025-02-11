@@ -4,7 +4,9 @@
     "private": true,
     "extends": "../../package.json",
     "scripts": {
-        "start": "ts-node src/index.ts",
+        "start": "node dist/index.js",
+        "start-local": "ts-node src/index.ts",
+        "compile": "tsc",
         "start:watch": "nodemon src/index.ts --watch",
         "build": "python ../../scripts/test-build.py",
         "deploy": "python deploy.py",
@@ -15,6 +17,7 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "@google-cloud/trace-agent": "^8.0.0",
         "@apollo/server": "^4.10.2",
         "@babel/cli": "^7.24.1",
         "@babel/core": "^7.24.3",

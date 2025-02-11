@@ -1,5 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { getCorrelationId } from 'common-middleware';
+
 import {
     CreateGroupPayload,
     UpdateGroupPayload,

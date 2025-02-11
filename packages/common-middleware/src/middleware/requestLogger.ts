@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createLogger, format, transports, Logger } from 'winston';
 import { Request, Response, NextFunction } from 'express';
 
+import { getCorrelationId } from './requestContext';
+
 // Augment Express Request to include custom properties
 declare global {
     namespace Express {
@@ -30,7 +32,7 @@ export const requestLogger = (
     next: NextFunction
 ): void => {
     // Use the provided correlation id header if available; otherwise generate one.
-    req.correlationId = (req.headers['x-correlation-id'] as string) || uuidv4();
+    req.correlationId = getCorrelationId();
     req.startTime = Date.now();
 
     // Log the incoming request.

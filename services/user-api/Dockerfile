@@ -38,6 +38,8 @@ RUN rm -rf node_modules
 # Install only production dependencies for the service
 RUN pnpm install --frozen-lockfile --prod
 
+RUN pnpm run compile
+
 # Run the application as a non-root user
 USER node
 

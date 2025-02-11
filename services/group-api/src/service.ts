@@ -1,7 +1,10 @@
+import '@google-cloud/trace-agent';
+
 import express, { Request, Response, NextFunction, Application } from 'express';
 import { createServer } from 'node:http';
 import { ParsedQs } from 'qs';
 import cors from 'cors';
+import multer from 'multer';
 
 import {
     DeleteGroupParams,
@@ -47,6 +50,8 @@ import {
     getGroupChannelPostComments,
 } from './handlers';
 
+import { initializeDataSource } from './database';
+
 import {
     validatePayload,
     validateParams,
@@ -63,6 +68,7 @@ export async function createService(
 }> {
     const app = express();
     const httpServer = createServer(app);
+    const upload = multer({ storage: multer.memoryStorage() });
 
     app.use(express.json()); // Parse JSON bodies
     app.use(cors()); // Enable CORS
@@ -100,6 +106,7 @@ export async function createService(
     // Create a new group
     app.post(
         '/group',
+        upload.single('avatar'),
         validatePayload(createGroupPayloadSchema),
         asyncHandler<unknown, unknown, CreateGroupPayload, ParsedQs>(
             (req, res) => createGroup(req, res)
@@ -210,9 +217,18 @@ export async function createService(
         res.status(500).send('Something broke!');
     });
 
-    async function start() {
-        return new Promise<void>((resolve) => {
-            httpServer.listen(port, () => {
+    async function start(): Promise<void> {
+        const dataSource = await initializeDataSource();
+
+        if (!dataSource.isInitialized) {
+            throw new Error('Data source failed to initialize.');
+        }
+
+        await new Promise<void>((resolve, reject) => {
+            httpServer.listen(port, (err?: Error) => {
+                if (err) {
+                    return reject(err);
+                }
                 console.log(
                     `Group API Server started on http://localhost:${port}`
                 );

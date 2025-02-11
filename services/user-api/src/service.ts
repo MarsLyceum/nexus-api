@@ -1,3 +1,5 @@
+import '@google-cloud/trace-agent';
+
 import express, { Request, Response, NextFunction, Application } from 'express';
 import { createServer } from 'node:http';
 import { ParsedQs } from 'qs';

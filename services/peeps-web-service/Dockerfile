@@ -4,6 +4,9 @@ ARG NODE_VERSION=22.3.0
 
 FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine
 
+# Set the tracing sampling rate environment variable
+ENV TRACING_SAMPLING_RATE=1
+
 # Install pnpm globally
 RUN npm install -g pnpm
 
@@ -37,6 +40,8 @@ RUN rm -rf node_modules
 
 # Install only production dependencies for the service
 RUN pnpm install --frozen-lockfile --prod
+
+RUN pnpm run compile
 
 # Run the application as a non-root user
 USER node
