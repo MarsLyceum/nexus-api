@@ -76,4 +76,5 @@ export type Group = {
     channels: GroupChannel[];
     description?: string;
     avatarFilePath?: string;
+    publicGroup: boolean;
 };

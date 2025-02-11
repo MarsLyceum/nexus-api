@@ -46,7 +46,7 @@ export const createGroup = async (
     res: Response
 ) => {
     try {
-        const { name, createdByUserId } = req.body;
+        const { name, createdByUserId, publicGroup } = req.body;
         const dataSource = await initializeDataSource();
         let avatarFilePath: string | undefined = undefined;
 
@@ -78,6 +78,7 @@ export const createGroup = async (
                 const group = manager.create(GroupEntity, {
                     name,
                     createdByUserId,
+                    publicGroup,
                     createdAt: new Date(),
                     members: [], // will add the owner below
                     channels: [], // will add the default channel below

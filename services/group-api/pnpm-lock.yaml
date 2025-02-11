@@ -26,6 +26,9 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
+      '@types/multer':
+        specifier: ^1.4.12
+        version: 1.4.12
       '@types/node':
         specifier: ^20.14.2
         version: 20.14.2
@@ -77,10 +80,6 @@ importers:
       yargs:
         specifier: ^17.7.2
         version: 17.7.2
-    devDependencies:
-      '@types/multer':
-        specifier: ^1.4.12
-        version: 1.4.12
 
 packages:
 

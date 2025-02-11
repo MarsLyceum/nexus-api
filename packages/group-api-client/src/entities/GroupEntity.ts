@@ -30,4 +30,7 @@ export class GroupEntity {
 
     @Column({ length: 100, nullable: true })
     avatarFilePath?: string;
+
+    @Column({ type: 'boolean', default: false })
+    publicGroup!: boolean;
 }

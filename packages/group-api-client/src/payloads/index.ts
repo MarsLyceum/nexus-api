@@ -40,6 +40,7 @@ export type CreateGroupChannelMessagePayload =
 
 export type CreateGroupPayload = {
     createdByUserId: string;
+    publicGroup: boolean;
     name: string;
 };
 
