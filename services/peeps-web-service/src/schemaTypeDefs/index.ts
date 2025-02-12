@@ -5,12 +5,6 @@ export const schemaTypeDefs = `#graphql
 ###########################
 scalar Upload
 
-type File {
-  filename: String!
-  mimetype: String!
-  encoding: String!
-}
-
 type User {
   id: String!
   email: String!

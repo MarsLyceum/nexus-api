@@ -75,22 +75,40 @@ export class GroupApiClient {
 
     async createGroup(
         createGroupPayload: CreateGroupPayload,
-        avatar: File
+        avatar: Promise<File>
     ): Promise<CreateGroupResponse> {
         const formData = new FormData();
 
         // Append all payload fields to the form data
         Object.entries(createGroupPayload).forEach(([key, value]) => {
             // If your payload values aren’t strings, you may need to convert them
-            formData.append(key, value as any);
+            formData.append(key, String(value as any));
         });
 
-        // Append the file with a key name that your server (multer) expects
-        formData.append('avatar', avatar);
+        const resolvedAvatar = await avatar;
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        if (typeof (resolvedAvatar as any).createReadStream === 'function') {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+            const stream = (resolvedAvatar as any).createReadStream();
+            formData.append('avatar', stream, {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+                filename:
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+                    (resolvedAvatar as any).filename || `${Date.now()}.jpg`,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+                contentType: (resolvedAvatar as any).mimetype || 'image/jpeg',
+            });
+        } else {
+            // Otherwise, assume avatar is already a browser File or compatible object.
+            formData.append('avatar', resolvedAvatar);
+        }
 
         return this.query(
             axios.post(`${this.baseURL}/group`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+                headers: formData.getHeaders
+                    ? formData.getHeaders()
+                    : { 'Content-Type': 'multipart/form-data' },
             })
         );
     }

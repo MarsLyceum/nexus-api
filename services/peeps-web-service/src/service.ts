@@ -8,7 +8,13 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createServer } from 'node:http';
 import cors from 'cors';
-import express, { Application, json } from 'express';
+import express, {
+    Application,
+    json,
+    Request,
+    Response,
+    NextFunction,
+} from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
@@ -117,11 +123,23 @@ export async function createService(
         });
     });
 
+    // eslint-disable-next-line consistent-return
+    function conditionalJsonParser(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) {
+        if (req.is('multipart/form-data')) {
+            return next();
+        }
+        express.json()(req, res, next);
+    }
+
     app.post(
         '/graphql',
+        conditionalJsonParser,
         graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 10 }),
         cors<cors.CorsRequest>(corsSetting),
-        json(),
         expressMiddleware(apolloServer, {
             context: async ({ req }) => {
                 // Extract user from JWT if it exists
