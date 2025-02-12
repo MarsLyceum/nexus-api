@@ -70,12 +70,10 @@ export const groupResolvers = {
     Mutation: {
         createGroup: async (
             _: unknown,
-            payload: CreateGroupPayload & { avatar: any }
+            payload: CreateGroupPayload & { avatar: File }
         ): Promise<CreateGroupResponse> => {
-            if (payload.avatar) {
-            }
             const client = new GroupApiClient();
-            const group = await client.createGroup(payload);
+            const group = await client.createGroup(payload, payload.avatar);
             return group;
         },
 

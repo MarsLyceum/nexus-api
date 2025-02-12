@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import FormData from 'form-data';
 
 import {
     CreateGroupPayload,
@@ -73,10 +74,24 @@ export class GroupApiClient {
     }
 
     async createGroup(
-        createGroupPayload: CreateGroupPayload
+        createGroupPayload: CreateGroupPayload,
+        avatar: File
     ): Promise<CreateGroupResponse> {
+        const formData = new FormData();
+
+        // Append all payload fields to the form data
+        Object.entries(createGroupPayload).forEach(([key, value]) => {
+            // If your payload values aren’t strings, you may need to convert them
+            formData.append(key, value as any);
+        });
+
+        // Append the file with a key name that your server (multer) expects
+        formData.append('avatar', avatar);
+
         return this.query(
-            axios.post(`${this.baseURL}/group`, createGroupPayload)
+            axios.post(`${this.baseURL}/group`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
         );
     }
 

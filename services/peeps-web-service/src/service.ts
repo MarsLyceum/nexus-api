@@ -119,7 +119,7 @@ export async function createService(
 
     app.post(
         '/graphql',
-        graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }),
+        graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 10 }),
         cors<cors.CorsRequest>(corsSetting),
         json(),
         expressMiddleware(apolloServer, {
