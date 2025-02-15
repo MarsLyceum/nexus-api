@@ -3,6 +3,7 @@ import {
     GroupChannelMessage,
     GroupChannelPostComment,
     GroupChannelPostMessage,
+    GroupWithImage,
 } from '../models';
 
 export type CreateGroupChannelMessageResponse = GroupChannelMessage;
@@ -14,6 +15,7 @@ export type GetGroupResponse = Group;
 export type GetPostResponse = GroupChannelPostMessage;
 
 export type GetUserGroupsResponse = Group[];
+export type GetUserGroupsWithImagesResponse = GroupWithImage[];
 
 export type GetChannelMessagesResponse = GroupChannelMessage[];
 

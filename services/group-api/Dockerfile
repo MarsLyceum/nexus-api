@@ -35,12 +35,6 @@ RUN pnpm install
 # Change the working directory to the service directory
 WORKDIR /usr/src/web/services/group-api
 
-# Remove existing node_modules to avoid conflicts
-RUN rm -rf node_modules
-
-# Install only production dependencies for the service
-RUN pnpm install --frozen-lockfile --prod
-
 RUN pnpm run compile
 
 # Run the application as a non-root user

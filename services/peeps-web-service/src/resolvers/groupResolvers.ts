@@ -1,11 +1,13 @@
 import { GraphQLUpload } from 'graphql-upload-minimal';
+import { createClient } from '@supabase/supabase-js';
+import { Buffer } from 'node:buffer';
 import {
     GroupApiClient,
     CreateGroupPayload,
     UpdateGroupPayload,
     CreateGroupResponse,
     GetGroupResponse,
-    GetUserGroupsResponse,
+    GetUserGroupsWithImagesResponse,
     GetChannelMessagesResponse,
     UpdateGroupResponse,
     CreateGroupChannelMessagePayload,
@@ -13,6 +15,21 @@ import {
     GetPostCommentsResponse,
     GetPostResponse,
 } from 'group-api-client';
+
+import { SUPABASE_SERVICE_KEY, SUPABASE_URL } from '../config';
+
+const supabaseUrl = SUPABASE_URL!;
+const supabaseServiceKey = SUPABASE_SERVICE_KEY!;
+const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+const blobToBase64 = async (blob: Blob): Promise<string> => {
+    // Convert blob to an ArrayBuffer
+    const arrayBuffer = await blob.arrayBuffer();
+    // Convert the ArrayBuffer to a Node Buffer, then to a base64 string.
+    const base64String = Buffer.from(arrayBuffer).toString('base64');
+    // Return a Data URI with the blob's MIME type for easy use in an <Image> or <img> tag.
+    return `data:${blob.type};base64,${base64String}`;
+};
 
 export const groupResolvers = {
     Upload: GraphQLUpload,
@@ -37,10 +54,50 @@ export const groupResolvers = {
         fetchUserGroups: async (
             _: unknown,
             { userId }: { userId: string }
-        ): Promise<GetUserGroupsResponse> => {
+        ): Promise<GetUserGroupsWithImagesResponse> => {
             const client = new GroupApiClient();
             const groups = await client.getUserGroups(userId);
-            return groups;
+
+            // @ts-expect-error avatar is filtered
+            const groupsWithAvatars: GetUserGroupsWithImagesResponse = (
+                await Promise.all(
+                    groups.map(async (group) => {
+                        const { avatarFilePath, ...groupWithoutAvatar } = group;
+
+                        // Download the avatar from the 'group-avatars' bucket
+                        const { data, error } = await supabaseClient.storage
+                            .from('group-avatars')
+                            .download(avatarFilePath ?? '');
+
+                        if (error) {
+                            console.error(
+                                `Error downloading avatar for group: ${groupWithoutAvatar.id}`,
+                                error
+                            );
+                            // Return group without an avatar if there's an error
+                            return {
+                                ...groupWithoutAvatar,
+                                avatar: undefined,
+                            };
+                        }
+
+                        // If data exists, convert the Blob to a base64 string
+                        if (data) {
+                            const base64Avatar = await blobToBase64(data);
+                            return {
+                                ...groupWithoutAvatar,
+                                avatar: base64Avatar,
+                            };
+                        }
+
+                        // Fallback if no data is returned
+                        return { ...groupWithoutAvatar, avatar: undefined };
+                    })
+                )
+            ).filter((group) => group.avatar);
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return groupsWithAvatars;
         },
         fetchChannelMessages: async (
             _: unknown,

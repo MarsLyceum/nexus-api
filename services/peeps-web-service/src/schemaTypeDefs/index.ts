@@ -61,7 +61,7 @@ type Query {
   # Group queries
   fetchGroup(id: String!): Group
   fetchPost(id: String!): PostMessage
-  fetchUserGroups(userId: String!): [Group!]!
+  fetchUserGroups(userId: String!): [GroupWithImage!]!
   fetchChannelMessages(
     channelId: String!
     offset: Int
@@ -93,6 +93,17 @@ type Group {
   members: [GroupMember!]!
   channels: [GroupChannel!]!
   avatarFilePath: String
+}
+
+type GroupWithImage {
+  id: String!
+  name: String!
+  createdByUserId: String!
+  createdAt: String!  # ISO date string
+  description: String
+  members: [GroupMember!]!
+  channels: [GroupChannel!]!
+  avatar: String!
 }
 
 enum GroupRole {

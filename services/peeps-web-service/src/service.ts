@@ -2,19 +2,15 @@
 
 import '@google-cloud/trace-agent';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { config } from 'dotenv';
 import 'reflect-metadata';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createServer } from 'node:http';
 import cors from 'cors';
-import express, {
-    Application,
-    json,
-    Request,
-    Response,
-    NextFunction,
-} from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';

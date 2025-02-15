@@ -78,3 +78,7 @@ export type Group = {
     avatarFilePath?: string;
     publicGroup: boolean;
 };
+
+export type GroupWithImage = Omit<Group, 'avatarFilePath'> & {
+    avatar: File;
+};

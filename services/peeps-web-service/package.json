@@ -17,7 +17,9 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "buffer": "^6.0.3",
         "form-data": "^4.0.1",
+        "@supabase/supabase-js": "^2.48.1",
         "graphql-upload-minimal": "^1.6.1",
         "@google-cloud/trace-agent": "^8.0.0",
         "@apollo/server": "^4.10.2",
