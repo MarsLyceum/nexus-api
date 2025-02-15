@@ -2,37 +2,55 @@
 
 ARG NODE_VERSION=22.3.0
 
-FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine
+# Stage 1: Builder
+FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine AS builder
+
+# Set tracing sampling rate (if needed during build)
+ENV TRACING_SAMPLING_RATE=1
 
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Use production node environment by default.
-ENV NODE_ENV=production
+# Set working directory for the entire repository
+WORKDIR /usr/src/web
 
-# Set the pnpm store directory
+# Copy the full repository (build context is the repo root)
+COPY . .
+
+# Remove any existing node_modules and install all workspace dependencies
+RUN rm -rf node_modules
+RUN pnpm install
+
+# Change directory to the service folder and compile the TypeScript code
+WORKDIR /usr/src/web/services/user-api
+RUN pnpm run compile
+
+# Stage 2: Production
+FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine AS production
+
+# Set production environment variables
+ENV TRACING_SAMPLING_RATE=1
+ENV NODE_ENV=production
 ENV PNPM_HOME="/usr/local/share/.pnpm"
+
+# Create the pnpm store directory and update PATH
 RUN mkdir -p ${PNPM_HOME}
 ENV PATH="${PNPM_HOME}/bin:${PATH}"
 
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Set working directory for the entire repository
 WORKDIR /usr/src/web
 
+# Copy the entire repository from the builder stage (all workspace packages included)
+COPY --from=builder /usr/src/web .
 
-# Copy the necessary files from the repo
-# The build context is the root of peeps-api rather than the service so everything
-# is relative to that
-COPY . .
+# Install only production dependencies for the entire workspace
+RUN pnpm install --prod --frozen-lockfile
 
-# Remove existing node_modules to avoid conflicts
-RUN rm -rf node_modules
-
-# Install only production dependencies for the service
-RUN pnpm install
-
-# Change the working directory to the service directory
+# Change directory to the service folder
 WORKDIR /usr/src/web/services/user-api
-
-RUN pnpm run compile
 
 # Run the application as a non-root user
 USER node
@@ -43,5 +61,5 @@ EXPOSE 4000
 # Set the environment variable for the port
 ENV PORT=4000
 
-# Run the application
+# Start the application
 CMD ["pnpm", "run", "start"]
