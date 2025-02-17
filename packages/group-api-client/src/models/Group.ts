@@ -80,5 +80,5 @@ export type Group = {
 };
 
 export type GroupWithImage = Omit<Group, 'avatarFilePath'> & {
-    avatar: File;
+    avatarUrl: string;
 };

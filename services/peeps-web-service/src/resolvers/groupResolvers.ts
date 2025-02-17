@@ -58,43 +58,49 @@ export const groupResolvers = {
             const client = new GroupApiClient();
             const groups = await client.getUserGroups(userId);
 
-            // @ts-expect-error avatar is filtered
             const groupsWithAvatars: GetUserGroupsWithImagesResponse = (
                 await Promise.all(
                     groups.map(async (group) => {
                         const { avatarFilePath, ...groupWithoutAvatar } = group;
 
-                        // Download the avatar from the 'group-avatars' bucket
-                        const { data, error } = await supabaseClient.storage
-                            .from('group-avatars')
-                            .download(avatarFilePath ?? '');
-
-                        if (error) {
-                            console.error(
-                                `Error downloading avatar for group: ${groupWithoutAvatar.id}`,
-                                error
-                            );
-                            // Return group without an avatar if there's an error
+                        // If there's no avatar file path, return the group without an avatar.
+                        if (!avatarFilePath) {
                             return {
                                 ...groupWithoutAvatar,
-                                avatar: undefined,
+                                avatarUrl: '',
                             };
                         }
 
-                        // If data exists, convert the Blob to a base64 string
-                        if (data) {
-                            const base64Avatar = await blobToBase64(data);
+                        // Generate a signed URL for the avatar from the 'group-avatars' bucket, valid for 60 seconds.
+                        const { data, error } = await supabaseClient.storage
+                            .from('group-avatars')
+                            .createSignedUrl(avatarFilePath, 60);
+
+                        if (error) {
+                            console.error(
+                                `Error generating signed URL for group: ${groupWithoutAvatar.id}`,
+                                error
+                            );
                             return {
                                 ...groupWithoutAvatar,
-                                avatar: base64Avatar,
+                                avatarUrl: '',
+                            };
+                        }
+
+                        if (data) {
+                            return {
+                                ...groupWithoutAvatar,
+                                avatarUrl: data.signedUrl,
                             };
                         }
 
                         // Fallback if no data is returned
-                        return { ...groupWithoutAvatar, avatar: undefined };
+                        return { ...groupWithoutAvatar, avatarUrl: '' };
                     })
                 )
-            ).filter((group) => group.avatar);
+            )
+                // eslint-disable-next-line unicorn/no-await-expression-member
+                .filter((group) => group.avatarUrl);
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return groupsWithAvatars;

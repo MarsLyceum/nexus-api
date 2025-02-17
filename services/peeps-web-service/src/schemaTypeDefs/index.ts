@@ -103,7 +103,7 @@ type GroupWithImage {
   description: String
   members: [GroupMember!]!
   channels: [GroupChannel!]!
-  avatar: String!
+  avatarUrl: String!
 }
 
 enum GroupRole {
