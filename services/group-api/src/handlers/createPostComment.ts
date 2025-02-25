@@ -47,6 +47,20 @@ export const createPostComment = async (
                     }
                 }
 
+                console.log('about to save comment to db:', {
+                    content,
+                    postedByUserId,
+                    postedAt: new Date(),
+                    edited: false,
+                    post,
+                    postId,
+                    parentComment,
+                    parentCommentId,
+                    upvotes,
+                    hasChildren,
+                    children: [],
+                });
+
                 // Create the new comment
                 const comment = manager.create(GroupChannelPostCommentEntity, {
                     content,
@@ -64,7 +78,10 @@ export const createPostComment = async (
 
                 await manager.save(comment);
 
-                await manager.save({ ...parentComment, hasChildren: true });
+                if (parentComment) {
+                    parentComment.hasChildren = true;
+                    await manager.save(parentComment);
+                }
 
                 return comment;
             }
