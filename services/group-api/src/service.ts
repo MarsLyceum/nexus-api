@@ -48,8 +48,8 @@ import {
     updateGroup,
     deleteGroup,
     getUserGroups,
-    createGroupChannelPostComment,
-    getGroupChannelPostComments,
+    createPostComment,
+    getPostComments,
     getPost,
 } from './handlers';
 
@@ -127,6 +127,7 @@ export async function createService(
     // Create a new group channel message
     app.post(
         '/group-channel-message',
+        upload.fields([{ name: 'attachments', maxCount: 10 }]),
         validatePayload(createGroupChannelMessagePayloadSchema),
         asyncHandler<
             unknown,
@@ -138,13 +139,14 @@ export async function createService(
 
     app.post(
         '/comment',
+        upload.fields([{ name: 'attachments', maxCount: 10 }]),
         validatePayload(createGroupChannelPostCommentPayloadSchema),
         asyncHandler<
             unknown,
             unknown,
             CreateGroupChannelPostCommentPayload,
             ParsedQs
-        >((req, res) => createGroupChannelPostComment(req, res))
+        >((req, res) => createPostComment(req, res))
     );
 
     // Get a group by id
@@ -195,7 +197,7 @@ export async function createService(
             unknown,
             unknown,
             GetPostCommentsQueryParams
-        >((req, res) => getGroupChannelPostComments(req, res))
+        >((req, res) => getPostComments(req, res))
     );
 
     // Update a group by id

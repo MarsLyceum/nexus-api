@@ -43,4 +43,7 @@ export class GroupChannelMessageEntity {
     // Expose the discriminator column as a property so that it gets returned in queries.
     @Column({ name: 'messageType', type: 'varchar', nullable: false })
     messageType!: string;
+
+    @Column({ type: 'jsonb', nullable: true })
+    attachmentFilePaths?: string[];
 }

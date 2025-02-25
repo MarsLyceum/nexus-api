@@ -30,6 +30,10 @@ module.exports = {
         project: './tsconfig.json',
     },
     rules: {
+        'max-lines': [
+            'warn',
+            { max: 500, skipBlankLines: true, skipComments: true },
+        ],
         'no-restricted-syntax': [
             'error',
             {

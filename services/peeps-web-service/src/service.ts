@@ -15,12 +15,11 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
-import { graphqlUploadExpress } from 'graphql-upload-minimal';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
-import { resolvers } from './resolvers/index';
+import { loadResolvers } from './resolvers/index';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -38,6 +37,7 @@ export async function createService(
     const pubsub = new PubSub();
     const app = express();
     const httpServer = createServer(app);
+    const resolvers = await loadResolvers();
     const schema = makeExecutableSchema({
         typeDefs: schemaTypeDefs,
         resolvers,
@@ -119,22 +119,31 @@ export async function createService(
         });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { default: graphqlUploadExpress } = await import(
+        'graphql-upload/graphqlUploadExpress.mjs'
+    );
+
     // eslint-disable-next-line consistent-return
-    function conditionalJsonParser(
+    function conditionalParser(
         req: Request,
         res: Response,
         next: NextFunction
     ) {
         if (req.is('multipart/form-data')) {
-            return next();
+            graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 10 })(
+                req,
+                res,
+                next
+            );
+        } else {
+            express.json()(req, res, next);
         }
-        express.json()(req, res, next);
     }
 
     app.post(
         '/graphql',
-        conditionalJsonParser,
-        graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 10 }),
+        conditionalParser,
         cors<cors.CorsRequest>(corsSetting),
         expressMiddleware(apolloServer, {
             context: async ({ req }) => {

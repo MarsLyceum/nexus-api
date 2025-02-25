@@ -8,6 +8,7 @@ export type BaseGroupChannelMessage = {
     channel: GroupChannel;
     channelId: string;
     postedByUserId: string;
+    attachmentFilePaths?: string[];
 };
 
 export type GroupChannelRegularMessage = BaseGroupChannelMessage & {
@@ -28,6 +29,16 @@ export type GroupChannelPostMessage = BaseGroupChannelMessage & {
 export type GroupChannelMessage =
     | GroupChannelRegularMessage
     | GroupChannelPostMessage;
+
+export type GroupChannelMessageWithAttachmentUrls = Omit<
+    GroupChannelMessage,
+    'attachmentFilePaths'
+> & { attachmentUrls?: string[] };
+
+export type PostWithAttachmentUrls = Omit<
+    GroupChannelPostMessage,
+    'attachmentFilePaths'
+> & { attachmentUrls?: string[] };
 
 // New type for post comments (reflecting GroupChannelPostCommentEntity)
 export type GroupChannelPostComment = {

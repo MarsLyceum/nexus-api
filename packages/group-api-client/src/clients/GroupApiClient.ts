@@ -1,10 +1,10 @@
 import axios, { AxiosResponse } from 'axios';
-import FormData from 'form-data';
 
 import {
     CreateGroupPayload,
     UpdateGroupPayload,
     CreateGroupChannelMessagePayload,
+    CreateGroupChannelPostCommentPayload,
 } from '../payloads';
 import {
     CreateGroupResponse,
@@ -15,10 +15,14 @@ import {
     GetChannelMessagesResponse,
     GetPostCommentsResponse,
     GetPostResponse,
+    CreatePostCommentResponse,
 } from '../responses';
+import { buildMultipartFormData } from '../utils';
 
 export class GroupApiClient {
-    private baseURL = 'https://group-api-197277044151.us-west1.run.app';
+    // private baseURL = 'https://group-api-197277044151.us-west1.run.app';
+
+    private baseURL = 'http://localhost:4002';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {
@@ -77,49 +81,71 @@ export class GroupApiClient {
         createGroupPayload: CreateGroupPayload,
         avatar: Promise<File>
     ): Promise<CreateGroupResponse> {
-        const formData = new FormData();
-
-        // Append all payload fields to the form data
-        Object.entries(createGroupPayload).forEach(([key, value]) => {
-            // If your payload values aren’t strings, you may need to convert them
-            formData.append(key, String(value as any));
-        });
-
-        const resolvedAvatar = await avatar;
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        if (typeof (resolvedAvatar as any).createReadStream === 'function') {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-            const stream = (resolvedAvatar as any).createReadStream();
-            formData.append('avatar', stream, {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-                filename:
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-                    (resolvedAvatar as any).filename || `${Date.now()}.jpg`,
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-                contentType: (resolvedAvatar as any).mimetype || 'image/jpeg',
-            });
-        } else {
-            // Otherwise, assume avatar is already a browser File or compatible object.
-            formData.append('avatar', resolvedAvatar);
-        }
+        const formData = await buildMultipartFormData(
+            createGroupPayload,
+            avatar,
+            'avatar'
+        );
 
         return this.query(
             axios.post(`${this.baseURL}/group`, formData, {
-                headers: formData.getHeaders
-                    ? formData.getHeaders()
-                    : { 'Content-Type': 'multipart/form-data' },
+                headers: formData.getHeaders(),
             })
         );
     }
 
     async createGroupChannelMessage(
-        createGroupChannelMessagePayload: CreateGroupChannelMessagePayload
+        createGroupChannelMessagePayload: CreateGroupChannelMessagePayload,
+        attachments?: Promise<File>[]
     ): Promise<CreateGroupChannelMessageResponse> {
+        if (attachments && attachments.length > 0) {
+            const formData = await buildMultipartFormData(
+                createGroupChannelMessagePayload,
+                attachments,
+                'attachments'
+            );
+
+            return this.query(
+                axios.post(`${this.baseURL}/group-channel-message`, formData, {
+                    headers: formData.getHeaders(),
+                })
+            );
+        }
+
         return this.query(
             axios.post(
                 `${this.baseURL}/group-channel-message`,
                 createGroupChannelMessagePayload
+            )
+        );
+    }
+
+    async createPostComment(
+        createGroupChannelPostCommentPayload: CreateGroupChannelPostCommentPayload,
+        attachments?: Promise<File>[]
+    ): Promise<CreatePostCommentResponse> {
+        if (attachments && attachments.length > 0) {
+            const formData = await buildMultipartFormData(
+                createGroupChannelPostCommentPayload,
+                attachments,
+                'attachments'
+            );
+
+            return this.query(
+                axios.post(`${this.baseURL}/comment`, formData, {
+                    headers: formData.getHeaders(),
+                })
+            );
+        }
+        console.log(
+            'about to post to api with payload:',
+            createGroupChannelPostCommentPayload
+        );
+
+        return this.query(
+            axios.post(
+                `${this.baseURL}/comment`,
+                createGroupChannelPostCommentPayload
             )
         );
     }

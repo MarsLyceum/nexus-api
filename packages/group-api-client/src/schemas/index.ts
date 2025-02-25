@@ -113,8 +113,9 @@ export const createGroupChannelMessagePayloadSchema = Joi.alternatives().try(
         postedByUserId: Joi.string()
             .guid({ version: ['uuidv4'] })
             .required(),
-        content: Joi.string().required(),
+        content: Joi.string().required().allow(''),
         messageType: Joi.string().valid('message').required(),
+        attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
     }),
     // Post message payload with extra fields.
     Joi.object({
@@ -124,12 +125,13 @@ export const createGroupChannelMessagePayloadSchema = Joi.alternatives().try(
         postedByUserId: Joi.string()
             .guid({ version: ['uuidv4'] })
             .required(),
-        content: Joi.string().required(),
+        content: Joi.string().required().allow(''),
         messageType: Joi.string().valid('post').required(),
         title: Joi.string().max(200).required(),
         flair: Joi.string().max(50).optional(),
         domain: Joi.string().optional(),
         thumbnail: Joi.string().optional(),
+        attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
     })
 );
 
@@ -191,6 +193,8 @@ export const createGroupChannelPostCommentPayloadSchema = Joi.object({
         .allow(null)
         .optional(), // Can be null if it's a top-level comment
     upvotes: Joi.number().integer().min(0).default(0), // Must be a positive integer, defaults to 0
+    attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
+    hasChildren: Joi.boolean(),
     children: Joi.array()
         .items(Joi.link('#createGroupChannelPostCommentPayloadSchema'))
         .optional(), // Recursively validates nested replies
