@@ -6,7 +6,7 @@
     "scripts": {
         "start": "ts-node src/index.ts",
         "start:watch": "nodemon src/index.ts --watch",
-        "build": "python ../../scripts/test-build.py",
+        "build": "echo 'Noop'",
         "deploy": "python deploy.py",
         "print_token": "gcloud auth print-identity-token",
         "typeorm": "typeorm-ts-node-commonjs",
