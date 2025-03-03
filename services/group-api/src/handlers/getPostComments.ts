@@ -53,6 +53,7 @@ export const getPostComments = async (
         const fetchReplies = async (_parentCommentId: string) => {
             const replies = await dataSource.manager.find(
                 GroupChannelPostCommentEntity,
+                // eslint-disable-next-line unicorn/no-array-method-this-argument
                 {
                     where: { parentCommentId: _parentCommentId },
                     order: { postedAt: 'ASC' },
@@ -60,6 +61,7 @@ export const getPostComments = async (
             );
 
             for (const reply of replies) {
+                // eslint-disable-next-line no-await-in-loop
                 reply.children = await fetchReplies(reply.id); // Recursively fetch nested replies
             }
 
@@ -68,6 +70,7 @@ export const getPostComments = async (
 
         // Attach nested replies to each top-level comment
         for (const comment of initialComments) {
+            // eslint-disable-next-line no-await-in-loop
             comment.children = await fetchReplies(comment.id);
         }
 

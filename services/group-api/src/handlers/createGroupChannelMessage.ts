@@ -35,10 +35,8 @@ export const createGroupChannelMessage = async (
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const { attachments } = req.files;
 
-            // eslint-disable-next-line no-plusplus
-            for (let i = 0; i < attachments.length; i++) {
-                const file = attachments[i];
-
+            // eslint-disable-next-line no-plusplus, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+            for (const [i, file] of attachments.entries()) {
                 // Generate a unique file name for each file
                 const filePath = `${Date.now()}_${i}`;
 
@@ -46,7 +44,9 @@ export const createGroupChannelMessage = async (
                 // eslint-disable-next-line no-await-in-loop
                 const { error } = await supabaseClient.storage
                     .from('message-attachments')
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     .upload(filePath, file.buffer, {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                         contentType: file.mimetype,
                         upsert: false,
                     });
@@ -92,10 +92,7 @@ export const createGroupChannelMessage = async (
                         flair,
                         domain,
                         thumbnail,
-                    } = req.body as Extract<
-                        CreateGroupChannelMessagePayload,
-                        { messageType: 'post' }
-                    >;
+                    } = req.body;
 
                     message = manager.create(GroupChannelPostEntity, {
                         content,
@@ -114,11 +111,7 @@ export const createGroupChannelMessage = async (
                         shareCount: 0,
                     });
                 } else {
-                    const { content, channelId, postedByUserId } =
-                        req.body as Extract<
-                            CreateGroupChannelMessagePayload,
-                            { messageType: 'message' }
-                        >;
+                    const { content, channelId, postedByUserId } = req.body;
 
                     message = manager.create(GroupChannelMessageMessageEntity, {
                         content,

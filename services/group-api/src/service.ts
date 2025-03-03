@@ -225,7 +225,7 @@ export async function createService(
     });
 
     // Error handling middleware
-    app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    app.use((err: Error, req: Request, res: Response) => {
         console.error(err.stack);
         res.status(500).send('Something broke!');
     });
@@ -238,6 +238,7 @@ export async function createService(
         }
 
         await new Promise<void>((resolve, reject) => {
+            // eslint-disable-next-line consistent-return
             httpServer.listen(port, (err?: Error) => {
                 if (err) {
                     return reject(err);

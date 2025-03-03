@@ -9,7 +9,6 @@ export async function createUser({
     phoneNumber,
 }: CreateUserPayload): Promise<User | undefined> {
     const dataSource = await initializeDataSource();
-    let error;
     let foundUser;
     try {
         foundUser =
@@ -17,9 +16,7 @@ export async function createUser({
                 where: { email },
             })) ?? undefined;
         return foundUser;
-    } catch (error_: unknown) {
-        error = error_;
-
+    } catch {
         return dataSource.manager.create(UserEntity, {
             email,
             firstName,
