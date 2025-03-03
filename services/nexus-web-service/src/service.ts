@@ -15,15 +15,17 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
-import { graphqlUploadExpress } from 'graphql-upload-minimal';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
-import { resolvers } from './resolvers/index';
+import { loadResolvers } from './resolvers/index';
 
 declare module 'express-serve-static-core' {
     interface Request {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         auth?: any; // Adjust the type as needed (e.g., `User` or a specific interface)
     }
 }
@@ -38,6 +40,11 @@ export async function createService(
     const pubsub = new PubSub();
     const app = express();
     const httpServer = createServer(app);
+    const wsServer = new WebSocketServer({
+        server: httpServer,
+        path: '/graphql', // This path will handle WebSocket connections
+    });
+    const resolvers = await loadResolvers();
     const schema = makeExecutableSchema({
         typeDefs: schemaTypeDefs,
         resolvers,
@@ -58,6 +65,17 @@ export async function createService(
     app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
 
     app.set('port', port);
+
+    const serverCleanup = useServer(
+        {
+            schema,
+            // eslint-disable-next-line @typescript-eslint/require-await
+            context: async () =>
+                // Return the context that you need for subscriptions
+                ({ pubsub }),
+        },
+        wsServer
+    );
 
     // JWT authentication middleware
     const authenticateJWT = expressjwt({
@@ -110,33 +128,43 @@ export async function createService(
             }
         };
 
-        onData();
+        void onData();
 
         req.on('close', () => {
             if (asyncIterator.return) {
-                asyncIterator.return();
+                void asyncIterator.return();
             }
         });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { default: graphqlUploadExpress } = await import(
+        'graphql-upload/graphqlUploadExpress.mjs'
+    );
+
     // eslint-disable-next-line consistent-return
-    function conditionalJsonParser(
+    function conditionalParser(
         req: Request,
         res: Response,
         next: NextFunction
     ) {
         if (req.is('multipart/form-data')) {
-            return next();
+            graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 10 })(
+                req,
+                res,
+                next
+            );
+        } else {
+            express.json()(req, res, next);
         }
-        express.json()(req, res, next);
     }
 
     app.post(
         '/graphql',
-        conditionalJsonParser,
-        graphqlUploadExpress({ maxFileSize: 100_000_000, maxFiles: 10 }),
+        conditionalParser,
         cors<cors.CorsRequest>(corsSetting),
         expressMiddleware(apolloServer, {
+            // eslint-disable-next-line @typescript-eslint/require-await
             context: async ({ req }) => {
                 // Extract user from JWT if it exists
                 const user = req.auth || null;
@@ -157,6 +185,7 @@ export async function createService(
     }
 
     async function stop() {
+        await serverCleanup.dispose();
         return new Promise<void>((resolve, reject) => {
             httpServer.close((error) => {
                 if (error) {
@@ -171,6 +200,7 @@ export async function createService(
     }
 
     async function publishGreetings() {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         await pubsub.publish('GREETINGS', {
             greetings: 'Hello every 5 seconds',
         });

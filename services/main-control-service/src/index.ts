@@ -1,18 +1,10 @@
 #!/usr/bin/env node
 
 import 'reflect-metadata';
-// import { ApolloServer } from '@apollo/server';
-// import { expressMiddleware } from '@apollo/server/express4';
-// import { makeExecutableSchema } from '@graphql-tools/schema';
-// import { createServer } from 'node:http';
-// import cors from 'cors';
-// import express, { json } from 'express';
-// import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-// import { PubSub } from 'graphql-subscriptions';
-// import { expressjwt, GetVerificationKey } from 'express-jwt';
-// import jwksRsa from 'jwks-rsa';
 
-import { createService as createServicePeepsWebService } from 'peeps-web-service/src/service';
+// @ts-expect-error workspace
+import { createService as createServicePeepsWebService } from 'nexus-web-service/src/service';
+// @ts-expect-error workspace
 import { createService as createServiceUserApi } from 'user-api/src/service';
 
 async function main() {
@@ -28,13 +20,16 @@ async function main() {
         console.log('Starting all services...');
 
         for (const service of services) {
+            // eslint-disable-next-line no-await-in-loop, unicorn/no-await-expression-member
             await (await service.instance).start();
             console.log(`${service.name} started successfully.`);
         }
 
+        // eslint-disable-next-line no-inner-declarations
         async function stopAllServices() {
             for (const service of services) {
                 try {
+                    // eslint-disable-next-line no-await-in-loop, unicorn/no-await-expression-member
                     (await service.instance).stop();
                     console.log(`${service.name} stopped successfully.`);
                 } catch (error) {
@@ -61,6 +56,7 @@ async function main() {
 
         for (const service of services) {
             try {
+                // eslint-disable-next-line no-await-in-loop, unicorn/no-await-expression-member
                 (await service.instance).stop();
                 console.log(`${service.name} stopped during error handling.`);
             } catch (stopError) {

@@ -65,6 +65,9 @@ export class GroupChannelPostCommentEntity {
     @Column({ type: 'uuid', nullable: true })
     parentCommentId?: string | null;
 
+    @Column({ type: 'boolean' })
+    hasChildren!: boolean;
+
     /**
      * One comment can have many child comments (i.e. replies).
      */

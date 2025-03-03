@@ -7,29 +7,33 @@ import { Group, ChannelType } from '../models';
  *  - Regular message: just content.
  *  - Post message: includes extra post fields.
  */
-export type CreateGroupChannelRegularMessagePayload = {
+
+type CreateMessageCommonPayload = {
     postedByUserId: string;
     channelId: string;
     content: string;
-    messageType: 'message'; // regular message discriminator
 };
 
-export type CreateGroupChannelPostMessagePayload = {
-    postedByUserId: string;
-    channelId: string;
-    content: string;
-    messageType: 'post'; // discriminator value for posts
-    title: string;
-    flair?: string;
-    domain?: string;
-    thumbnail?: string;
-};
+export type CreateGroupChannelRegularMessagePayload =
+    CreateMessageCommonPayload & {
+        messageType: 'message'; // regular message discriminator
+    };
+
+export type CreateGroupChannelPostMessagePayload =
+    CreateMessageCommonPayload & {
+        messageType: 'post'; // discriminator value for posts
+        title: string;
+        flair?: string;
+        domain?: string;
+        thumbnail?: string;
+    };
 
 export type CreateGroupChannelPostCommentPayload = {
     content: string;
     postedByUserId: string;
     postId: string;
     parentCommentId?: string | null; // Optional for top-level comments
+    hasChildren: boolean;
     children?: CreateGroupChannelPostCommentPayload[]; // Nested replies
     upvotes?: number; // Defaults to 0 if not provided
 };
@@ -73,6 +77,7 @@ export type GetPostCommentsParams = {
 export type GetPostCommentsQueryParams = ParsedQs & {
     offset?: string;
     limit?: string;
+    parentCommentId?: string;
 };
 
 export type GetChannelMessagesQueryParams = ParsedQs & {

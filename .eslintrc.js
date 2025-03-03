@@ -5,11 +5,9 @@ module.exports = {
         'jest',
         'promise',
         'unicorn',
-        'react',
     ],
     extends: [
         'eslint:recommended',
-        'plugin:react/recommended',
         'airbnb-base',
         'airbnb-typescript/base',
         'plugin:@typescript-eslint/recommended',
@@ -20,6 +18,7 @@ module.exports = {
         'plugin:unicorn/recommended',
         'prettier',
     ],
+    ignorePatterns: ['dist/'],
     env: {
         node: true,
         browser: true,
@@ -30,6 +29,18 @@ module.exports = {
         project: './tsconfig.json',
     },
     rules: {
+        '@typescript-eslint/no-redundant-type-constituents': 'off',
+        '@typescript-eslint/no-unsafe-return': 'off',
+        'no-void': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        'unicorn/no-null': 'off',
+        'unicorn/no-array-method-this-argument': 'off',
+        'max-lines': [
+            'warn',
+            { max: 500, skipBlankLines: true, skipComments: true },
+        ],
         'no-restricted-syntax': [
             'error',
             {
@@ -39,20 +50,14 @@ module.exports = {
         ],
         'unicorn/prefer-top-level-await': 'off',
         'import/extensions': 'off',
-        'react/jsx-boolean-value': 'error',
         'unicorn/filename-case': 'off',
         '@typescript-eslint/no-misused-promises': 'warn',
-        'react/no-unescaped-entities': 'off',
         'unicorn/no-negated-condition': 'off',
         // Too restrictive, writing ugly code to defend against a very unlikely scenario: https://eslint.org/docs/rules/no-prototype-builtins
         'no-prototype-builtins': 'off',
         // https://basarat.gitbooks.io/typescript/docs/tips/defaultIsBad.html
         'import/prefer-default-export': 'off',
         'import/no-default-export': 'error',
-        // Too restrictive: https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/destructuring-assignment.md
-        'react/destructuring-assignment': 'off',
-        // No jsx extension: https://github.com/facebook/create-react-app/issues/87#issuecomment-234627904
-        'react/jsx-filename-extension': 'off',
         // Use function hoisting to improve code readability
         'no-use-before-define': [
             'error',

@@ -5,6 +5,16 @@ export const schemaTypeDefs = `#graphql
 ###########################
 scalar Upload
 
+input CreatePostCommentInput {
+  content: String!
+  postedByUserId: String!
+  postId: String!
+  parentCommentId: String
+  upvotes: Int
+  # If you need nested children input, recursively reference the same input type.
+  children: [CreatePostCommentInput]
+}
+
 type User {
   id: String!
   email: String!
@@ -39,7 +49,26 @@ type Mutation {
     flair: String
     domain: String
     thumbnail: String
+    attachments: [Upload!]
   ): GroupChannelMessage
+
+    # content: string;
+    # postedByUserId: string;
+    # postId: string;
+    # parentCommentId?: string | null; // Optional for top-level comments
+    # children?: CreateGroupChannelPostCommentPayload[]; // Nested replies
+    # upvotes?: number; // Defaults to 0 if not provided
+
+  createPostComment(
+    postedByUserId: String!
+    content: String!
+    attachments: [Upload!]
+    postId: String!
+    parentCommentId: String
+    hasChildren: Boolean!
+    children: [CreatePostCommentInput!]
+    upvotes: Int
+  ): GroupChannelPostComment
 
   updateGroup(
     id: String!
@@ -70,6 +99,7 @@ type Query {
   # Fetch paginated post comments
   fetchPostComments(
     postId: String!
+    parentCommentId: String
     offset: Int
     limit: Int
   ): [GroupChannelPostComment!]!
@@ -140,6 +170,7 @@ interface GroupChannelMessage {
   channelId: String!
   postedByUserId: String!
   messageType: String!   # Either "message" or "post"
+  attachmentUrls: [String!]
 }
 
 # A regular message implements the interface.
@@ -151,6 +182,7 @@ type RegularMessage implements GroupChannelMessage {
   channelId: String!
   postedByUserId: String!
   messageType: String!   # Expected value: "message"
+  attachmentUrls: [String!]
 }
 
 # A post message implements the interface and adds extra fields.
@@ -169,6 +201,7 @@ type PostMessage implements GroupChannelMessage {
   upvotes: Int!
   commentsCount: Int!
   shareCount: Int!
+  attachmentUrls: [String!]
 }
 
 # A communication channel within a group.
@@ -195,8 +228,8 @@ type GroupChannelPostComment {
   postId: String!
   parentCommentId: String
   upvotes: Int!
+  hasChildren: Boolean!
   children: [GroupChannelPostComment!]!  # Fetches nested replies
 }
-
 
 `;
