@@ -132,7 +132,7 @@ export async function createService(
 
         req.on('close', () => {
             if (asyncIterator.return) {
-                asyncIterator.return();
+                void asyncIterator.return();
             }
         });
     });
