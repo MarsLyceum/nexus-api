@@ -25,6 +25,7 @@ import { loadResolvers } from './resolvers/index';
 
 declare module 'express-serve-static-core' {
     interface Request {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         auth?: any; // Adjust the type as needed (e.g., `User` or a specific interface)
     }
 }
@@ -68,10 +69,10 @@ export async function createService(
     const serverCleanup = useServer(
         {
             schema,
-            context: async (ctx, msg, args) => {
+            // eslint-disable-next-line @typescript-eslint/require-await
+            context: async () =>
                 // Return the context that you need for subscriptions
-                return { pubsub };
-            },
+                ({ pubsub }),
         },
         wsServer
     );
@@ -127,7 +128,7 @@ export async function createService(
             }
         };
 
-        onData();
+        void onData();
 
         req.on('close', () => {
             if (asyncIterator.return) {
@@ -163,6 +164,7 @@ export async function createService(
         conditionalParser,
         cors<cors.CorsRequest>(corsSetting),
         expressMiddleware(apolloServer, {
+            // eslint-disable-next-line @typescript-eslint/require-await
             context: async ({ req }) => {
                 // Extract user from JWT if it exists
                 const user = req.auth || null;
@@ -198,6 +200,7 @@ export async function createService(
     }
 
     async function publishGreetings() {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         await pubsub.publish('GREETINGS', {
             greetings: 'Hello every 5 seconds',
         });

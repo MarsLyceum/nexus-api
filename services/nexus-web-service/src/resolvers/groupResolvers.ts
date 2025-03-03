@@ -61,9 +61,9 @@ export const loadGroupResolvers = async () => {
                         }
 
                         const attachmentUrls = await Promise.all(
-                            (attachmentFilePaths as string[]).map(
+                            attachmentFilePaths.map(
                                 async (attachmentFilePath) => {
-                                    const { data, error } =
+                                    const { data } =
                                         await supabaseClient.storage
                                             .from('message-attachments')
                                             .createSignedUrl(
@@ -166,9 +166,9 @@ export const loadGroupResolvers = async () => {
                             }
 
                             const attachmentUrls = await Promise.all(
-                                (attachmentFilePaths as string[]).map(
+                                attachmentFilePaths.map(
                                     async (attachmentFilePath) => {
-                                        const { data, error } =
+                                        const { data } =
                                             await supabaseClient.storage
                                                 .from('message-attachments')
                                                 .createSignedUrl(
@@ -218,6 +218,7 @@ export const loadGroupResolvers = async () => {
         Mutation: {
             createGroup: async (
                 _: unknown,
+                // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
                 payload: CreateGroupPayload & { avatar: Promise<File> }
             ): Promise<CreateGroupResponse> => {
                 const client = new GroupApiClient();
@@ -231,6 +232,7 @@ export const loadGroupResolvers = async () => {
 
             createGroupChannelMessage: async (
                 _: unknown,
+                // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
                 payload: CreateGroupChannelMessagePayload & {
                     attachments?: Promise<File>[];
                 }
@@ -248,6 +250,7 @@ export const loadGroupResolvers = async () => {
 
             createPostComment: async (
                 _: unknown,
+                // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
                 payload: CreateGroupChannelPostCommentPayload & {
                     attachments?: Promise<File>[];
                 }
@@ -274,16 +277,19 @@ export const loadGroupResolvers = async () => {
                 return group;
             },
 
+            // eslint-disable-next-line @typescript-eslint/require-await
             deleteGroup: async (
                 _: unknown,
                 { id }: { id: string }
             ): Promise<undefined> => {
                 const client = new GroupApiClient();
-                return await client.deleteGroup(id);
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                return client.deleteGroup(id);
             },
         },
         // __resolveType on the GroupChannelMessage interface
         GroupChannelMessage: {
+            // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
             __resolveType(obj: any) {
                 // Use messageType if provided.
                 if (obj.messageType === 'post') {

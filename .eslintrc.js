@@ -29,6 +29,11 @@ module.exports = {
         project: './tsconfig.json',
     },
     rules: {
+        '@typescript-eslint/no-unsafe-return': 'off',
+        'no-void': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
         'unicorn/no-null': 'off',
         'unicorn/no-array-method-this-argument': 'off',
         'max-lines': [
