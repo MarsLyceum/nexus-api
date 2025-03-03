@@ -9,17 +9,16 @@ export async function createUser({
     phoneNumber,
 }: CreateUserPayload): Promise<User | undefined> {
     const dataSource = await initializeDataSource();
-    let error;
     let foundUser;
     try {
         foundUser =
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             (await dataSource.manager.findOne(UserEntity, {
                 where: { email },
             })) ?? undefined;
         return foundUser;
-    } catch (error_: unknown) {
-        error = error_;
-
+    } catch {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return dataSource.manager.create(UserEntity, {
             email,
             firstName,

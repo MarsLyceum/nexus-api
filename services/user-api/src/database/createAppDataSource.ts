@@ -23,7 +23,7 @@ export function createAppDataSource(): DataSource {
         },
         extra: {
             max: 10, // Maximum number of connections in the pool
-            idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
+            idleTimeoutMillis: 30_000, // How long a client is allowed to remain idle before being closed
         },
     });
 }
