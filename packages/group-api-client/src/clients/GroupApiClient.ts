@@ -67,12 +67,13 @@ export class GroupApiClient {
 
     async getPostComments(
         postId: string,
+        parentCommentId: string,
         offset: number,
         limit: number
     ): Promise<GetPostCommentsResponse> {
         return this.query(
             axios.get(
-                `${this.baseURL}/post/${postId}/comments?offset=${offset}&limit=${limit}`
+                `${this.baseURL}/post/${postId}/comments?offset=${offset}&limit=${limit}&parentCommentId=${parentCommentId}`
             )
         );
     }

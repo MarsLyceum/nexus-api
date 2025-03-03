@@ -195,15 +195,22 @@ export const loadGroupResolvers = async () => {
                 _: unknown,
                 {
                     postId,
+                    parentCommentId,
                     offset,
                     limit,
-                }: { postId: string; offset: number; limit: number }
+                }: {
+                    postId: string;
+                    parentCommentId?: string;
+                    offset?: number;
+                    limit?: number;
+                }
             ): Promise<GetPostCommentsResponse> => {
                 const client = new GroupApiClient();
                 const comments = await client.getPostComments(
                     postId,
-                    offset,
-                    limit
+                    parentCommentId ?? '',
+                    offset ?? 0,
+                    limit ?? 50
                 );
                 return comments;
             },

@@ -1,5 +1,5 @@
 {
-    "name": "peeps-web-service",
+    "name": "nexus-web-service",
     "version": "0.0.0",
     "private": true,
     "extends": "../../package.json",

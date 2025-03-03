@@ -99,6 +99,7 @@ type Query {
   # Fetch paginated post comments
   fetchPostComments(
     postId: String!
+    parentCommentId: String
     offset: Int
     limit: Int
   ): [GroupChannelPostComment!]!

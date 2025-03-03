@@ -15,6 +15,8 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
@@ -37,6 +39,10 @@ export async function createService(
     const pubsub = new PubSub();
     const app = express();
     const httpServer = createServer(app);
+    const wsServer = new WebSocketServer({
+        server: httpServer,
+        path: '/graphql', // This path will handle WebSocket connections
+    });
     const resolvers = await loadResolvers();
     const schema = makeExecutableSchema({
         typeDefs: schemaTypeDefs,
@@ -58,6 +64,17 @@ export async function createService(
     app.options('*', cors(corsSetting)); // Enable pre-flight request for DELETE request
 
     app.set('port', port);
+
+    const serverCleanup = useServer(
+        {
+            schema,
+            context: async (ctx, msg, args) => {
+                // Return the context that you need for subscriptions
+                return { pubsub };
+            },
+        },
+        wsServer
+    );
 
     // JWT authentication middleware
     const authenticateJWT = expressjwt({
@@ -166,6 +183,7 @@ export async function createService(
     }
 
     async function stop() {
+        await serverCleanup.dispose();
         return new Promise<void>((resolve, reject) => {
             httpServer.close((error) => {
                 if (error) {

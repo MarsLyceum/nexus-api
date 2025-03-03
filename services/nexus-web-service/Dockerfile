@@ -18,7 +18,7 @@ RUN rm -rf node_modules
 RUN pnpm install
 
 # Change directory to the service folder and compile the TypeScript code
-WORKDIR /usr/src/web/services/peeps-web-service
+WORKDIR /usr/src/web/services/nexus-web-service
 RUN pnpm run compile
 
 # Stage 2: Production
@@ -46,7 +46,7 @@ COPY --from=builder /usr/src/web .
 RUN pnpm install --prod --frozen-lockfile
 
 # Set working directory to the service folder
-WORKDIR /usr/src/web/services/peeps-web-service
+WORKDIR /usr/src/web/services/nexus-web-service
 
 # Run the application as a non-root user
 USER node

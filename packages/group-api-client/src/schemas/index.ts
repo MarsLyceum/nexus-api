@@ -178,6 +178,12 @@ export const getChannelMessagesQueryParamsSchema = Joi.object({
 export const getPostCommentsQueryParamsSchema = Joi.object({
     offset: Joi.number(),
     limit: Joi.number(),
+    parentCommentId: Joi.string()
+        .empty('')
+        .default(null)
+        .guid({ version: ['uuidv4'] })
+        .allow(null)
+        .optional(), // Can be null if it's a top-level comment
 });
 
 export const createGroupChannelPostCommentPayloadSchema = Joi.object({

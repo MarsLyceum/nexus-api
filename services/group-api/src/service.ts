@@ -187,7 +187,7 @@ export async function createService(
         >((req, res) => getChannelMessages(req, res))
     );
 
-    // GET /post/:postId/comments?offset=0&limit=10
+    // GET /post/:postId/comments?offset=0&limit=10&parentCommentId=NULL
     app.get(
         '/post/:postId/comments',
         validateParams(getPostCommentsParamsSchema),

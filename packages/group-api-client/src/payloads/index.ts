@@ -77,6 +77,7 @@ export type GetPostCommentsParams = {
 export type GetPostCommentsQueryParams = ParsedQs & {
     offset?: string;
     limit?: string;
+    parentCommentId?: string;
 };
 
 export type GetChannelMessagesQueryParams = ParsedQs & {

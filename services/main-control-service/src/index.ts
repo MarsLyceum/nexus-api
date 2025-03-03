@@ -12,7 +12,7 @@ import 'reflect-metadata';
 // import { expressjwt, GetVerificationKey } from 'express-jwt';
 // import jwksRsa from 'jwks-rsa';
 
-import { createService as createServicePeepsWebService } from 'peeps-web-service/src/service';
+import { createService as createServicePeepsWebService } from 'nexus-web-service/src/service';
 import { createService as createServiceUserApi } from 'user-api/src/service';
 
 async function main() {

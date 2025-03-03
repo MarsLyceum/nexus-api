@@ -16,7 +16,7 @@ from gcp_microservice_management import (
 def main():
     project_id = "hephaestus-418809"
     region = "us-west1"
-    service_name = "peeps-web-service"
+    service_name = "nexus-web-service"
 
     env_file = find_env_file()
     print(color_text(f"Using .env file: {env_file}", OKGREEN))
@@ -24,10 +24,11 @@ def main():
     global DATABASE_PASSWORD
     DATABASE_PASSWORD = env_vars.get("DATABASE_PASSWORD", "")
 
-    key_file = find_key_file("../../service-account-keys", "hephaestus-418809-*.json")
+    key_file = find_key_file(
+        "../../service-account-keys", "hephaestus-418809-*.json"
+    )
     print(color_text(f"Using key file: {key_file}", OKGREEN))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
-
 
     print(
         color_text("Authenticating gcloud with a service account...", OKCYAN)

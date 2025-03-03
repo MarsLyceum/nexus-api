@@ -21,6 +21,7 @@ export const getPostComments = async (
         const { postId } = req.params;
         const offset = Number.parseInt(req.query.offset || '0', 10);
         const limit = Number.parseInt(req.query.limit || '50', 10);
+        const { parentCommentId } = req.query;
 
         if (!postId) {
             res.status(400).send('Post ID is required');
@@ -29,22 +30,31 @@ export const getPostComments = async (
 
         const dataSource = await initializeDataSource();
 
-        // Fetch paginated top-level comments
-        const topLevelComments = await dataSource.manager
+        const commentsQuery = dataSource.manager
             .createQueryBuilder(GroupChannelPostCommentEntity, 'comment')
-            .where('comment.postId = :postId', { postId })
-            .andWhere('comment.parentCommentId IS NULL') // Fetch only top-level comments
+            .where('comment.postId = :postId', { postId });
+
+        if (parentCommentId) {
+            commentsQuery.andWhere(
+                'comment.parentCommentId = :parentCommentId',
+                { parentCommentId }
+            );
+        } else {
+            commentsQuery.andWhere('comment.parentCommentId IS NULL');
+        }
+
+        const initialComments = await commentsQuery
             .orderBy('comment.postedAt', 'DESC')
             .skip(offset)
             .take(limit)
             .getMany();
 
         // Recursively fetch nested replies
-        const fetchReplies = async (parentCommentId: string) => {
+        const fetchReplies = async (_parentCommentId: string) => {
             const replies = await dataSource.manager.find(
                 GroupChannelPostCommentEntity,
                 {
-                    where: { parentCommentId },
+                    where: { parentCommentId: _parentCommentId },
                     order: { postedAt: 'ASC' },
                 }
             );
@@ -57,11 +67,11 @@ export const getPostComments = async (
         };
 
         // Attach nested replies to each top-level comment
-        for (const comment of topLevelComments) {
+        for (const comment of initialComments) {
             comment.children = await fetchReplies(comment.id);
         }
 
-        res.status(200).json(topLevelComments);
+        res.status(200).json(initialComments);
         // eslint-disable-next-line consistent-return, no-useless-return
         return;
     } catch (error) {
