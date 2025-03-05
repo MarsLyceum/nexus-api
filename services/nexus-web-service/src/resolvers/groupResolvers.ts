@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { withFilter } from 'graphql-subscriptions';
+
 import {
     GroupApiClient,
     CreateGroupPayload,
@@ -15,12 +16,7 @@ import {
     CreateGroupChannelPostCommentPayload,
     CreatePostCommentResponse,
 } from 'group-api-client';
-
-import { SUPABASE_SERVICE_KEY, SUPABASE_URL } from '../config';
-
-const supabaseUrl = SUPABASE_URL!;
-const supabaseServiceKey = SUPABASE_SERVICE_KEY!;
-const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+import { SupabaseClientSingleton, fetchAttachmentsForMessage } from '../utils';
 
 export const loadGroupResolvers = async () => {
     const { default: GraphQLUpload } = await import(
@@ -64,8 +60,8 @@ export const loadGroupResolvers = async () => {
                             attachmentFilePaths.map(
                                 async (attachmentFilePath) => {
                                     const { data } =
-                                        await supabaseClient.storage
-                                            .from('message-attachments')
+                                        await SupabaseClientSingleton.getInstance()
+                                            .storage.from('message-attachments')
                                             .createSignedUrl(
                                                 attachmentFilePath,
                                                 60 * 60 // one hour
@@ -107,9 +103,10 @@ export const loadGroupResolvers = async () => {
                             }
 
                             // Generate a signed URL for the avatar from the 'group-avatars' bucket, valid for 60 seconds.
-                            const { data, error } = await supabaseClient.storage
-                                .from('group-avatars')
-                                .createSignedUrl(avatarFilePath, 60 * 60);
+                            const { data, error } =
+                                await SupabaseClientSingleton.getInstance()
+                                    .storage.from('group-avatars')
+                                    .createSignedUrl(avatarFilePath, 60 * 60);
 
                             if (error) {
                                 console.error(
@@ -152,41 +149,9 @@ export const loadGroupResolvers = async () => {
 
                 const messagesWithAttachments: GetChannelMessagesResponseWithAttachmentUrls =
                     await Promise.all(
-                        messages.map(async (message) => {
-                            const {
-                                attachmentFilePaths,
-                                ...messageWithoutFilePaths
-                            } = message;
-
-                            if (!attachmentFilePaths) {
-                                return {
-                                    ...messageWithoutFilePaths,
-                                    attachmentUrls: [],
-                                };
-                            }
-
-                            const attachmentUrls = await Promise.all(
-                                attachmentFilePaths.map(
-                                    async (attachmentFilePath) => {
-                                        const { data } =
-                                            await supabaseClient.storage
-                                                .from('message-attachments')
-                                                .createSignedUrl(
-                                                    attachmentFilePath,
-                                                    60 * 60
-                                                );
-
-                                        return data?.signedUrl ?? '';
-                                    }
-                                )
-                            );
-
-                            // Fallback if no data is returned
-                            return {
-                                ...messageWithoutFilePaths,
-                                attachmentUrls,
-                            };
-                        })
+                        messages.map((element) =>
+                            fetchAttachmentsForMessage(element)
+                        )
                     );
 
                 return messagesWithAttachments;
@@ -257,8 +222,6 @@ export const loadGroupResolvers = async () => {
             ): Promise<CreatePostCommentResponse> => {
                 const client = new GroupApiClient();
 
-                console.log('in createPostComment payload:', payload);
-
                 const { attachments = [] } = payload;
 
                 const comment = await client.createPostComment(
@@ -285,6 +248,17 @@ export const loadGroupResolvers = async () => {
                 const client = new GroupApiClient();
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return client.deleteGroup(id);
+            },
+        },
+        Subscription: {
+            messageAdded: {
+                subscribe: withFilter(
+                    (_, __, context) =>
+                        context.pubsub.asyncIterableIterator('MESSAGE_ADDED'),
+                    (payload, variables) =>
+                        // Only forward the event if the channelIds match
+                        payload.messageAdded.channelId === variables.channelId
+                ),
             },
         },
         // __resolveType on the GroupChannelMessage interface

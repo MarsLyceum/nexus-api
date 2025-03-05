@@ -12,7 +12,7 @@ async function main() {
     const userApi = createServiceUserApi(4001);
 
     const services = [
-        { name: 'Peeps Web Service', instance: peepsWebService },
+        { name: 'Nexus Web Service', instance: peepsWebService },
         { name: 'User API', instance: userApi },
     ];
 

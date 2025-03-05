@@ -17,6 +17,8 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "uuid": "^11.1.0",
+        "@google-cloud/pubsub": "^4.10.0",
         "buffer": "^6.0.3",
         "form-data": "^4.0.1",
         "@supabase/supabase-js": "^2.48.1",
@@ -66,7 +68,7 @@
         "express-jwt": "^8.4.1",
         "graphql": "^16.8.1",
         "graphql-sse": "^2.5.3",
-        "graphql-subscriptions": "^2.0.0",
+        "graphql-subscriptions": "^3.0.0",
         "graphql-ws": "^5.16.0",
         "html-entities": "^2.5.2",
         "http-errors": "~1.6.3",

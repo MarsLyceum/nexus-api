@@ -107,6 +107,7 @@ type Query {
 
 type Subscription {
   greetings: String
+  messageAdded(channelId: String!): GroupChannelMessage!
 }
 
 ###########################

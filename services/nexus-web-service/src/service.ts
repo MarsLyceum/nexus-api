@@ -12,16 +12,20 @@ import { createServer } from 'node:http';
 import cors from 'cors';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { PubSub } from 'graphql-subscriptions';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
+import { PubSub as GCPubSub } from '@google-cloud/pubsub';
+import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
+import { v4 as uuidv4 } from 'uuid';
+import { GroupChannelMessage } from 'group-api-client';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
+import { fetchAttachmentsForMessage } from './utils';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -37,7 +41,6 @@ export async function createService(
     start: () => Promise<void>;
     stop: () => Promise<void>;
 }> {
-    const pubsub = new PubSub();
     const app = express();
     const httpServer = createServer(app);
     const wsServer = new WebSocketServer({
@@ -49,6 +52,10 @@ export async function createService(
         typeDefs: schemaTypeDefs,
         resolvers,
     });
+    const pubSubClient = new GCPubSub({
+        projectId: 'hephaestus-418809',
+    });
+    const localPubSub = new InMemoryPubSub();
 
     const corsSetting = {
         origin: 'http://localhost:8081', // Or '*' for all origins
@@ -66,13 +73,42 @@ export async function createService(
 
     app.set('port', port);
 
+    const instanceId = uuidv4();
+    const subscriptionName = `new-message-${instanceId}`;
+    const [subscription] = await pubSubClient
+        .topic('new-message')
+        .createSubscription(subscriptionName, { ackDeadlineSeconds: 30 });
+
+    subscription.on(
+        'message',
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        async (message: {
+            data: { toString: () => string };
+            ack: () => void;
+        }) => {
+            const eventData = JSON.parse(
+                message.data.toString()
+            ) as GroupChannelMessage;
+
+            const messageWithAttachments =
+                await fetchAttachmentsForMessage(eventData);
+            // Publish to local in-memory PubSub so that active websockets get notified
+            void localPubSub.publish('MESSAGE_ADDED', {
+                messageAdded: messageWithAttachments,
+            });
+
+            // Acknowledge the message to prevent redelivery
+            message.ack();
+        }
+    );
+
     const serverCleanup = useServer(
         {
             schema,
             // eslint-disable-next-line @typescript-eslint/require-await
             context: async () =>
                 // Return the context that you need for subscriptions
-                ({ pubsub }),
+                ({ pubsub: localPubSub }),
         },
         wsServer
     );
@@ -106,36 +142,36 @@ export async function createService(
     await apolloServer.start();
 
     // SSE endpoint
-    app.get('/graphql/stream', (req, res) => {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
+    // app.get('/graphql/stream', (req, res) => {
+    //     res.setHeader('Content-Type', 'text/event-stream');
+    //     res.setHeader('Cache-Control', 'no-cache');
+    //     res.setHeader('Connection', 'keep-alive');
 
-        const asyncIterator = pubsub.asyncIterator<{ greetings: string }>(
-            'GREETINGS'
-        );
+    //     const asyncIterator = pubsub.asyncIterator<{ greetings: string }>(
+    //         'GREETINGS'
+    //     );
 
-        const onData = async () => {
-            try {
-                // eslint-disable-next-line no-restricted-syntax
-                for await (const data of asyncIterator as AsyncIterableIterator<{
-                    greetings: string;
-                }>) {
-                    res.write(`data: ${JSON.stringify(data)}\n\n`);
-                }
-            } catch (error) {
-                console.error('Failed to stream data:', error);
-            }
-        };
+    //     const onData = async () => {
+    //         try {
+    //             // eslint-disable-next-line no-restricted-syntax
+    //             for await (const data of asyncIterator as AsyncIterableIterator<{
+    //                 greetings: string;
+    //             }>) {
+    //                 res.write(`data: ${JSON.stringify(data)}\n\n`);
+    //             }
+    //         } catch (error) {
+    //             console.error('Failed to stream data:', error);
+    //         }
+    //     };
 
-        void onData();
+    //     void onData();
 
-        req.on('close', () => {
-            if (asyncIterator.return) {
-                void asyncIterator.return();
-            }
-        });
-    });
+    //     req.on('close', () => {
+    //         if (asyncIterator.return) {
+    //             void asyncIterator.return();
+    //         }
+    //     });
+    // });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { default: graphqlUploadExpress } = await import(
@@ -168,7 +204,7 @@ export async function createService(
             context: async ({ req }) => {
                 // Extract user from JWT if it exists
                 const user = req.auth || null;
-                return { pubsub, user };
+                return { pubsub: localPubSub, user };
             },
         })
     );
@@ -201,7 +237,7 @@ export async function createService(
 
     async function publishGreetings() {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        await pubsub.publish('GREETINGS', {
+        await localPubSub.publish('GREETINGS', {
             greetings: 'Hello every 5 seconds',
         });
     }

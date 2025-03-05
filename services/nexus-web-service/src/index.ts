@@ -6,7 +6,7 @@ import { createService } from './service';
     const { start } = await createService();
     await start();
 })().catch((error: unknown) => {
-    console.error('Error starting the Peeps Web service:', error);
+    console.error('Error starting the Nexus Web service:', error);
 
     // Safely handle 'error':
     const errorObj =

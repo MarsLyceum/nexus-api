@@ -2,6 +2,7 @@
 
 import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import { PubSub as GCPubSub } from '@google-cloud/pubsub';
 import {
     GroupChannelEntity,
     GroupChannelMessageMessageEntity,
@@ -28,6 +29,9 @@ export const createGroupChannelMessage = async (
     try {
         const dataSource = await initializeDataSource();
         const filePaths: string[] = [];
+        const pubSubClient = new GCPubSub({
+            projectId: 'hephaestus-418809',
+        });
 
         if (req.files) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -134,6 +138,11 @@ export const createGroupChannelMessage = async (
                 return message;
             }
         );
+
+        const dataBuffer = Buffer.from(JSON.stringify(newMessage));
+        await pubSubClient
+            .topic('new-message')
+            .publishMessage({ data: dataBuffer });
 
         res.status(201).json(newMessage);
     } catch (error) {
