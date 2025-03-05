@@ -19,6 +19,7 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub as GCPubSub } from '@google-cloud/pubsub';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
+import { GroupChannelMessage } from 'group-api-client';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
@@ -85,7 +86,9 @@ export async function createService(
             data: { toString: () => string };
             ack: () => void;
         }) => {
-            const eventData = JSON.parse(message.data.toString());
+            const eventData = JSON.parse(
+                message.data.toString()
+            ) as GroupChannelMessage;
 
             const messageWithAttachments =
                 await fetchAttachmentsForMessage(eventData);
