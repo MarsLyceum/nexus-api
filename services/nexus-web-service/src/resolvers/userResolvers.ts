@@ -46,7 +46,7 @@ export const userResolvers = {
                 _: unknown,
                 __: unknown,
                 { pubsub }: { pubsub: PubSub }
-            ) => pubsub.asyncIterator(['GREETINGS']),
+            ) => pubsub.asyncIterableIterator(['GREETINGS']),
         },
     },
 };
