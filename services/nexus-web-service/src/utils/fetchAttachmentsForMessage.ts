@@ -1,6 +1,10 @@
+import { GroupChannelMessage } from 'group-api-client';
+
 import { SupabaseClientSingleton } from './supabaseClient';
 
-export const fetchAttachmentsForMessage = async (message: any) => {
+export const fetchAttachmentsForMessage = async (
+    message: GroupChannelMessage
+) => {
     const { attachmentFilePaths, ...messageWithoutFilePaths } = message;
 
     if (!attachmentFilePaths) {
