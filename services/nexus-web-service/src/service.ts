@@ -235,18 +235,5 @@ export async function createService(
         });
     }
 
-    async function publishGreetings() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        await localPubSub.publish('GREETINGS', {
-            greetings: 'Hello every 5 seconds',
-        });
-    }
-
-    setInterval(() => {
-        publishGreetings().catch((error) => {
-            console.error('Failed to publish greetings:', error);
-        });
-    }, 5000);
-
     return { app, start, stop };
 }

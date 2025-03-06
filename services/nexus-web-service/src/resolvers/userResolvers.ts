@@ -1,4 +1,3 @@
-import { PubSub } from 'graphql-subscriptions';
 import {
     UserApiClient,
     CreateUserPayload,
@@ -38,15 +37,6 @@ export const userResolvers = {
             const user = await client.getUserByEmail(email);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return user;
-        },
-    },
-    Subscription: {
-        greetings: {
-            subscribe: (
-                _: unknown,
-                __: unknown,
-                { pubsub }: { pubsub: PubSub }
-            ) => pubsub.asyncIterableIterator(['GREETINGS']),
         },
     },
 };
