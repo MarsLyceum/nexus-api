@@ -1,6 +1,6 @@
 import { GroupChannelMessage } from 'group-api-client';
 
-import { SupabaseClientSingleton } from './supabaseClient';
+import { getCachedSignedUrl } from './getCachedSignedUrl';
 
 export const fetchAttachmentsForMessage = async (
     message: GroupChannelMessage
@@ -15,13 +15,9 @@ export const fetchAttachmentsForMessage = async (
     }
 
     const attachmentUrls = await Promise.all(
-        attachmentFilePaths.map(async (attachmentFilePath: string) => {
-            const { data } = await SupabaseClientSingleton.getInstance()
-                .storage.from('message-attachments')
-                .createSignedUrl(attachmentFilePath, 60 * 60);
-
-            return data?.signedUrl ?? '';
-        })
+        attachmentFilePaths.map(async (attachmentFilePath: string) =>
+            getCachedSignedUrl('message-attachments', attachmentFilePath)
+        )
     );
 
     // Fallback if no data is returned

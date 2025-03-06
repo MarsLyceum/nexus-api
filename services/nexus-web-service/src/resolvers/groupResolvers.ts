@@ -16,7 +16,12 @@ import {
     CreateGroupChannelPostCommentPayload,
     CreatePostCommentResponse,
 } from 'group-api-client';
-import { SupabaseClientSingleton, fetchAttachmentsForMessage } from '../utils';
+import {
+    SupabaseClientSingleton,
+    fetchAttachmentsForMessage,
+    getCachedSignedUrl,
+} from '../utils';
+import { SIGNED_URL_EXPIRATION_SECONDS } from '../constants';
 
 export const loadGroupResolvers = async () => {
     const { default: GraphQLUpload } = await import(
@@ -58,17 +63,11 @@ export const loadGroupResolvers = async () => {
 
                         const attachmentUrls = await Promise.all(
                             attachmentFilePaths.map(
-                                async (attachmentFilePath) => {
-                                    const { data } =
-                                        await SupabaseClientSingleton.getInstance()
-                                            .storage.from('message-attachments')
-                                            .createSignedUrl(
-                                                attachmentFilePath,
-                                                60 * 60 // one hour
-                                            );
-
-                                    return data?.signedUrl ?? '';
-                                }
+                                async (attachmentFilePath) =>
+                                    getCachedSignedUrl(
+                                        'message-attachments',
+                                        attachmentFilePath
+                                    )
                             )
                         );
 
@@ -103,31 +102,15 @@ export const loadGroupResolvers = async () => {
                             }
 
                             // Generate a signed URL for the avatar from the 'group-avatars' bucket, valid for 60 seconds.
-                            const { data, error } =
-                                await SupabaseClientSingleton.getInstance()
-                                    .storage.from('group-avatars')
-                                    .createSignedUrl(avatarFilePath, 60 * 60);
+                            const avatarUrl = await getCachedSignedUrl(
+                                'group-avatars',
+                                avatarFilePath
+                            );
 
-                            if (error) {
-                                console.error(
-                                    `Error generating signed URL for group: ${groupWithoutAvatar.id}`,
-                                    error
-                                );
-                                return {
-                                    ...groupWithoutAvatar,
-                                    avatarUrl: '',
-                                };
-                            }
-
-                            if (data) {
-                                return {
-                                    ...groupWithoutAvatar,
-                                    avatarUrl: data.signedUrl,
-                                };
-                            }
-
-                            // Fallback if no data is returned
-                            return { ...groupWithoutAvatar, avatarUrl: '' };
+                            return {
+                                ...groupWithoutAvatar,
+                                avatarUrl,
+                            };
                         })
                     )
                 )

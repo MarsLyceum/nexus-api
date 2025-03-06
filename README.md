@@ -1,6 +1,15 @@
-# peeps_api
+# nexus_api
 
-The backend API for Peeps.
+The backend API for Nexus.
+
+## Architecture
+
+-   Microservices with GCP on Google Cloud Run
+-   Supabase Database
+-   Supabase Document Storage for Images and Media
+-   Squarespace for Domain: my-nexus.net
+-   Cloudflare for CDN
+-   Upstash for Redis Cache Around Supabase Requests
 
 ## Docker
 

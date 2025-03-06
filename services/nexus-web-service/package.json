@@ -17,6 +17,7 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "@upstash/redis": "^1.34.5",
         "uuid": "^11.1.0",
         "@google-cloud/pubsub": "^4.10.0",
         "buffer": "^6.0.3",
