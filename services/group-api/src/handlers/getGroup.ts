@@ -3,6 +3,7 @@
 import { Request, Response } from 'express';
 import { GroupEntity, GetGroupParams } from 'group-api-client';
 import { initializeDataSource } from '../database';
+import { RedisClientSingleton } from '../utils';
 
 /**
  * Handler to retrieve a group by its identifier.
@@ -15,16 +16,24 @@ export const getGroup = async (req: Request<GetGroupParams>, res: Response) => {
             res.status(400).send('Group id parameter is missing');
             return;
         }
-        const dataSource = await initializeDataSource();
-        const group = await dataSource.manager.findOne(GroupEntity, {
-            where: { id },
-            relations: ['members', 'channels'],
-        });
+        const cacheKey = `group:${id}`;
+        let cachedGroup =
+            await RedisClientSingleton.getInstance().get(cacheKey);
 
-        if (!group) {
+        if (!cachedGroup) {
+            const dataSource = await initializeDataSource();
+            const group = await dataSource.manager.findOne(GroupEntity, {
+                where: { id },
+                relations: ['members', 'channels'],
+            });
+            cachedGroup = group;
+            await RedisClientSingleton.getInstance().set(cacheKey, cachedGroup);
+        }
+
+        if (!cachedGroup) {
             res.status(404).send('Group not found');
         } else {
-            res.status(200).json(group);
+            res.status(200).json(cachedGroup);
         }
     } catch (error) {
         res.status(500).send((error as Error).message);
