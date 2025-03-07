@@ -34,6 +34,7 @@ export class GroupChannelPostCommentEntity {
 
     // The UUID of the user who posted the comment.
     @Column({ type: 'uuid' })
+    @Index()
     postedByUserId!: string;
 
     /**

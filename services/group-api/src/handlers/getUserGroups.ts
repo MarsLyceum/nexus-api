@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { GroupEntity, GetUserGroupsParams } from 'group-api-client';
 import { initializeDataSource } from '../database';
 import { RedisClientSingleton } from '../utils';
+import { REDIS_EXPIRATION_SECONDS } from '../constants';
 
 export const getUserGroups = async (
     req: Request<GetUserGroupsParams>,
@@ -25,16 +26,16 @@ export const getUserGroups = async (
 
             const groups = await dataSource.manager
                 .createQueryBuilder(GroupEntity, 'group')
-                .leftJoinAndSelect('group.members', 'member')
+                .innerJoinAndSelect('group.members', 'member')
                 .leftJoinAndSelect('group.channels', 'channel')
-                .leftJoinAndSelect('channel.messages', 'message')
                 .where('member.userId = :userId', { userId })
                 .getMany();
 
             cachedUserGroups = groups;
             await RedisClientSingleton.getInstance().set(
                 cacheKey,
-                cachedUserGroups
+                cachedUserGroups,
+                { ex: REDIS_EXPIRATION_SECONDS }
             );
         }
 

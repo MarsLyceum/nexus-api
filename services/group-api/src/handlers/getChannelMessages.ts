@@ -6,6 +6,7 @@ import {
 } from 'group-api-client';
 import { initializeDataSource } from '../database';
 import { RedisClientSingleton } from '../utils';
+import { REDIS_EXPIRATION_SECONDS } from '../constants';
 
 export const getChannelMessages = async (
     req: Request<
@@ -46,7 +47,8 @@ export const getChannelMessages = async (
             cachedMessages = messages;
             await RedisClientSingleton.getInstance().set(
                 cacheKey,
-                cachedMessages
+                cachedMessages,
+                { ex: REDIS_EXPIRATION_SECONDS }
             );
         }
 

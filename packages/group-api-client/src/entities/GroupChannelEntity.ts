@@ -5,6 +5,7 @@ import {
     ManyToOne,
     OneToMany,
     JoinColumn,
+    Index,
 } from 'typeorm';
 // Use a type-only import for Group.
 import type { GroupEntity } from './GroupEntity';
@@ -13,6 +14,7 @@ import type { GroupChannelMessageEntity } from './GroupChannelMessageEntity';
 @Entity('GroupChannel')
 export class GroupChannelEntity {
     @PrimaryGeneratedColumn('uuid')
+    @Index()
     id!: string;
 
     @Column({ length: 100 })
@@ -30,6 +32,7 @@ export class GroupChannelEntity {
     group!: GroupEntity;
 
     @Column({ type: 'uuid' })
+    @Index()
     groupId!: string;
 
     @OneToMany('GroupChannelMessage', 'channel', { cascade: true })
