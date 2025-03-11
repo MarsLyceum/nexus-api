@@ -37,4 +37,7 @@ export class GroupChannelEntity {
 
     @OneToMany('GroupChannelMessage', 'channel', { cascade: true })
     messages!: GroupChannelMessageEntity[];
+
+    @Column({ type: 'int', default: 0 })
+    orderIndex!: number;
 }

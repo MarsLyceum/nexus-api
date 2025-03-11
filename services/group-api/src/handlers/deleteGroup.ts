@@ -1,7 +1,6 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
 import { In } from 'typeorm';
 import {
     GroupEntity,
@@ -12,11 +11,10 @@ import {
     DeleteGroupParams,
     GroupChannelPostCommentEntity,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
-
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+import {
+    GoogleCloudStorageSingleton,
+    TypeOrmDataSourceSingleton,
+} from 'third-party-clients';
 
 /**
  * Handler to delete a group by its identifier.
@@ -34,7 +32,7 @@ export const deleteGroup = async (
             return;
         }
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         // Retrieve the group along with its channels.
         // (Adjust relations as needed; here we assume that channels are loaded.)
@@ -95,18 +93,12 @@ export const deleteGroup = async (
             await manager.delete(GroupEntity, { id: group.id });
         });
 
-        // After the database transaction completes, delete the avatar from Supabase Storage if it exists.
+        // After the database transaction completes, delete the avatar from Cloud Storage if it exists.
         if (group.avatarFilePath) {
-            const { error: storageError } = await supabaseClient.storage
-                .from('group-avatars')
-                .remove([group.avatarFilePath]);
-            if (storageError) {
-                console.error(
-                    'Error deleting group avatar from Supabase Storage:',
-                    storageError.message
-                );
-                // Optionally, you could return a 500 error here or simply log the error.
-            }
+            await GoogleCloudStorageSingleton.getInstance()
+                .bucket('group-avatars')
+                .file(group.avatarFilePath)
+                .delete();
         }
 
         res.status(204).send();

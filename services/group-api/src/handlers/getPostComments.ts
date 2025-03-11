@@ -6,7 +6,7 @@ import {
     GetPostCommentsParams,
     GetPostCommentsQueryParams,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 export const getPostComments = async (
     req: Request<
@@ -28,7 +28,7 @@ export const getPostComments = async (
             return;
         }
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         const commentsQuery = dataSource.manager
             .createQueryBuilder(GroupChannelPostCommentEntity, 'comment')

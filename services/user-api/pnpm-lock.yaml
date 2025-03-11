@@ -56,6 +56,9 @@ importers:
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
+      third-party-clients:
+        specifier: workspace:*
+        version: link:../../packages/third-party-clients
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.14.2)(typescript@5.4.5)

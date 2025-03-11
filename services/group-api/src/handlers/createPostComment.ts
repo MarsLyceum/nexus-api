@@ -4,7 +4,7 @@ import {
     GroupChannelPostCommentEntity,
     CreateGroupChannelPostCommentPayload,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 export const createPostComment = async (
     req: Request<unknown, unknown, CreateGroupChannelPostCommentPayload>,
@@ -20,7 +20,7 @@ export const createPostComment = async (
             hasChildren,
         } = req.body;
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         // Start a transaction to ensure consistency
         const newComment = await dataSource.manager.transaction(

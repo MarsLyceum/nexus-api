@@ -10,6 +10,8 @@ import {
 export class UserApiClient {
     private baseURL = 'https://user-api-iwesf7iypq-uw.a.run.app';
 
+    // private baseURL = 'http://localhost:4001';
+
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {
         try {
@@ -40,7 +42,9 @@ export class UserApiClient {
     async createUser(
         createUserPayload: CreateUserPayload
     ): Promise<CreateUserResponse> {
-        return this.query(axios.post(this.baseURL, createUserPayload));
+        return this.query(
+            axios.post(`${this.baseURL}/user`, createUserPayload)
+        );
     }
 
     // Update a user

@@ -2,8 +2,10 @@
 
 import { Request, Response } from 'express';
 import { GroupEntity, GetGroupParams } from 'group-api-client';
-import { initializeDataSource } from '../database';
-import { RedisClientSingleton } from '../utils';
+import {
+    RedisClientSingleton,
+    TypeOrmDataSourceSingleton,
+} from 'third-party-clients';
 
 /**
  * Handler to retrieve a group by its identifier.
@@ -21,7 +23,7 @@ export const getGroup = async (req: Request<GetGroupParams>, res: Response) => {
             await RedisClientSingleton.getInstance().get(cacheKey);
 
         if (!cachedGroup) {
-            const dataSource = await initializeDataSource();
+            const dataSource = await TypeOrmDataSourceSingleton.getInstance();
             const group = await dataSource.manager.findOne(GroupEntity, {
                 where: { id },
                 relations: ['members', 'channels'],

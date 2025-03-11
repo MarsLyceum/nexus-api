@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis';
-import { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } from '../config';
+import { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } from './config';
 
 export const RedisClientSingleton = (function () {
     let redis: Redis | undefined;

@@ -6,7 +6,7 @@ import {
     GroupChannelEntity,
     CreateGroupChannelPayload,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 export const createGroupChannel = async (
     req: Request<unknown, unknown, CreateGroupChannelPayload>,
@@ -14,7 +14,7 @@ export const createGroupChannel = async (
 ) => {
     try {
         const { name, groupId, type } = req.body;
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         const group = await dataSource.manager.findOne(GroupEntity, {
             where: { id: groupId },

@@ -1,18 +1,16 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
 import {
     GroupEntity,
     GroupMemberEntity,
     GroupChannelEntity,
     CreateGroupPayload,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
-
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+import {
+    GoogleCloudStorageSingleton,
+    TypeOrmDataSourceSingleton,
+} from 'third-party-clients';
 
 /**
  * Handler to create a new group.
@@ -30,28 +28,20 @@ export const createGroup = async (
 ) => {
     try {
         const { name, createdByUserId, publicGroup } = req.body;
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         let avatarFilePath: string | undefined;
 
         if (req.file) {
             // Generate a unique file name (you can adjust the naming scheme)
             avatarFilePath = `${Date.now()}`;
 
-            // Upload the file buffer to Supabase Storage.
-            const { error } = await supabaseClient.storage
-                .from('group-avatars')
-                .upload(avatarFilePath, req.file.buffer, {
-                    contentType: req.file.mimetype,
-                    upsert: false,
+            // Upload the file buffer to Cloud Storage.
+            await GoogleCloudStorageSingleton.getInstance()
+                .bucket('group-avatars')
+                .file(avatarFilePath)
+                .save(req.file.buffer, {
+                    metadata: { contentType: req.file.mimetype },
                 });
-
-            if (error) {
-                console.error(
-                    'Error uploading file to Supabase:',
-                    error.message
-                );
-                throw new Error('Failed to upload group avatar.');
-            }
         }
 
         // Wrap multiple writes in a transaction.
@@ -69,7 +59,6 @@ export const createGroup = async (
                     avatarFilePath,
                 });
                 await manager.save(group);
-                console.log(group);
 
                 // Create a GroupMember record for the creator with role "owner".
                 const groupMember = manager.create(GroupMemberEntity, {
@@ -87,6 +76,7 @@ export const createGroup = async (
                     createdAt: new Date(),
                     group,
                     messages: [],
+                    orderIndex: 0,
                 });
                 await manager.save(generalChannel);
 
@@ -97,6 +87,7 @@ export const createGroup = async (
                     createdAt: new Date(),
                     group,
                     messages: [],
+                    orderIndex: 1,
                 });
                 await manager.save(feedChannel);
 

@@ -2,8 +2,10 @@
 
 import { Request, Response } from 'express';
 import { GroupChannelMessageEntity, GetPostParams } from 'group-api-client';
-import { initializeDataSource } from '../database';
-import { RedisClientSingleton } from '../utils';
+import {
+    RedisClientSingleton,
+    TypeOrmDataSourceSingleton,
+} from 'third-party-clients';
 
 export const getPost = async (req: Request<GetPostParams>, res: Response) => {
     try {
@@ -16,7 +18,7 @@ export const getPost = async (req: Request<GetPostParams>, res: Response) => {
         let cachedPost = await RedisClientSingleton.getInstance().get(cacheKey);
 
         if (!cachedPost) {
-            const dataSource = await initializeDataSource();
+            const dataSource = await TypeOrmDataSourceSingleton.getInstance();
             const post = await dataSource.manager.findOne(
                 GroupChannelMessageEntity,
                 {

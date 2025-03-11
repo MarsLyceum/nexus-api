@@ -76,6 +76,7 @@ export type GroupChannel = {
     messages: GroupChannelMessage[];
     groupId: string;
     group: Group;
+    orderIndex: number;
 };
 
 export type Group = {

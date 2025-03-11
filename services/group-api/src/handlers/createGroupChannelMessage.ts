@@ -1,7 +1,6 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
 import { PubSub as GCPubSub } from '@google-cloud/pubsub';
 import {
     GroupChannelEntity,
@@ -9,11 +8,10 @@ import {
     GroupChannelPostEntity,
     CreateGroupChannelMessagePayload,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
-
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+import {
+    GoogleCloudStorageSingleton,
+    TypeOrmDataSourceSingleton,
+} from 'third-party-clients';
 
 /**
  * Handler to create a channel message.
@@ -27,7 +25,7 @@ export const createGroupChannelMessage = async (
     res: Response
 ) => {
     try {
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const filePaths: string[] = [];
         const pubSubClient = new GCPubSub({
             projectId: 'hephaestus-418809',
@@ -45,23 +43,14 @@ export const createGroupChannelMessage = async (
                 const filePath = `${Date.now()}_${i}`;
 
                 // Upload the file buffer to Supabase Storage.
-                // eslint-disable-next-line no-await-in-loop
-                const { error } = await supabaseClient.storage
-                    .from('message-attachments')
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    .upload(filePath, file.buffer, {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                        contentType: file.mimetype,
-                        upsert: false,
-                    });
 
-                if (error) {
-                    console.error(
-                        'Error uploading file to Supabase:',
-                        error.message
-                    );
-                    throw new Error('Failed to upload group avatar.');
-                }
+                // eslint-disable-next-line no-await-in-loop
+                await GoogleCloudStorageSingleton.getInstance()
+                    .bucket('message-attachments')
+                    .file(filePath)
+                    .save(file.buffer, {
+                        metadata: { contentType: file.mimetype },
+                    });
 
                 // Store the file path for further use.
                 filePaths.push(filePath);

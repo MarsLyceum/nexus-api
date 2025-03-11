@@ -6,7 +6,10 @@ import { DATABASE_PASSWORD } from '../config';
 
 export function createAppDataSource(): DataSource {
     const hostSettings = {
-        url: `postgresql://postgres.zrgnvlobrohtrrqeajhy:${DATABASE_PASSWORD}@aws-0-us-west-1.pooler.supabase.com:6543/postgres`,
+        // connection pool
+        // url: `postgresql://postgres.zrgnvlobrohtrrqeajhy:${DATABASE_PASSWORD}@aws-0-us-west-1.pooler.supabase.com:6543/postgres`,
+
+        url: `postgresql://postgres.zrgnvlobrohtrrqeajhy:${DATABASE_PASSWORD}@aws-0-us-west-1.pooler.supabase.com:5432/postgres`,
     };
 
     return new DataSource({
@@ -23,7 +26,7 @@ export function createAppDataSource(): DataSource {
         },
         extra: {
             max: 10, // Maximum number of connections in the pool
-            idleTimeoutMillis: 30_000, // How long a client is allowed to remain idle before being closed
+            idleTimeoutMillis: 60_000, // How long a client is allowed to remain idle before being closed
         },
     });
 }

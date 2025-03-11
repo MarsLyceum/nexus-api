@@ -8,16 +8,16 @@ import {
     UpdateUserPayload,
     DeleteUserParams,
 } from 'user-api-client';
-import { initializeDataSource } from './database';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 export const createUser = async (
     req: Request<unknown, unknown, CreateUserPayload>,
     res: Response
 ) => {
     try {
-        const { email, firstName, lastName, phoneNumber } = req.body;
+        const { email, username, firstName, lastName, phoneNumber } = req.body;
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         const foundUser =
             (await dataSource.manager.findOne(UserEntity, {
@@ -29,6 +29,7 @@ export const createUser = async (
         } else {
             const newUser = dataSource.manager.create(UserEntity, {
                 email,
+                username,
                 firstName,
                 lastName,
                 phoneNumber,
@@ -52,7 +53,7 @@ export const getUser = async (req: Request<GetUserParams>, res: Response) => {
             return;
         }
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const user = await dataSource.manager.findOne(UserEntity, {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { id: userId },
@@ -80,7 +81,7 @@ export const getUserByEmail = async (
             return;
         }
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const user = await dataSource.manager.findOne(UserEntity, {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { email },
@@ -105,7 +106,7 @@ export const updateUser = async (
         const { userId } = req.params;
         const { firstName, lastName, phoneNumber, email } = req.body;
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const user = await dataSource.manager.findOne(UserEntity, {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { id: userId },
@@ -143,7 +144,7 @@ export const deleteUser = async (
             return;
         }
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const user = await dataSource.manager.findOne(UserEntity, {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             where: { id: userId },

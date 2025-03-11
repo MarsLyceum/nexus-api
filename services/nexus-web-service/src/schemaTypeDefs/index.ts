@@ -27,6 +27,7 @@ type User {
 type Mutation {
   registerUser(
     email: String!
+    username: String!
     firstName: String!
     lastName: String!
     phoneNumber: String!
@@ -212,7 +213,7 @@ type GroupChannel {
   type: GroupChannelType!
   createdAt: String!  # ISO date string
   groupId: String!
-  messages: [GroupChannelMessage!]!
+  messages: [GroupChannelMessage!]
 }
 
 ###########################

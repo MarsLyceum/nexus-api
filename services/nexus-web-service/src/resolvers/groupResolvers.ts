@@ -16,12 +16,7 @@ import {
     CreateGroupChannelPostCommentPayload,
     CreatePostCommentResponse,
 } from 'group-api-client';
-import {
-    SupabaseClientSingleton,
-    fetchAttachmentsForMessage,
-    getCachedSignedUrl,
-} from '../utils';
-import { SIGNED_URL_EXPIRATION_SECONDS } from '../constants';
+import { fetchAttachmentsForMessage, getCachedSignedUrl } from '../utils';
 
 export const loadGroupResolvers = async () => {
     const { default: GraphQLUpload } = await import(

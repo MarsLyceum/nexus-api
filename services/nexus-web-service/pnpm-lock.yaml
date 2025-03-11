@@ -218,6 +218,9 @@ importers:
       serverless-plugin-typescript:
         specifier: ^2.1.5
         version: 2.1.5(serverless@3.39.0(debug@2.6.9))(typescript@5.4.5)
+      third-party-clients:
+        specifier: workspace:*
+        version: link:../../packages/third-party-clients
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.14.2)(typescript@5.4.5)

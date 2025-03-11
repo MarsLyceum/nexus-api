@@ -1,7 +1,9 @@
-import { SIGNED_URL_EXPIRATION_SECONDS } from '../constants';
+import {
+    GoogleCloudStorageSingleton,
+    RedisClientSingleton,
+} from 'third-party-clients';
 
-import { RedisClientSingleton } from './RedisClientSingleton';
-import { SupabaseClientSingleton } from './SupabaseClientSingleton';
+import { SIGNED_URL_EXPIRATION_SECONDS } from '../constants';
 
 export const getCachedSignedUrl = async (
     bucket: string,
@@ -13,23 +15,17 @@ export const getCachedSignedUrl = async (
     let cachedUrl = await RedisClientSingleton.getInstance().get(cacheKey);
 
     if (cachedUrl) {
-        console.log('Cache HIT:', filePath);
         return cachedUrl as string;
     }
+    const [signedUrl] = await GoogleCloudStorageSingleton.getInstance()
+        .bucket(bucket)
+        .file(filePath)
+        .getSignedUrl({
+            action: 'read',
+            expires: Date.now() + SIGNED_URL_EXPIRATION_SECONDS * 1000,
+        });
 
-    console.log('Cache MISS:', filePath);
-
-    // Step 2: Fetch new signed URL from Supabase
-    const { data, error } = await SupabaseClientSingleton.getInstance()
-        .storage.from(bucket) // adjust bucket name
-        .createSignedUrl(filePath, SIGNED_URL_EXPIRATION_SECONDS);
-
-    if (error || !data?.signedUrl) {
-        console.error('Error generating signed URL:', error);
-        throw new Error('Failed to generate signed URL');
-    }
-
-    cachedUrl = data.signedUrl;
+    cachedUrl = signedUrl;
 
     // Step 3: Cache the URL slightly less than the expiry
     const redisCacheExpiry = SIGNED_URL_EXPIRATION_SECONDS - 600; // cache for expiry minus 10 minutes
