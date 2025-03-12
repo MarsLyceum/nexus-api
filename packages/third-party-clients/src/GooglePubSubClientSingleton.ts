@@ -1,6 +1,6 @@
 import { PubSub as GCPubSub } from '@google-cloud/pubsub';
 
-import { isRunningInCloudRun } from './utils';
+import { isRunningInCloudRun } from 'common-utils';
 
 export const GooglePubSubClientSingleton = (function () {
     let pubSubClient: GCPubSub | undefined;

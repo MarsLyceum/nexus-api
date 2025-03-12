@@ -5,6 +5,8 @@ import {
     GetUserResponse,
     GetUserParams,
     GetUserByEmailParams,
+    SearchForUsersParams,
+    SearchForUsersResponse,
 } from 'user-api-client';
 
 export const userResolvers = {
@@ -37,6 +39,15 @@ export const userResolvers = {
             const user = await client.getUserByEmail(email);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return user;
+        },
+
+        searchForUsers: async (
+            _: never,
+            { searchQuery }: SearchForUsersParams
+        ): Promise<SearchForUsersResponse> => {
+            const client = new UserApiClient();
+            const users = await client.searchForUsers(searchQuery);
+            return users;
         },
     },
 };

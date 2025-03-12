@@ -1,6 +1,6 @@
 import { Storage } from '@google-cloud/storage';
 
-import { isRunningInCloudRun } from './utils';
+import { isRunningInCloudRun } from 'common-utils';
 
 export const GoogleCloudStorageSingleton = (function () {
     let storageClient: Storage | undefined;

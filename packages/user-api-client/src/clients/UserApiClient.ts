@@ -1,16 +1,19 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { isRunningInCloudRun } from 'common-utils';
+
 import { CreateUserPayload, UpdateUserPayload } from '../payloads';
 import {
     CreateUserResponse,
     GetUserResponse,
     UpdateUserResponse,
+    SearchForUsersResponse,
 } from '../responses';
 
 export class UserApiClient {
-    private baseURL = 'https://user-api-iwesf7iypq-uw.a.run.app';
-
-    // private baseURL = 'http://localhost:4001';
+    private baseURL = isRunningInCloudRun()
+        ? 'https://user-api-iwesf7iypq-uw.a.run.app'
+        : 'http://localhost:4001';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {
@@ -36,6 +39,10 @@ export class UserApiClient {
 
     async getUserByEmail(email: string): Promise<GetUserResponse> {
         return this.query(axios.get(`${this.baseURL}/user-by-email/${email}`));
+    }
+
+    async searchForUsers(searchQuery: string): Promise<SearchForUsersResponse> {
+        return this.query(axios.get(`${this.baseURL}/search/${searchQuery}`));
     }
 
     // Create a new user

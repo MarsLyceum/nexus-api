@@ -71,6 +71,7 @@ type Mutation {
 type Query {
   fetchUser(userId: String!): User
   fetchUserByEmail(email: String!): User
+  searchForUsers(searchQuery: String!): [User!]!
 
   # Group queries
   fetchGroup(id: String!): Group

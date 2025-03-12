@@ -17,6 +17,8 @@ import {
     updateUserParamsSchema,
     updateUserPayloadSchema,
     deleteUserParamsSchema,
+    SearchForUsersParams,
+    searchForUsersParamsSchema,
 } from 'user-api-client';
 
 import { applyCommonMiddleware } from 'common-middleware';
@@ -27,6 +29,7 @@ import {
     updateUser,
     deleteUser,
     getUserByEmail,
+    searchForUsers,
 } from './handlers';
 import {
     validatePayload,
@@ -99,6 +102,15 @@ export async function createService(
         validateParams(getUserByEmailParamsSchema),
         asyncHandler<GetUserByEmailParams, unknown, unknown, ParsedQs>(
             (req, res) => getUserByEmail(req, res)
+        )
+    );
+
+    app.get(
+        '/search/:searchQuery',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        validateParams(searchForUsersParamsSchema),
+        asyncHandler<SearchForUsersParams, unknown, unknown, ParsedQs>(
+            (req, res) => searchForUsers(req, res)
         )
     );
 

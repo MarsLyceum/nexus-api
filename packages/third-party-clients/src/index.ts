@@ -1,5 +1,4 @@
 export * from './config';
-export * from './utils';
 export * from './createAppDataSource';
 export * from './GoogleCloudStorageSingleton';
 export * from './GooglePubSubClientSingleton';

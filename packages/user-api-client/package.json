@@ -11,6 +11,7 @@
   },
   "author": "Mars Lyceum Inc.",
   "dependencies": {
+    "common-utils": "workspace:*",
     "@types/node": "^20.14.2",
     "joi": "^17.13.3",
     "reflect-metadata": "^0.2.2",

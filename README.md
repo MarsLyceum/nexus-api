@@ -33,6 +33,14 @@ or just connect with the public ip:
 psql -h 34.169.241.220 -U postgres -d postgres
 ```
 
+### Extensions
+
+We have these extensions enabled:
+```
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+```
+
+
 ## Docker
 
 On Windows Docker takes up a lot of space so periodically you have to clear
