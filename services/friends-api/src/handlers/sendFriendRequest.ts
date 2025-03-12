@@ -23,6 +23,7 @@ export const sendFriendRequest = async (
                 const friend = manager.create(FriendEntity, {
                     user,
                     friend: friendUser,
+                    requestedBy: user,
                     status: 'pending',
                 });
                 await manager.save(friend);
@@ -31,6 +32,7 @@ export const sendFriendRequest = async (
                 const friendOtherDirection = manager.create(FriendEntity, {
                     user: friendUser,
                     friend: user,
+                    requestedBy: user,
                     status: 'pending',
                 });
                 await manager.save(friendOtherDirection);

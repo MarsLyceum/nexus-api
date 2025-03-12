@@ -17,7 +17,7 @@ export const getFriends = async (
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         // eslint-disable-next-line unicorn/no-array-callback-reference
-        const friends = dataSource.manager.find(FriendEntity, {
+        const friends = await dataSource.manager.find(FriendEntity, {
             where: { user: { id: userId } },
             relations: ['friend'],
         });

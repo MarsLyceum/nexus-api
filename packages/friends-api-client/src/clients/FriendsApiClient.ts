@@ -1,16 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 
-import {
-    SendFriendRequestPayload,
-    AcceptFriendRequestPayload,
-} from '../payloads';
+import { SendFriendRequestPayload } from '../payloads';
 import {
     SendFriendRequestResponse,
     AcceptFriendRequestResponse,
     GetFriendsResponse,
 } from '../responses';
 
-export class GroupApiClient {
+export class FriendsApiClient {
     // private baseURL = 'https://group-api-197277044151.us-west1.run.app';
 
     private baseURL = 'http://localhost:4003';
@@ -49,13 +46,14 @@ export class GroupApiClient {
     }
 
     async acceptFriendRequest(
-        acceptFriendRequestPayload: AcceptFriendRequestPayload
+        friendId: string
     ): Promise<AcceptFriendRequestResponse> {
         return this.query(
-            axios.patch(
-                `${this.baseURL}/accept-friend-request`,
-                acceptFriendRequestPayload
-            )
+            axios.patch(`${this.baseURL}/friend-request/${friendId}`)
         );
+    }
+
+    async removeFriend(friendId: string): Promise<undefined> {
+        return this.query(axios.delete(`${this.baseURL}/friend/${friendId}`));
     }
 }

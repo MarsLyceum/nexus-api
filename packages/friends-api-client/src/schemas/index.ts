@@ -9,7 +9,13 @@ export const sendFriendRequestPayloadSchema = Joi.object({
         .required(),
 });
 
-export const acceptFriendRequestPayloadSchema = Joi.object({
+export const acceptFriendRequestParamsSchema = Joi.object({
+    friendId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
+export const removeFriendParamsSchema = Joi.object({
     friendId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),

@@ -20,6 +20,9 @@ importers:
       '@upstash/redis':
         specifier: ^1.34.5
         version: 1.34.5
+      friends-api-client:
+        specifier: workspace:*
+        version: link:../friends-api-client
       group-api-client:
         specifier: workspace:*
         version: link:../group-api-client

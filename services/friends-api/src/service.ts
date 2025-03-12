@@ -7,9 +7,11 @@ import cors from 'cors';
 
 import {
     SendFriendRequestPayload,
-    AcceptFriendRequestPayload,
+    AcceptFriendRequestParams,
+    RemoveFriendParams,
     sendFriendRequestPayloadSchema,
-    acceptFriendRequestPayloadSchema,
+    acceptFriendRequestParamsSchema,
+    removeFriendParamsSchema,
     GetFriendsParams,
     getFriendsParamsSchema,
 } from 'friends-api-client';
@@ -17,7 +19,12 @@ import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
-import { getFriends, sendFriendRequest, acceptFriendRequest } from './handlers';
+import {
+    getFriends,
+    sendFriendRequest,
+    acceptFriendRequest,
+    removeFriend,
+} from './handlers';
 
 import {
     validatePayload,
@@ -83,10 +90,18 @@ export async function createService(
     );
 
     app.patch(
-        '/accept-friend-request',
-        validatePayload(acceptFriendRequestPayloadSchema),
-        asyncHandler<unknown, unknown, AcceptFriendRequestPayload, ParsedQs>(
+        '/friend-request/:friendId',
+        validateParams(acceptFriendRequestParamsSchema),
+        asyncHandler<AcceptFriendRequestParams, unknown, unknown, ParsedQs>(
             (req, res) => acceptFriendRequest(req, res)
+        )
+    );
+
+    app.delete(
+        '/friend/:friendId',
+        validateParams(removeFriendParamsSchema),
+        asyncHandler<RemoveFriendParams, unknown, unknown, ParsedQs>(
+            (req, res) => removeFriend(req, res)
         )
     );
 
@@ -115,7 +130,7 @@ export async function createService(
                     return reject(err);
                 }
                 console.log(
-                    `Group API Server started on http://localhost:${port}`
+                    `Friend API Server started on http://localhost:${port}`
                 );
                 resolve();
             });
@@ -129,7 +144,7 @@ export async function createService(
                     console.error('Failed to stop server:', error);
                     reject(error);
                 } else {
-                    console.log(`Group API Server on port ${port} stopped.`);
+                    console.log(`Friend API Server on port ${port} stopped.`);
                     resolve();
                 }
             });

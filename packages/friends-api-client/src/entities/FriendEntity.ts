@@ -24,6 +24,9 @@ export class FriendEntity implements Friend {
     @ManyToOne(() => UserEntity)
     friend!: UserEntity;
 
+    @ManyToOne(() => UserEntity)
+    requestedBy!: UserEntity;
+
     @Column({
         type: 'enum',
         enum: ['pending', 'accepted', 'blocked'],

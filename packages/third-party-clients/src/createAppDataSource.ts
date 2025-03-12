@@ -12,6 +12,7 @@ import {
     GroupChannelMessageMessageEntity,
 } from 'group-api-client';
 import { UserEntity } from 'user-api-client';
+import { FriendEntity } from 'friends-api-client';
 import { DATABASE_PASSWORD } from './config';
 
 export function createAppDataSource(): DataSource {
@@ -33,6 +34,8 @@ export function createAppDataSource(): DataSource {
         migrationsRun: false,
         logging: false,
         entities: [
+            // friends api
+            FriendEntity,
             // user api
             UserEntity,
             // group api

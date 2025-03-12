@@ -5,24 +5,6 @@ export const schemaTypeDefs = `#graphql
 ###########################
 scalar Upload
 
-input CreatePostCommentInput {
-  content: String!
-  postedByUserId: String!
-  postId: String!
-  parentCommentId: String
-  upvotes: Int
-  # If you need nested children input, recursively reference the same input type.
-  children: [CreatePostCommentInput]
-}
-
-type User {
-  id: String!
-  email: String!
-  username: String!
-  firstName: String!
-  lastName: String!
-  phoneNumber: String!
-}
 
 type Mutation {
   registerUser(
@@ -54,12 +36,6 @@ type Mutation {
     attachments: [Upload!]
   ): GroupChannelMessage
 
-    # content: string;
-    # postedByUserId: string;
-    # postId: string;
-    # parentCommentId?: string | null; // Optional for top-level comments
-    # children?: CreateGroupChannelPostCommentPayload[]; // Nested replies
-    # upvotes?: number; // Defaults to 0 if not provided
 
   createPostComment(
     postedByUserId: String!
@@ -79,6 +55,13 @@ type Mutation {
   ): Group
 
   deleteGroup(id: String!): Boolean
+
+  sendFriendRequest(
+    userId: String!
+    friendUserId: String!
+  ): Friend
+
+  acceptFriendRequest(friendId: String!): Friend
 }
 
 ###########################
@@ -105,6 +88,8 @@ type Query {
     offset: Int
     limit: Int
   ): [GroupChannelPostComment!]!
+
+  getFriends(userId: String!): [Friend!]!
 }
 
 type Subscription {
@@ -112,9 +97,29 @@ type Subscription {
   messageAdded(channelId: String!): GroupChannelMessage!
 }
 
+
+type User {
+  id: String!
+  email: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+}
+
 ###########################
 # Group API Types
 ###########################
+
+input CreatePostCommentInput {
+  content: String!
+  postedByUserId: String!
+  postId: String!
+  parentCommentId: String
+  upvotes: Int
+  # If you need nested children input, recursively reference the same input type.
+  children: [CreatePostCommentInput]
+}
 
 # A group represents a collection of members and channels.
 type Group {
@@ -233,6 +238,22 @@ type GroupChannelPostComment {
   upvotes: Int!
   hasChildren: Boolean!
   children: [GroupChannelPostComment!]!  # Fetches nested replies
+}
+
+enum FriendStatus {
+  pending
+  accepted
+  blocked
+}
+
+type Friend {
+    id: String!
+    user: User
+    friend: User
+    requestedBy: User
+    status: FriendStatus
+    createdAt: String
+    updatedAt: String
 }
 
 `;

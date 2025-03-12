@@ -1,15 +1,16 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
-import { FriendEntity, AcceptFriendRequestPayload } from 'friends-api-client';
+import { FriendEntity, AcceptFriendRequestParams } from 'friends-api-client';
 import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 export const acceptFriendRequest = async (
-    req: Request<unknown, unknown, AcceptFriendRequestPayload>,
+    req: Request<AcceptFriendRequestParams, unknown, unknown>,
     res: Response
 ) => {
     try {
-        const { friendId } = req.body;
+        const { friendId } = req.params;
+        console.log('friendId:', friendId);
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         // Wrap multiple writes in a transaction.
@@ -18,10 +19,13 @@ export const acceptFriendRequest = async (
             async (manager) => {
                 const friendEntry = await manager.findOne(FriendEntity, {
                     where: { id: friendId },
-                    relations: ['user', 'friend'],
+                    relations: ['user', 'friend', 'requestedBy'],
                 });
 
-                if (friendEntry) {
+                if (
+                    friendEntry &&
+                    friendEntry.requestedBy.id === friendEntry.friend.id
+                ) {
                     friendEntry.status = 'accepted';
                     await manager.save(friendEntry);
 
@@ -30,7 +34,7 @@ export const acceptFriendRequest = async (
                         FriendEntity,
                         {
                             where: { user: { id: friendEntry.friend.id } },
-                            relations: ['user', 'friend'],
+                            relations: ['user', 'friend', 'requestedBy'],
                         }
                     );
                     if (friendEntryOtherDirection) {

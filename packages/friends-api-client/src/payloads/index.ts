@@ -3,7 +3,11 @@ export type SendFriendRequestPayload = {
     friendUserId: string;
 };
 
-export type AcceptFriendRequestPayload = {
+export type AcceptFriendRequestParams = {
+    friendId: string;
+};
+
+export type RemoveFriendParams = {
     friendId: string;
 };
 
