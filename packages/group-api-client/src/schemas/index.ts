@@ -107,6 +107,9 @@ export const createGroupChannelPayloadSchema = Joi.object({
 export const createGroupChannelMessagePayloadSchema = Joi.alternatives().try(
     // Regular message payload
     Joi.object({
+        id: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .optional(),
         channelId: Joi.string()
             .guid({ version: ['uuidv4'] })
             .required(),

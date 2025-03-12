@@ -5,11 +5,11 @@ The backend API for Nexus.
 ## Architecture
 
 -   Microservices with GCP on Google Cloud Run
--   Supabase Database
--   Supabase Document Storage for Images and Media
+-   Google Compute Engine VM running the Database
+-   Google Cloud Storage for Images and Media
 -   Squarespace for Domain: my-nexus.net
 -   Cloudflare for CDN
--   Upstash for Redis Cache Around Supabase Requests
+-   Upstash for Redis Cache Around DB and Storage Requests
 
 ## DB
 

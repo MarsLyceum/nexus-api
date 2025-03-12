@@ -1,7 +1,8 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
-import { PubSub as GCPubSub } from '@google-cloud/pubsub';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
     GroupChannelEntity,
     GroupChannelMessageMessageEntity,
@@ -10,6 +11,7 @@ import {
 } from 'group-api-client';
 import {
     GoogleCloudStorageSingleton,
+    GooglePubSubClientSingleton,
     TypeOrmDataSourceSingleton,
 } from 'third-party-clients';
 
@@ -27,9 +29,6 @@ export const createGroupChannelMessage = async (
     try {
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const filePaths: string[] = [];
-        const pubSubClient = new GCPubSub({
-            projectId: 'hephaestus-418809',
-        });
 
         if (req.files) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -78,6 +77,7 @@ export const createGroupChannelMessage = async (
                 // Check the payload type discriminator.
                 if (req.body.messageType === 'post') {
                     const {
+                        id,
                         content,
                         channelId,
                         postedByUserId,
@@ -88,6 +88,7 @@ export const createGroupChannelMessage = async (
                     } = req.body;
 
                     message = manager.create(GroupChannelPostEntity, {
+                        id: id || uuidv4(),
                         content,
                         channelId,
                         postedByUserId,
@@ -104,9 +105,10 @@ export const createGroupChannelMessage = async (
                         shareCount: 0,
                     });
                 } else {
-                    const { content, channelId, postedByUserId } = req.body;
+                    const { id, content, channelId, postedByUserId } = req.body;
 
                     message = manager.create(GroupChannelMessageMessageEntity, {
+                        id: id || uuidv4(),
                         content,
                         channelId,
                         postedByUserId,
@@ -129,7 +131,7 @@ export const createGroupChannelMessage = async (
         );
 
         const dataBuffer = Buffer.from(JSON.stringify(newMessage));
-        await pubSubClient
+        await GooglePubSubClientSingleton.getInstance()
             .topic('new-message')
             .publishMessage({ data: dataBuffer });
 

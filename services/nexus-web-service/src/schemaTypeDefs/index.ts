@@ -42,6 +42,7 @@ type Mutation {
   ): Group
 
   createGroupChannelMessage(
+    id: String
     postedByUserId: String!
     channelId: String!
     content: String!

@@ -9,6 +9,7 @@ import { Group, ChannelType } from '../models';
  */
 
 type CreateMessageCommonPayload = {
+    id?: string;
     postedByUserId: string;
     channelId: string;
     content: string;

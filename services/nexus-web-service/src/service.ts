@@ -16,11 +16,11 @@ import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
-import { PubSub as GCPubSub } from '@google-cloud/pubsub';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupChannelMessage } from 'group-api-client';
 
+import { GooglePubSubClientSingleton } from 'third-party-clients';
 import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
@@ -52,9 +52,6 @@ export async function createService(
         typeDefs: schemaTypeDefs,
         resolvers,
     });
-    const pubSubClient = new GCPubSub({
-        projectId: 'hephaestus-418809',
-    });
     const localPubSub = new InMemoryPubSub();
 
     const corsSetting = {
@@ -75,7 +72,7 @@ export async function createService(
 
     const instanceId = uuidv4();
     const subscriptionName = `new-message-${instanceId}`;
-    const [subscription] = await pubSubClient
+    const [subscription] = await GooglePubSubClientSingleton.getInstance()
         .topic('new-message')
         .createSubscription(subscriptionName, { ackDeadlineSeconds: 30 });
 
