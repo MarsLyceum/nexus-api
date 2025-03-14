@@ -1,7 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { isRunningInCloudRun } from 'common-utils';
-
 import { SendFriendRequestPayload } from '../payloads';
 import {
     SendFriendRequestResponse,
@@ -10,9 +8,9 @@ import {
 } from '../responses';
 
 export class FriendsApiClient {
-    private baseURL = isRunningInCloudRun()
-        ? 'https://group-api-197277044151.us-west1.run.app'
-        : 'http://localhost:4003';
+    private baseURL = 'https://friends-api-197277044151.us-west1.run.app';
+
+    // private baseURL = 'http://localhost:4003';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {

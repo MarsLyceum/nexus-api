@@ -62,6 +62,8 @@ type Mutation {
   ): Friend
 
   acceptFriendRequest(friendId: String!): Friend
+
+  removeFriend(friendId: String!): Boolean!
 }
 
 ###########################

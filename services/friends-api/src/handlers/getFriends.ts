@@ -19,7 +19,7 @@ export const getFriends = async (
         // eslint-disable-next-line unicorn/no-array-callback-reference
         const friends = await dataSource.manager.find(FriendEntity, {
             where: { user: { id: userId } },
-            relations: ['friend'],
+            relations: ['friend', 'requestedBy'],
         });
 
         if (!friends) {

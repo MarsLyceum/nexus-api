@@ -6,6 +6,7 @@ import {
     AcceptFriendRequestResponse,
     GetFriendsParams,
     GetFriendsResponse,
+    RemoveFriendParams,
 } from 'friends-api-client';
 
 export const friendsResolvers = {
@@ -25,6 +26,15 @@ export const friendsResolvers = {
             const client = new FriendsApiClient();
             const friend = await client.acceptFriendRequest(friendId);
             return friend;
+        },
+
+        removeFriend: async (
+            _: never,
+            { friendId }: RemoveFriendParams
+        ): Promise<boolean> => {
+            const client = new FriendsApiClient();
+            await client.removeFriend(friendId);
+            return true;
         },
     },
     Query: {

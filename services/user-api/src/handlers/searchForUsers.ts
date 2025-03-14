@@ -42,8 +42,7 @@ export const searchForUsers = async (
             // Build a similarity score expression for this token across several fields.
             const scoreExpr = `(similarity(user.username, :term${index}) +
                       similarity(user.firstName, :term${index}) +
-                      similarity(user.lastName, :term${index}) +
-                      similarity(user.email, :term${index}))`;
+                      similarity(user.lastName, :term${index}))`;
             scoreComponents.push(scoreExpr);
         });
 

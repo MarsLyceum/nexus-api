@@ -24,8 +24,7 @@ export const removeFriend = async (
                 if (friendEntry) {
                     // the other direction of the friendship
                     await manager.delete(FriendEntity, {
-                        where: { user: { id: friendEntry.friend.id } },
-                        relations: ['user', 'friend'],
+                        user: { id: friendEntry.friend.id },
                     });
 
                     await manager.remove(friendEntry);
