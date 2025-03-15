@@ -17,9 +17,9 @@ export const getChannelMessages = async (
 ) => {
     try {
         const { channelId } = req.params;
-        const { offset: offsetQuery } = req.query;
+        const { offset: offsetQuery, limit: limitQuery } = req.query;
         const offset = Number.parseInt(offsetQuery || '0', 10);
-        const limit = 100;
+        const limit = Number.parseInt(limitQuery || '100', 10);
 
         if (!channelId) {
             res.status(400).send('Channel ID parameter is missing');

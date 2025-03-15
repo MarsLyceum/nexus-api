@@ -83,6 +83,7 @@ export type GetPostCommentsQueryParams = ParsedQs & {
 
 export type GetChannelMessagesQueryParams = ParsedQs & {
     offset: string;
+    limit?: string;
 };
 
 export type UpdateGroupParams = GetGroupParams;

@@ -82,6 +82,7 @@ type Query {
   fetchChannelMessages(
     channelId: String!
     offset: Int
+    limit: Int
   ): [GroupChannelMessage!]!
 
   # Fetch paginated post comments

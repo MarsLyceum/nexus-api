@@ -176,6 +176,7 @@ export const getPostCommentsParamsSchema = Joi.object({
 
 export const getChannelMessagesQueryParamsSchema = Joi.object({
     offset: Joi.number(),
+    limit: Joi.number().optional(),
 });
 
 export const getPostCommentsQueryParamsSchema = Joi.object({

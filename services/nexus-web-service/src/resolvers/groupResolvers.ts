@@ -117,12 +117,17 @@ export const loadGroupResolvers = async () => {
             },
             fetchChannelMessages: async (
                 _: unknown,
-                { channelId, offset }: { channelId: string; offset: number }
+                {
+                    channelId,
+                    offset,
+                    limit,
+                }: { channelId: string; offset: number; limit: number }
             ): Promise<GetChannelMessagesResponseWithAttachmentUrls> => {
                 const client = new GroupApiClient();
                 const messages = await client.getChannelMessages(
                     channelId,
-                    offset
+                    offset,
+                    limit
                 );
 
                 const messagesWithAttachments: GetChannelMessagesResponseWithAttachmentUrls =
