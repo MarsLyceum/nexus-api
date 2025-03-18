@@ -62,4 +62,4 @@ EXPOSE 4000
 ENV PORT=4000
 
 # Start the application
-CMD ["pnpm", "run", "start"]
+CMD ["pnpm", "run", "start-ci"]
