@@ -54,7 +54,13 @@ export type GroupChannelPostComment = {
     // Nested replies
     children?: GroupChannelPostComment[];
     upvotes: number;
+    attachmentFilePaths?: string[];
 };
+
+export type GroupChannelPostCommentWithAttachmentUrls = Omit<
+    GroupChannelPostComment,
+    'attachmentFilePaths'
+> & { attachmentUrls?: string[] };
 
 export type GroupRole = 'owner' | 'admin' | 'moderator' | 'member';
 export type ChannelType = 'text' | 'voice' | 'feed';

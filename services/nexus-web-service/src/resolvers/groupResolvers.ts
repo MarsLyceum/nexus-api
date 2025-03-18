@@ -14,9 +14,14 @@ import {
     GetPostCommentsResponse,
     GetPostResponseWithAttachmentUrls,
     CreateGroupChannelPostCommentPayload,
+    GetPostCommentsResponseWithAttachmentUrls,
     CreatePostCommentResponse,
 } from 'group-api-client';
-import { fetchAttachmentsForMessage, getCachedSignedUrl } from '../utils';
+import {
+    fetchAttachmentsForMessage,
+    getCachedSignedUrl,
+    fetchAttachmentsForCommentsRecursive,
+} from '../utils';
 
 export const loadGroupResolvers = async () => {
     const { default: GraphQLUpload } = await import(
@@ -160,7 +165,15 @@ export const loadGroupResolvers = async () => {
                     offset ?? 0,
                     limit ?? 50
                 );
-                return comments;
+
+                const commentsWithAttachments: GetPostCommentsResponseWithAttachmentUrls =
+                    await Promise.all(
+                        comments.map((element) =>
+                            fetchAttachmentsForCommentsRecursive(element)
+                        )
+                    );
+
+                return commentsWithAttachments;
             },
         },
         Mutation: {

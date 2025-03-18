@@ -191,7 +191,7 @@ export const getPostCommentsQueryParamsSchema = Joi.object({
 });
 
 export const createGroupChannelPostCommentPayloadSchema = Joi.object({
-    content: Joi.string().required(), // Comment content is required
+    content: Joi.string().required().allow(''), // Comment content is required
     postedByUserId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(), // Must be a valid UUID

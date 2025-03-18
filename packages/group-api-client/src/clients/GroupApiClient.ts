@@ -139,10 +139,6 @@ export class GroupApiClient {
                 })
             );
         }
-        console.log(
-            'about to post to api with payload:',
-            createGroupChannelPostCommentPayload
-        );
 
         return this.query(
             axios.post(

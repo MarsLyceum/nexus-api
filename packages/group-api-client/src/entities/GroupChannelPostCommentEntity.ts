@@ -74,4 +74,7 @@ export class GroupChannelPostCommentEntity {
      */
     @OneToMany('GroupChannelPostCommentEntity', 'parentComment')
     children!: GroupChannelPostCommentEntity[];
+
+    @Column({ type: 'jsonb', nullable: true })
+    attachmentFilePaths?: string[];
 }

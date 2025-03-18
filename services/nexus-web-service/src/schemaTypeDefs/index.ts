@@ -44,7 +44,6 @@ type Mutation {
     postId: String!
     parentCommentId: String
     hasChildren: Boolean!
-    children: [CreatePostCommentInput!]
     upvotes: Int
   ): GroupChannelPostComment
 
@@ -241,6 +240,7 @@ type GroupChannelPostComment {
   parentCommentId: String
   upvotes: Int!
   hasChildren: Boolean!
+  attachmentUrls: [String!]
   children: [GroupChannelPostComment!]!  # Fetches nested replies
 }
 

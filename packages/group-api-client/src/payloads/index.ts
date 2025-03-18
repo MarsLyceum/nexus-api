@@ -35,7 +35,6 @@ export type CreateGroupChannelPostCommentPayload = {
     postId: string;
     parentCommentId?: string | null; // Optional for top-level comments
     hasChildren: boolean;
-    children?: CreateGroupChannelPostCommentPayload[]; // Nested replies
     upvotes?: number; // Defaults to 0 if not provided
 };
 
