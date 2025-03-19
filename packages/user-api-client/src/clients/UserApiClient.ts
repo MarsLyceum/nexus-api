@@ -57,7 +57,7 @@ export class UserApiClient {
         userId: string,
         data: UpdateUserPayload
     ): Promise<UpdateUserResponse> {
-        return this.query(axios.put(`${this.baseURL}/${userId}`, data));
+        return this.query(axios.put(`${this.baseURL}/user/${userId}`, data));
     }
 
     // Delete a user

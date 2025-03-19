@@ -20,6 +20,7 @@ import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupChannelMessage } from 'group-api-client';
 
+import { UserApiClient } from 'user-api-client';
 import { GooglePubSubClientSingleton } from 'third-party-clients';
 import { applyCommonMiddleware } from 'common-middleware';
 
@@ -71,12 +72,22 @@ export async function createService(
     app.set('port', port);
 
     const instanceId = uuidv4();
-    const subscriptionName = `new-message-${instanceId}`;
-    const [subscription] = await GooglePubSubClientSingleton.getInstance()
-        .topic('new-message')
-        .createSubscription(subscriptionName, { ackDeadlineSeconds: 30 });
+    const newMessageSubscriptionName = `new-message-${instanceId}`;
+    const friendStatusChangedSubscriptionName = `friend-status-changed-${instanceId}`;
+    const [newMessageSubscription] =
+        await GooglePubSubClientSingleton.getInstance()
+            .topic('new-message')
+            .createSubscription(newMessageSubscriptionName, {
+                ackDeadlineSeconds: 30,
+            });
+    const [friendStatusChangedSubscription] =
+        await GooglePubSubClientSingleton.getInstance()
+            .topic('friend-status-changed')
+            .createSubscription(friendStatusChangedSubscriptionName, {
+                ackDeadlineSeconds: 30,
+            });
 
-    subscription.on(
+    newMessageSubscription.on(
         'message',
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         async (message: {
@@ -92,6 +103,25 @@ export async function createService(
             // Publish to local in-memory PubSub so that active websockets get notified
             void localPubSub.publish('MESSAGE_ADDED', {
                 messageAdded: messageWithAttachments,
+            });
+
+            // Acknowledge the message to prevent redelivery
+            message.ack();
+        }
+    );
+
+    friendStatusChangedSubscription.on(
+        'message',
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        async (message: {
+            data: { toString: () => string };
+            ack: () => void;
+        }) => {
+            const eventData = JSON.parse(message.data.toString());
+
+            // Publish to local in-memory PubSub so that active websockets get notified
+            void localPubSub.publish('FRIEND_STATUS_CHANGED', {
+                friendStatusChanged: eventData,
             });
 
             // Acknowledge the message to prevent redelivery

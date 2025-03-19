@@ -4,7 +4,10 @@ import {
     UpdateUserParams,
     UpdateUserPayload,
 } from 'user-api-client';
-import { TypeOrmDataSourceSingleton } from 'third-party-clients';
+import {
+    TypeOrmDataSourceSingleton,
+    GooglePubSubClientSingleton,
+} from 'third-party-clients';
 
 export const updateUser = async (
     req: Request<UpdateUserParams, unknown, UpdateUserPayload>,
@@ -13,7 +16,19 @@ export const updateUser = async (
 ) => {
     try {
         const { userId } = req.params;
-        const { firstName, lastName, phoneNumber, email } = req.body;
+        const { firstName, lastName, phoneNumber, email, status } = req.body;
+
+        if (status) {
+            const dataBuffer = Buffer.from(
+                JSON.stringify({
+                    friendUserId: userId,
+                    status,
+                })
+            );
+            await GooglePubSubClientSingleton.getInstance()
+                .topic('friend-status-changed')
+                .publishMessage({ data: dataBuffer });
+        }
 
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const user = await dataSource.manager.findOne(UserEntity, {
@@ -30,6 +45,7 @@ export const updateUser = async (
         user.lastName = lastName ?? user.lastName;
         user.phoneNumber = phoneNumber ?? user.phoneNumber;
         user.email = email ?? user.email;
+        user.status = status ?? user.status;
 
         await dataSource.manager.save(user);
 

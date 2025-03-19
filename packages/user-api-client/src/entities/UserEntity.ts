@@ -1,7 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
+import { User } from '../models';
+
 @Entity()
-export class User {
+export class UserEntity implements User {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
@@ -20,4 +22,24 @@ export class User {
 
     @Column({ length: 20 })
     phoneNumber!: string;
+
+    @Column({
+        type: 'enum',
+        enum: [
+            'online',
+            'offline',
+            'idle',
+            'invisible',
+            'offline_dnd',
+            'online_dnd',
+        ],
+        default: 'offline',
+    })
+    status!:
+        | 'online'
+        | 'offline'
+        | 'idle'
+        | 'invisible'
+        | 'offline_dnd'
+        | 'online_dnd';
 }

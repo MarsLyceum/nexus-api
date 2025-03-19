@@ -13,6 +13,17 @@ type Mutation {
     firstName: String!
     lastName: String!
     phoneNumber: String!
+    status: UserOnlineStatus
+  ): User
+
+  updateUser(
+    id: String!
+    email: String
+    username: String
+    firstName: String
+    lastName: String
+    phoneNumber: String
+    status: UserOnlineStatus
   ): User
 
   # Group mutations
@@ -95,11 +106,25 @@ type Query {
   getFriends(userId: String!): [Friend!]!
 }
 
-type Subscription {
-  greetings: String
-  messageAdded(channelId: String!): GroupChannelMessage!
+type FriendStatusChangedPayload {
+  friendUserId: String!
+  status: String!
 }
 
+type Subscription {
+  messageAdded(channelId: String!): GroupChannelMessage!
+
+  friendStatusChanged(userId: String!): FriendStatusChangedPayload!
+}
+
+enum UserOnlineStatus {
+  online
+  offline
+  idle
+  offline_dnd
+  online_dnd
+  invisible
+}
 
 type User {
   id: String!
@@ -108,6 +133,7 @@ type User {
   firstName: String!
   lastName: String!
   phoneNumber: String!
+  status: UserOnlineStatus!
 }
 
 ###########################

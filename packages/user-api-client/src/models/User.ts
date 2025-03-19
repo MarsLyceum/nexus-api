@@ -5,4 +5,11 @@ export type User = {
     firstName: string;
     lastName: string;
     phoneNumber: string;
+    status:
+        | 'online'
+        | 'offline'
+        | 'idle'
+        | 'invisible'
+        | 'offline_dnd'
+        | 'online_dnd';
 };
