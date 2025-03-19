@@ -8,6 +8,10 @@ import {
     UpdateUserPayload,
 } from '../payloads';
 
+export const searchForUsersParamsSchema = Joi.object({
+    searchQuery: Joi.string().required(),
+});
+
 const userIdentifierSchema = Joi.object({
     userId: Joi.string()
         .guid({ version: ['uuidv4'] })

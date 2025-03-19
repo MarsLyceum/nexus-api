@@ -4,7 +4,10 @@ import {
     GroupChannelPostCommentEntity,
     CreateGroupChannelPostCommentPayload,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
+import {
+    TypeOrmDataSourceSingleton,
+    GoogleCloudStorageSingleton,
+} from 'third-party-clients';
 
 export const createPostComment = async (
     req: Request<unknown, unknown, CreateGroupChannelPostCommentPayload>,
@@ -20,7 +23,35 @@ export const createPostComment = async (
             hasChildren,
         } = req.body;
 
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
+        const filePaths: string[] = [];
+
+        if (req.files) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            // @ts-expect-error types is wrong
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const { attachments } = req.files;
+
+            // eslint-disable-next-line no-plusplus, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+            for (const [i, file] of attachments.entries()) {
+                // Generate a unique file name for each file
+                const filePath = `${Date.now()}_${i}`;
+
+                // Upload the file buffer to Supabase Storage.
+
+                // eslint-disable-next-line no-await-in-loop
+                await GoogleCloudStorageSingleton.getInstance()
+                    .bucket('nexus-comment-attachments')
+                    .file(filePath)
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    .save(file.buffer, {
+                        metadata: { contentType: file.mimetype },
+                    });
+
+                // Store the file path for further use.
+                filePaths.push(filePath);
+            }
+        }
 
         // Start a transaction to ensure consistency
         const newComment = await dataSource.manager.transaction(
@@ -47,25 +78,12 @@ export const createPostComment = async (
                     }
                 }
 
-                console.log('about to save comment to db:', {
-                    content,
-                    postedByUserId,
-                    postedAt: new Date(),
-                    edited: false,
-                    post,
-                    postId,
-                    parentComment,
-                    parentCommentId,
-                    upvotes,
-                    hasChildren,
-                    children: [],
-                });
-
                 // Create the new comment
                 const comment = manager.create(GroupChannelPostCommentEntity, {
                     content,
                     postedByUserId,
                     postedAt: new Date(),
+                    attachmentFilePaths: filePaths,
                     edited: false,
                     post,
                     postId,
@@ -75,6 +93,7 @@ export const createPostComment = async (
                     hasChildren,
                     children: [],
                 });
+                console.log('Children property:', comment.children);
 
                 await manager.save(comment);
 

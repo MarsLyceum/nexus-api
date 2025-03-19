@@ -1,19 +1,19 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { PubSub as GCPubSub } from '@google-cloud/pubsub';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
     GroupChannelEntity,
     GroupChannelMessageMessageEntity,
     GroupChannelPostEntity,
     CreateGroupChannelMessagePayload,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
-
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+import {
+    GoogleCloudStorageSingleton,
+    GooglePubSubClientSingleton,
+    TypeOrmDataSourceSingleton,
+} from 'third-party-clients';
 
 /**
  * Handler to create a channel message.
@@ -27,11 +27,8 @@ export const createGroupChannelMessage = async (
     res: Response
 ) => {
     try {
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const filePaths: string[] = [];
-        const pubSubClient = new GCPubSub({
-            projectId: 'hephaestus-418809',
-        });
 
         if (req.files) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -45,23 +42,15 @@ export const createGroupChannelMessage = async (
                 const filePath = `${Date.now()}_${i}`;
 
                 // Upload the file buffer to Supabase Storage.
-                // eslint-disable-next-line no-await-in-loop
-                const { error } = await supabaseClient.storage
-                    .from('message-attachments')
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    .upload(filePath, file.buffer, {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                        contentType: file.mimetype,
-                        upsert: false,
-                    });
 
-                if (error) {
-                    console.error(
-                        'Error uploading file to Supabase:',
-                        error.message
-                    );
-                    throw new Error('Failed to upload group avatar.');
-                }
+                // eslint-disable-next-line no-await-in-loop
+                await GoogleCloudStorageSingleton.getInstance()
+                    .bucket('message-attachments')
+                    .file(filePath)
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    .save(file.buffer, {
+                        metadata: { contentType: file.mimetype },
+                    });
 
                 // Store the file path for further use.
                 filePaths.push(filePath);
@@ -89,6 +78,7 @@ export const createGroupChannelMessage = async (
                 // Check the payload type discriminator.
                 if (req.body.messageType === 'post') {
                     const {
+                        id,
                         content,
                         channelId,
                         postedByUserId,
@@ -99,6 +89,7 @@ export const createGroupChannelMessage = async (
                     } = req.body;
 
                     message = manager.create(GroupChannelPostEntity, {
+                        id: id || uuidv4(),
                         content,
                         channelId,
                         postedByUserId,
@@ -115,9 +106,10 @@ export const createGroupChannelMessage = async (
                         shareCount: 0,
                     });
                 } else {
-                    const { content, channelId, postedByUserId } = req.body;
+                    const { id, content, channelId, postedByUserId } = req.body;
 
                     message = manager.create(GroupChannelMessageMessageEntity, {
+                        id: id || uuidv4(),
                         content,
                         channelId,
                         postedByUserId,
@@ -140,7 +132,7 @@ export const createGroupChannelMessage = async (
         );
 
         const dataBuffer = Buffer.from(JSON.stringify(newMessage));
-        await pubSubClient
+        await GooglePubSubClientSingleton.getInstance()
             .topic('new-message')
             .publishMessage({ data: dataBuffer });
 

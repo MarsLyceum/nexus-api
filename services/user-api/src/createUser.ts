@@ -1,6 +1,5 @@
 import { UserEntity, User, CreateUserPayload } from 'user-api-client';
-
-import { initializeDataSource } from './database/initializeDataSource';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 export async function createUser({
     email,
@@ -8,7 +7,7 @@ export async function createUser({
     lastName,
     phoneNumber,
 }: CreateUserPayload): Promise<User | undefined> {
-    const dataSource = await initializeDataSource();
+    const dataSource = await TypeOrmDataSourceSingleton.getInstance();
     let foundUser;
     try {
         foundUser =

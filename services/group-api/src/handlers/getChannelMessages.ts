@@ -4,7 +4,7 @@ import {
     GetChannelMessagesParams,
     GetChannelMessagesQueryParams,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 export const getChannelMessages = async (
     req: Request<
@@ -17,15 +17,17 @@ export const getChannelMessages = async (
 ) => {
     try {
         const { channelId } = req.params;
-        const { offset: offsetQuery } = req.query;
+        const { offset: offsetQuery, limit: limitQuery } = req.query;
         const offset = Number.parseInt(offsetQuery || '0', 10);
-        const limit = 100;
+        const limit = Number.parseInt(limitQuery || '100', 10);
 
         if (!channelId) {
             res.status(400).send('Channel ID parameter is missing');
             return;
         }
-        const dataSource = await initializeDataSource();
+        // Step 1: Check Redis cache
+
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         // Fetch messages for the channel.
         const messages = await dataSource.manager

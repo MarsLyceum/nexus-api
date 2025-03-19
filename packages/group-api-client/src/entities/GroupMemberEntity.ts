@@ -19,6 +19,7 @@ export class GroupMemberEntity {
     // Use the group's id as the other part of the composite primary key.
     // We assume that GroupEntity has an id of type UUID.
     @PrimaryColumn({ type: 'uuid' })
+    @Index()
     groupId!: string;
 
     @Column({ type: 'enum', enum: ['owner', 'admin', 'moderator', 'member'] })

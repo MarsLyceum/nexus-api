@@ -36,6 +36,7 @@ import {
     getPostParamsSchema,
     GetPostParams,
 } from 'group-api-client';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 import { applyCommonMiddleware } from 'common-middleware';
 
@@ -52,8 +53,6 @@ import {
     getPostComments,
     getPost,
 } from './handlers';
-
-import { initializeDataSource } from './database';
 
 import {
     validatePayload,
@@ -231,7 +230,7 @@ export async function createService(
     });
 
     async function start(): Promise<void> {
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         if (!dataSource.isInitialized) {
             throw new Error('Data source failed to initialize.');

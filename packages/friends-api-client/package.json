@@ -1,0 +1,23 @@
+{
+  "name": "friends-api-client",
+  "version": "1.0.0",
+  "description": "A package to hold various types and queries from the Friends API.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "pnpm run build"
+  },
+  "author": "Mars Lyceum Inc.",
+  "dependencies": {
+    "user-api-client": "workspace:*",
+    "common-middleware": "workspace:*",
+    "qs": "^6.14.0",
+    "@types/node": "^20.14.2",
+    "joi": "^17.13.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
+    "typescript": "^5.5.2"
+  }
+}

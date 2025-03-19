@@ -9,6 +9,7 @@ import { Group, ChannelType } from '../models';
  */
 
 type CreateMessageCommonPayload = {
+    id?: string;
     postedByUserId: string;
     channelId: string;
     content: string;
@@ -34,7 +35,6 @@ export type CreateGroupChannelPostCommentPayload = {
     postId: string;
     parentCommentId?: string | null; // Optional for top-level comments
     hasChildren: boolean;
-    children?: CreateGroupChannelPostCommentPayload[]; // Nested replies
     upvotes?: number; // Defaults to 0 if not provided
 };
 
@@ -82,6 +82,7 @@ export type GetPostCommentsQueryParams = ParsedQs & {
 
 export type GetChannelMessagesQueryParams = ParsedQs & {
     offset: string;
+    limit?: string;
 };
 
 export type UpdateGroupParams = GetGroupParams;

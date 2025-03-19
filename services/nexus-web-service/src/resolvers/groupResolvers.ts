@@ -14,9 +14,14 @@ import {
     GetPostCommentsResponse,
     GetPostResponseWithAttachmentUrls,
     CreateGroupChannelPostCommentPayload,
+    GetPostCommentsResponseWithAttachmentUrls,
     CreatePostCommentResponse,
 } from 'group-api-client';
-import { SupabaseClientSingleton, fetchAttachmentsForMessage } from '../utils';
+import {
+    fetchAttachmentsForMessage,
+    getCachedSignedUrl,
+    fetchAttachmentsForCommentsRecursive,
+} from '../utils';
 
 export const loadGroupResolvers = async () => {
     const { default: GraphQLUpload } = await import(
@@ -58,17 +63,11 @@ export const loadGroupResolvers = async () => {
 
                         const attachmentUrls = await Promise.all(
                             attachmentFilePaths.map(
-                                async (attachmentFilePath) => {
-                                    const { data } =
-                                        await SupabaseClientSingleton.getInstance()
-                                            .storage.from('message-attachments')
-                                            .createSignedUrl(
-                                                attachmentFilePath,
-                                                60 * 60 // one hour
-                                            );
-
-                                    return data?.signedUrl ?? '';
-                                }
+                                async (attachmentFilePath) =>
+                                    getCachedSignedUrl(
+                                        'message-attachments',
+                                        attachmentFilePath
+                                    )
                             )
                         );
 
@@ -103,31 +102,15 @@ export const loadGroupResolvers = async () => {
                             }
 
                             // Generate a signed URL for the avatar from the 'group-avatars' bucket, valid for 60 seconds.
-                            const { data, error } =
-                                await SupabaseClientSingleton.getInstance()
-                                    .storage.from('group-avatars')
-                                    .createSignedUrl(avatarFilePath, 60 * 60);
+                            const avatarUrl = await getCachedSignedUrl(
+                                'group-avatars',
+                                avatarFilePath
+                            );
 
-                            if (error) {
-                                console.error(
-                                    `Error generating signed URL for group: ${groupWithoutAvatar.id}`,
-                                    error
-                                );
-                                return {
-                                    ...groupWithoutAvatar,
-                                    avatarUrl: '',
-                                };
-                            }
-
-                            if (data) {
-                                return {
-                                    ...groupWithoutAvatar,
-                                    avatarUrl: data.signedUrl,
-                                };
-                            }
-
-                            // Fallback if no data is returned
-                            return { ...groupWithoutAvatar, avatarUrl: '' };
+                            return {
+                                ...groupWithoutAvatar,
+                                avatarUrl,
+                            };
                         })
                     )
                 )
@@ -139,12 +122,17 @@ export const loadGroupResolvers = async () => {
             },
             fetchChannelMessages: async (
                 _: unknown,
-                { channelId, offset }: { channelId: string; offset: number }
+                {
+                    channelId,
+                    offset,
+                    limit,
+                }: { channelId: string; offset: number; limit: number }
             ): Promise<GetChannelMessagesResponseWithAttachmentUrls> => {
                 const client = new GroupApiClient();
                 const messages = await client.getChannelMessages(
                     channelId,
-                    offset
+                    offset,
+                    limit
                 );
 
                 const messagesWithAttachments: GetChannelMessagesResponseWithAttachmentUrls =
@@ -177,7 +165,15 @@ export const loadGroupResolvers = async () => {
                     offset ?? 0,
                     limit ?? 50
                 );
-                return comments;
+
+                const commentsWithAttachments: GetPostCommentsResponseWithAttachmentUrls =
+                    await Promise.all(
+                        comments.map((element) =>
+                            fetchAttachmentsForCommentsRecursive(element)
+                        )
+                    );
+
+                return commentsWithAttachments;
             },
         },
         Mutation: {

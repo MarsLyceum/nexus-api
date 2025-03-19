@@ -1,6 +1,45 @@
-# peeps_api
+# nexus_api
 
-The backend API for Peeps.
+The backend API for Nexus.
+
+## Architecture
+
+-   Microservices with GCP on Google Cloud Run
+-   Google Compute Engine VM running the Database
+-   Google Cloud Storage for Images and Media
+-   Squarespace for Domain: my-nexus.net
+-   Cloudflare for CDN
+-   Upstash for Redis Cache Around DB and Storage Requests
+
+## DB
+
+We use a Google Compute Engine VM running Postgres for our database. This is
+cheaper than managed Google Cloud SQL and faster than Supabase.
+
+You manage it by SSHing in and using the Postgres CLI.
+
+````
+gcloud compute ssh nexus-postgres-vm --zone=us-west1-a
+```
+
+To connect you can either setup a SSH Tunnel with this:
+
+```
+gcloud compute start-iap-tunnel nexus-postgres-vm 5432 --local-host-port=localhost:5432
+```
+
+or just connect with the public ip:
+```
+psql -h 34.169.241.220 -U postgres -d postgres
+```
+
+### Extensions
+
+We have these extensions enabled:
+```
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+```
+
 
 ## Docker
 
@@ -64,7 +103,7 @@ You can also run it using docker with this command:
 
 ```docker run --rm --network=host gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.6.1 --address 0.0.0.0 --port 5432 --token=$(gcloud auth print-access-token) --login-token=$(gcloud sql generate-login-token) --auto-iam-authn $(gcloud sql instances describe hephaestus-postgres --format='value(connectionName)')
 
-```
+````
 
 or this one
 

@@ -16,11 +16,11 @@ import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
-import { PubSub as GCPubSub } from '@google-cloud/pubsub';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupChannelMessage } from 'group-api-client';
 
+import { GooglePubSubClientSingleton } from 'third-party-clients';
 import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
@@ -52,9 +52,6 @@ export async function createService(
         typeDefs: schemaTypeDefs,
         resolvers,
     });
-    const pubSubClient = new GCPubSub({
-        projectId: 'hephaestus-418809',
-    });
     const localPubSub = new InMemoryPubSub();
 
     const corsSetting = {
@@ -75,7 +72,7 @@ export async function createService(
 
     const instanceId = uuidv4();
     const subscriptionName = `new-message-${instanceId}`;
-    const [subscription] = await pubSubClient
+    const [subscription] = await GooglePubSubClientSingleton.getInstance()
         .topic('new-message')
         .createSubscription(subscriptionName, { ackDeadlineSeconds: 30 });
 
@@ -141,38 +138,6 @@ export async function createService(
 
     await apolloServer.start();
 
-    // SSE endpoint
-    // app.get('/graphql/stream', (req, res) => {
-    //     res.setHeader('Content-Type', 'text/event-stream');
-    //     res.setHeader('Cache-Control', 'no-cache');
-    //     res.setHeader('Connection', 'keep-alive');
-
-    //     const asyncIterator = pubsub.asyncIterator<{ greetings: string }>(
-    //         'GREETINGS'
-    //     );
-
-    //     const onData = async () => {
-    //         try {
-    //             // eslint-disable-next-line no-restricted-syntax
-    //             for await (const data of asyncIterator as AsyncIterableIterator<{
-    //                 greetings: string;
-    //             }>) {
-    //                 res.write(`data: ${JSON.stringify(data)}\n\n`);
-    //             }
-    //         } catch (error) {
-    //             console.error('Failed to stream data:', error);
-    //         }
-    //     };
-
-    //     void onData();
-
-    //     req.on('close', () => {
-    //         if (asyncIterator.return) {
-    //             void asyncIterator.return();
-    //         }
-    //     });
-    // });
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { default: graphqlUploadExpress } = await import(
         'graphql-upload/graphqlUploadExpress.mjs'
@@ -234,19 +199,6 @@ export async function createService(
             });
         });
     }
-
-    async function publishGreetings() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        await localPubSub.publish('GREETINGS', {
-            greetings: 'Hello every 5 seconds',
-        });
-    }
-
-    setInterval(() => {
-        publishGreetings().catch((error) => {
-            console.error('Failed to publish greetings:', error);
-        });
-    }, 5000);
 
     return { app, start, stop };
 }

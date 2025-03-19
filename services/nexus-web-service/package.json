@@ -4,8 +4,8 @@
     "private": true,
     "extends": "../../package.json",
     "scripts": {
-        "start": "node dist/index.js",
-        "start-local": "ts-node src/index.ts",
+        "start-ci": "node dist/index.js",
+        "start": "ts-node src/index.ts",
         "compile": "tsc",
         "start:watch": "nodemon src/index.ts --watch",
         "build": "python ../../scripts/test-build.py",
@@ -17,6 +17,8 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "third-party-clients": "workspace:*",
+        "@upstash/redis": "^1.34.5",
         "uuid": "^11.1.0",
         "@google-cloud/pubsub": "^4.10.0",
         "buffer": "^6.0.3",
@@ -91,6 +93,7 @@
         "user-api-client": "workspace:*",
         "group-api-client": "workspace:*",
         "common-middleware": "workspace:*",
+        "friends-api-client": "workspace:*",
         "ws": "^8.17.0",
         "yargs": "^17.7.2"
     },

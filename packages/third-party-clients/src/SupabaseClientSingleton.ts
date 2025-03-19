@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_SERVICE_KEY, SUPABASE_URL } from '../config';
+import { SUPABASE_SERVICE_KEY, SUPABASE_URL } from './config';
 
 export const SupabaseClientSingleton = (function () {
     let supabaseClient: ReturnType<typeof createClient> | undefined;

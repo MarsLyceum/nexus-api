@@ -1,0 +1,17 @@
+{
+  "name": "common-utils",
+  "version": "1.0.0",
+  "description": "A package to hold common utility functions.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "pnpm run build"
+  },
+  "author": "Mars Lyceum Inc.",
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "typescript": "^5.5.2"
+  }
+}

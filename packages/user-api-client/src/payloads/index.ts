@@ -14,6 +14,10 @@ export type GetUserByEmailParams = {
     email: string;
 };
 
+export type SearchForUsersParams = {
+    searchQuery: string;
+};
+
 export type UpdateUserParams = GetUserParams;
 
 export type UpdateUserPayload = CreateUserPayload;

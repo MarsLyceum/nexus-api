@@ -6,7 +6,7 @@ import {
     UpdateGroupParams,
     UpdateGroupPayload,
 } from 'group-api-client';
-import { initializeDataSource } from '../database';
+import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
 /**
  * Handler to update an existing group.
@@ -21,7 +21,7 @@ export const updateGroup = async (
     try {
         const { id } = req.params;
         const payload = req.body;
-        const dataSource = await initializeDataSource();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         const group = await dataSource.manager.findOne(GroupEntity, {
             where: { id },

@@ -1,6 +1,6 @@
 import {
     Entity,
-    PrimaryGeneratedColumn,
+    PrimaryColumn,
     Column,
     ManyToOne,
     JoinColumn,
@@ -10,10 +10,11 @@ import {
 } from 'typeorm';
 import type { GroupChannelEntity } from './GroupChannelEntity';
 
+@Index('idx_message_channel_postedat', ['channelId', 'postedAt'])
 @Entity('GroupChannelMessage')
 @TableInheritance({ column: { type: 'varchar', name: 'messageType' } })
 export class GroupChannelMessageEntity {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn('uuid')
     id!: string;
 
     // All messages have content, postedAt, and an author.

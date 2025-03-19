@@ -5,6 +5,7 @@ import {
     GroupChannelPostMessage,
     GroupWithImage,
     GroupChannelMessageWithAttachmentUrls,
+    GroupChannelPostCommentWithAttachmentUrls,
     PostWithAttachmentUrls,
 } from '../models';
 
@@ -25,6 +26,8 @@ export type GetChannelMessagesResponseWithAttachmentUrls =
     GroupChannelMessageWithAttachmentUrls[];
 
 export type GetPostCommentsResponse = GroupChannelPostComment[];
+export type GetPostCommentsResponseWithAttachmentUrls =
+    GroupChannelPostCommentWithAttachmentUrls[];
 export type CreatePostCommentResponse = GroupChannelPostComment;
 
 export type UpdateGroupResponse = Group;

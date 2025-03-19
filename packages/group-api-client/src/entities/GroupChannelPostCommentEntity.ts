@@ -34,6 +34,7 @@ export class GroupChannelPostCommentEntity {
 
     // The UUID of the user who posted the comment.
     @Column({ type: 'uuid' })
+    @Index()
     postedByUserId!: string;
 
     /**
@@ -73,4 +74,7 @@ export class GroupChannelPostCommentEntity {
      */
     @OneToMany('GroupChannelPostCommentEntity', 'parentComment')
     children!: GroupChannelPostCommentEntity[];
+
+    @Column({ type: 'jsonb', nullable: true })
+    attachmentFilePaths?: string[];
 }

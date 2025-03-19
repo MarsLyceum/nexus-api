@@ -1,4 +1,3 @@
-import { PubSub } from 'graphql-subscriptions';
 import {
     UserApiClient,
     CreateUserPayload,
@@ -6,6 +5,8 @@ import {
     GetUserResponse,
     GetUserParams,
     GetUserByEmailParams,
+    SearchForUsersParams,
+    SearchForUsersResponse,
 } from 'user-api-client';
 
 export const userResolvers = {
@@ -39,14 +40,14 @@ export const userResolvers = {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return user;
         },
-    },
-    Subscription: {
-        greetings: {
-            subscribe: (
-                _: unknown,
-                __: unknown,
-                { pubsub }: { pubsub: PubSub }
-            ) => pubsub.asyncIterableIterator(['GREETINGS']),
+
+        searchForUsers: async (
+            _: never,
+            { searchQuery }: SearchForUsersParams
+        ): Promise<SearchForUsersResponse> => {
+            const client = new UserApiClient();
+            const users = await client.searchForUsers(searchQuery);
+            return users;
         },
     },
 };
