@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG NODE_VERSION=22.3.0
+ARG NODE_VERSION=22.9.0
 
 # Stage 1: Builder
 FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine AS builder
