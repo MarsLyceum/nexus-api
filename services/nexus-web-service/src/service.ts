@@ -138,38 +138,6 @@ export async function createService(
 
     await apolloServer.start();
 
-    // SSE endpoint
-    // app.get('/graphql/stream', (req, res) => {
-    //     res.setHeader('Content-Type', 'text/event-stream');
-    //     res.setHeader('Cache-Control', 'no-cache');
-    //     res.setHeader('Connection', 'keep-alive');
-
-    //     const asyncIterator = pubsub.asyncIterator<{ greetings: string }>(
-    //         'GREETINGS'
-    //     );
-
-    //     const onData = async () => {
-    //         try {
-    //             // eslint-disable-next-line no-restricted-syntax
-    //             for await (const data of asyncIterator as AsyncIterableIterator<{
-    //                 greetings: string;
-    //             }>) {
-    //                 res.write(`data: ${JSON.stringify(data)}\n\n`);
-    //             }
-    //         } catch (error) {
-    //             console.error('Failed to stream data:', error);
-    //         }
-    //     };
-
-    //     void onData();
-
-    //     req.on('close', () => {
-    //         if (asyncIterator.return) {
-    //             void asyncIterator.return();
-    //         }
-    //     });
-    // });
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { default: graphqlUploadExpress } = await import(
         'graphql-upload/graphqlUploadExpress.mjs'
