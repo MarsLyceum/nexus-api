@@ -1,3 +1,5 @@
+import { withFilter } from 'graphql-subscriptions';
+
 import {
     FriendsApiClient,
     SendFriendRequestPayload,
@@ -43,8 +45,46 @@ export const friendsResolvers = {
             { userId }: GetFriendsParams
         ): Promise<GetFriendsResponse> => {
             const client = new FriendsApiClient();
-            const friend = await client.getFriends(userId);
-            return friend;
+            const friends = await client.getFriends(userId);
+            return friends;
+        },
+    },
+    Subscription: {
+        friendStatusChanged: {
+            subscribe: withFilter(
+                // 1. Create an async iterator for all friend status changes
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (_: any, __: any, { pubsub }: any) =>
+                    pubsub.asyncIterableIterator('FRIEND_STATUS_CHANGED'),
+
+                // 2. Filter function: Only forward the event if the friend is in the subscriber's friend list.
+                async (
+                    payload?: {
+                        friendStatusChanged: {
+                            friendUserId: string;
+                            status: string;
+                        };
+                    },
+                    variables?: { userId: string }
+                ) => {
+                    if (variables?.userId) {
+                        // Assume variables.userId is passed from the client.
+                        // Use a data source (or service) that queries your database using TypeORM.
+                        const client = new FriendsApiClient();
+                        const friends = await client.getFriends(
+                            variables.userId
+                        );
+
+                        // Check if the updated friend exists in the subscriber's friend list.
+                        return friends.some(
+                            (item: { friend: { id: string } }) =>
+                                item.friend.id ===
+                                payload?.friendStatusChanged.friendUserId
+                        );
+                    }
+                    return false;
+                }
+            ),
         },
     },
 };

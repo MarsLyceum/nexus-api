@@ -1,5 +1,9 @@
+# syntax=docker/dockerfile:1
+
+ARG NODE_VERSION=22.14.0
+
 # Stage 1: Builder
-FROM --platform=linux/amd64 node:22.3.0-alpine AS builder
+FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine AS builder
 
 # Set the tracing sampling rate environment variable (available if needed during build)
 ENV TRACING_SAMPLING_RATE=1
@@ -22,7 +26,7 @@ WORKDIR /usr/src/web/services/nexus-web-service
 RUN pnpm run compile
 
 # Stage 2: Production
-FROM --platform=linux/amd64 node:22.3.0-alpine AS production
+FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine AS production
 
 # Set production environment variables
 ENV TRACING_SAMPLING_RATE=1

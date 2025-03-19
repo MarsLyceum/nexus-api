@@ -1,6 +1,7 @@
 import {
     UserApiClient,
     CreateUserPayload,
+    UpdateUserPayload,
     CreateUserResponse,
     GetUserResponse,
     GetUserParams,
@@ -17,6 +18,15 @@ export const userResolvers = {
         ): Promise<CreateUserResponse> => {
             const client = new UserApiClient();
             const user = await client.createUser(payload);
+            return user;
+        },
+
+        updateUser: async (
+            _: never,
+            payload: UpdateUserPayload
+        ): Promise<CreateUserResponse> => {
+            const client = new UserApiClient();
+            const user = await client.updateUser(payload.id, payload);
             return user;
         },
     },

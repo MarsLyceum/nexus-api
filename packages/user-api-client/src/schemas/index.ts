@@ -24,6 +24,9 @@ const userProfileSchema = Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     phoneNumber: Joi.string().required(),
+    status: Joi.string()
+        .valid('online', 'offline', 'idle', 'invisible', 'dnd')
+        .optional(),
 });
 
 export const createUserPayloadSchema: ObjectSchema<CreateUserPayload> =
@@ -43,4 +46,16 @@ export const updateUserParamsSchema: ObjectSchema<UpdateUserParams> =
     userIdentifierSchema as ObjectSchema<UpdateUserParams>;
 
 export const updateUserPayloadSchema: ObjectSchema<UpdateUserPayload> =
-    userProfileSchema as ObjectSchema<UpdateUserPayload>;
+    Joi.object({
+        id: Joi.string()
+            .guid({ version: ['uuidv4'] })
+            .optional(),
+        email: Joi.string().email().optional(),
+        username: Joi.string().optional(),
+        firstName: Joi.string().optional(),
+        lastName: Joi.string().optional(),
+        phoneNumber: Joi.string().optional(),
+        status: Joi.string()
+            .valid('online', 'offline', 'idle', 'invisible', 'dnd')
+            .optional(),
+    });

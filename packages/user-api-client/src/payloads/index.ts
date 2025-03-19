@@ -1,10 +1,6 @@
-export type CreateUserPayload = {
-    email: string;
-    username: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string;
-};
+import { User } from '../models';
+
+export type CreateUserPayload = User;
 
 export type GetUserParams = {
     userId: string;
@@ -20,6 +16,9 @@ export type SearchForUsersParams = {
 
 export type UpdateUserParams = GetUserParams;
 
-export type UpdateUserPayload = CreateUserPayload;
+type MakeOptionalExcept<T, K extends keyof T> = Pick<T, K> &
+    Partial<Omit<T, K>>;
+
+export type UpdateUserPayload = MakeOptionalExcept<User, 'id'>;
 
 export type DeleteUserParams = GetUserParams;

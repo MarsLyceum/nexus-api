@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "description": "",
-    "packageManager": "pnpm@9.3.0",
+    "packageManager": "pnpm@10.6.5",
     "scripts": {
         "lint": "npx eslint .",
         "typecheck": "tsc --noEmit",
