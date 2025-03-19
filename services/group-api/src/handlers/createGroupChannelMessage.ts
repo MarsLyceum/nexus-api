@@ -47,6 +47,7 @@ export const createGroupChannelMessage = async (
                 await GoogleCloudStorageSingleton.getInstance()
                     .bucket('message-attachments')
                     .file(filePath)
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     .save(file.buffer, {
                         metadata: { contentType: file.mimetype },
                     });

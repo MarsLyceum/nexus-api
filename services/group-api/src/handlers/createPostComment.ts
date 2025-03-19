@@ -43,6 +43,7 @@ export const createPostComment = async (
                 await GoogleCloudStorageSingleton.getInstance()
                     .bucket('nexus-comment-attachments')
                     .file(filePath)
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     .save(file.buffer, {
                         metadata: { contentType: file.mimetype },
                     });
