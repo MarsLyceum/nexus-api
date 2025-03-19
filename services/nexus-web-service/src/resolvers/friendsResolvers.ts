@@ -53,6 +53,7 @@ export const friendsResolvers = {
         friendStatusChanged: {
             subscribe: withFilter(
                 // 1. Create an async iterator for all friend status changes
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (_: any, __: any, { pubsub }: any) =>
                     pubsub.asyncIterableIterator('FRIEND_STATUS_CHANGED'),
 
@@ -64,19 +65,24 @@ export const friendsResolvers = {
                             status: string;
                         };
                     },
-                    variables?: { userId: any }
+                    variables?: { userId: string }
                 ) => {
-                    // Assume variables.userId is passed from the client.
-                    // Use a data source (or service) that queries your database using TypeORM.
-                    const client = new FriendsApiClient();
-                    const friends = await client.getFriends(variables?.userId);
+                    if (variables?.userId) {
+                        // Assume variables.userId is passed from the client.
+                        // Use a data source (or service) that queries your database using TypeORM.
+                        const client = new FriendsApiClient();
+                        const friends = await client.getFriends(
+                            variables.userId
+                        );
 
-                    // Check if the updated friend exists in the subscriber's friend list.
-                    return friends.some(
-                        (item: { friend: { id: string } }) =>
-                            item.friend.id ===
-                            payload?.friendStatusChanged.friendUserId
-                    );
+                        // Check if the updated friend exists in the subscriber's friend list.
+                        return friends.some(
+                            (item: { friend: { id: string } }) =>
+                                item.friend.id ===
+                                payload?.friendStatusChanged.friendUserId
+                        );
+                    }
+                    return false;
                 }
             ),
         },

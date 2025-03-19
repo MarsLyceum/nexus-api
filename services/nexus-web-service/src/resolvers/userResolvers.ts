@@ -26,7 +26,7 @@ export const userResolvers = {
             payload: UpdateUserPayload
         ): Promise<CreateUserResponse> => {
             const client = new UserApiClient();
-            const user = await client.updateUser(payload.id as string, payload);
+            const user = await client.updateUser(payload.id, payload);
             return user;
         },
     },

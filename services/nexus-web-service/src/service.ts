@@ -20,7 +20,6 @@ import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupChannelMessage } from 'group-api-client';
 
-import { UserApiClient } from 'user-api-client';
 import { GooglePubSubClientSingleton } from 'third-party-clients';
 import { applyCommonMiddleware } from 'common-middleware';
 
@@ -112,11 +111,7 @@ export async function createService(
 
     friendStatusChangedSubscription.on(
         'message',
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        async (message: {
-            data: { toString: () => string };
-            ack: () => void;
-        }) => {
+        (message: { data: { toString: () => string }; ack: () => void }) => {
             const eventData = JSON.parse(message.data.toString());
 
             // Publish to local in-memory PubSub so that active websockets get notified
