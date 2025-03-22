@@ -198,6 +198,19 @@ enum GroupChannelType {
 # Message Types
 ###########################
 
+type PreviewData {
+  id: String!
+  title: String
+  description: String
+  images: [String!]
+  siteName: String
+  url: String
+  locale: String
+  ogType: String
+  logo: String
+  embedHtml: String
+}
+
 # An interface representing the common fields of any channel message.
 interface GroupChannelMessage {
   id: String!
@@ -208,6 +221,7 @@ interface GroupChannelMessage {
   postedByUserId: String!
   messageType: String!   # Either "message" or "post"
   attachmentUrls: [String!]
+  previewData: [PreviewData!]
 }
 
 # A regular message implements the interface.
@@ -220,6 +234,7 @@ type RegularMessage implements GroupChannelMessage {
   postedByUserId: String!
   messageType: String!   # Expected value: "message"
   attachmentUrls: [String!]
+  previewData: [PreviewData!]
 }
 
 # A post message implements the interface and adds extra fields.
@@ -239,6 +254,7 @@ type PostMessage implements GroupChannelMessage {
   commentsCount: Int!
   shareCount: Int!
   attachmentUrls: [String!]
+  previewData: [PreviewData!]
 }
 
 # A communication channel within a group.

@@ -21,6 +21,7 @@
   "keywords": [],
   "author": "Mars Lyceum Inc.",
   "dependencies": {
+    "puppeteer": "^24.4.0",
     "uuid": "^11.1.0",
     "@google-cloud/storage": "^7.15.2",
     "@upstash/redis": "^1.34.5",

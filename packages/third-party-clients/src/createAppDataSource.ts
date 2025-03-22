@@ -9,6 +9,7 @@ import {
     GroupChannelPostEntity,
     GroupChannelPostCommentEntity,
     GroupChannelMessageMessageEntity,
+    PreviewDataEntity,
 } from 'group-api-client';
 import { UserEntity } from 'user-api-client';
 import { FriendEntity } from 'friends-api-client';
@@ -49,6 +50,7 @@ export function createAppDataSource(): DataSource {
             GroupChannelPostEntity,
             GroupChannelPostCommentEntity,
             GroupChannelMessageMessageEntity,
+            PreviewDataEntity,
         ],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],

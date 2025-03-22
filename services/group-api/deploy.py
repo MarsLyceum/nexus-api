@@ -24,12 +24,16 @@ def main():
     DATABASE_PASSWORD = env_vars.get("DATABASE_PASSWORD", "")
 
     # Locate the GCP service account key
-    key_file = find_key_file("../../service-account-keys", "hephaestus-418809-*.json")
+    key_file = find_key_file(
+        "../../service-account-keys", "hephaestus-418809-*.json"
+    )
     print(color_text(f"Using key file: {key_file}", OKGREEN))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
 
     # Authenticate with gcloud
-    print(color_text("Authenticating gcloud with a service account...", OKCYAN))
+    print(
+        color_text("Authenticating gcloud with a service account...", OKCYAN)
+    )
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file
 
     # Build and push Docker image
@@ -37,7 +41,7 @@ def main():
     env = os.environ.copy()
     env["DOCKER_BUILDKIT"] = "1"
     run_command(
-        f"docker build -f {os.getcwd()}/Dockerfile -t gcr.io/{project_id}/{service_name}:latest --progress=plain ../..",
+        f"docker --debug build -f {os.getcwd()}/Dockerfile -t gcr.io/{project_id}/{service_name}:latest --progress=plain ../..",
         env=env,
     )
     print(color_text("Pushing Docker image...", OKCYAN))
@@ -50,7 +54,7 @@ def main():
         region=region,
         service_name=service_name,
         env_vars=env_vars,  # Pass environment variables to Cloud Run
-        force_recreate=True
+        force_recreate=True,
     )
 
 

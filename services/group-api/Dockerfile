@@ -32,6 +32,7 @@ FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine AS production
 ENV TRACING_SAMPLING_RATE=1
 ENV NODE_ENV=production
 ENV PNPM_HOME="/usr/local/share/.pnpm"
+ENV CI=true
 
 # Create the pnpm store directory and update PATH
 RUN mkdir -p ${PNPM_HOME}
@@ -39,6 +40,18 @@ ENV PATH="${PNPM_HOME}/bin:${PATH}"
 
 # Install pnpm globally
 RUN npm install -g pnpm
+
+# Install Chromium and dependencies for Puppeteer.
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Set the Puppeteer executable path environment variable
+ENV PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium-browser"
 
 # Set working directory for the entire repository
 WORKDIR /usr/src/web
