@@ -54,14 +54,25 @@ export async function createService(
     });
     const localPubSub = new InMemoryPubSub();
 
+    const allowedOrigins = new Set([
+        'http://localhost:8081',
+        'https://dev.my-nexus.net',
+    ]);
+
     const corsSetting = {
-        origin: 'http://localhost:8081', // Or '*' for all origins
+        origin(
+            origin: string | undefined,
+            callback: (err: Error | null, allow?: boolean) => void
+        ) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+            return allowedOrigins.has(origin)
+                ? callback(null, true)
+                : callback(new Error('Not allowed by CORS'), false);
+        },
     };
 
-    app.use(
-        // enable cors for local development
-        cors(corsSetting)
-    );
+    app.use(cors(corsSetting));
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     applyCommonMiddleware(app);

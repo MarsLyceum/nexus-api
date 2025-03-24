@@ -1,3 +1,6 @@
+import { AuthenticationClient } from 'auth0';
+import jwtDecode from 'jwt-decode';
+
 import {
     UserApiClient,
     CreateUserPayload,
@@ -8,17 +11,68 @@ import {
     GetUserByEmailParams,
     SearchForUsersParams,
     SearchForUsersResponse,
+    LoginUserPayload,
+    LoginUserResponse,
 } from 'user-api-client';
+
+import {
+    AUTH0_DOMAIN,
+    AUTH0_CLIENT_ID,
+    AUTH0_AUDIENCE,
+    AUTH0_CLIENT_SECRET,
+} from '../config';
+
+const auth0 = new AuthenticationClient({
+    domain: AUTH0_DOMAIN ?? '',
+    clientId: AUTH0_CLIENT_ID ?? '',
+    clientSecret: AUTH0_CLIENT_SECRET ?? '',
+});
+
+async function loginUser({ email, password }: LoginUserPayload) {
+    // Call the password grant endpoint via the new Node client
+    const credentials = await auth0.oauth.passwordGrant({
+        username: email,
+        password,
+        realm: 'Username-Password-Authentication',
+        audience: AUTH0_AUDIENCE,
+        scope: 'openid profile email',
+    });
+
+    // Extract and decode the id_token
+    const idToken = credentials.data.id_token;
+    // const decodedToken = jwtDecode<DecodedToken>(idToken);
+
+    const client = new UserApiClient();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const user = await client.getUserByEmail(email);
+
+    return { ...user, token: idToken };
+}
 
 export const userResolvers = {
     Mutation: {
+        loginUser: async (
+            _: never,
+            payload: LoginUserPayload
+        ): Promise<LoginUserResponse> => loginUser(payload),
+
         registerUser: async (
             _: never,
             payload: CreateUserPayload
         ): Promise<CreateUserResponse> => {
+            await auth0.database.signUp({
+                email: payload.email,
+                password: payload.password,
+                connection: 'Username-Password-Authentication',
+            });
+
             const client = new UserApiClient();
-            const user = await client.createUser(payload);
-            return user;
+            await client.createUser(payload);
+
+            return loginUser({
+                email: payload.email,
+                password: payload.password,
+            });
         },
 
         updateUser: async (

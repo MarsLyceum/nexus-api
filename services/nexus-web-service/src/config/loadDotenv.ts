@@ -38,3 +38,7 @@ export const { SUPABASE_URL } = process.env;
 export const { SUPABASE_SERVICE_KEY } = process.env;
 export const { UPSTASH_REDIS_REST_URL } = process.env;
 export const { UPSTASH_REDIS_REST_TOKEN } = process.env;
+export const { AUTH0_DOMAIN } = process.env;
+export const { AUTH0_CLIENT_ID } = process.env;
+export const { AUTH0_AUDIENCE } = process.env;
+export const { AUTH0_CLIENT_SECRET } = process.env;

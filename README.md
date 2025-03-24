@@ -4,6 +4,7 @@ The backend API for Nexus.
 
 ## Architecture
 
+-   We host the frontend on Firebase
 -   Microservices with GCP on Google Cloud Run
 -   Google Compute Engine VM running the Database
 -   Google Cloud Storage for Images and Media

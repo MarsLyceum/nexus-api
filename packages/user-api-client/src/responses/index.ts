@@ -1,5 +1,7 @@
 import { User } from '../models';
 
+export type LoginUserResponse = User;
+
 export type CreateUserResponse = User;
 
 export type GetUserResponse = User;

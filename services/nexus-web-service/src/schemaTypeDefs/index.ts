@@ -7,9 +7,15 @@ scalar Upload
 
 
 type Mutation {
+  loginUser(
+    email: String!
+    password: String!
+  ): User
+
   registerUser(
     email: String!
     username: String!
+    password: String!
     firstName: String!
     lastName: String!
     phoneNumber: String!
@@ -134,6 +140,7 @@ type User {
   lastName: String!
   phoneNumber: String!
   status: UserOnlineStatus!
+  token: String
 }
 
 ###########################
