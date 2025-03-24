@@ -128,15 +128,21 @@ export const createGroupChannelMessage = async (
 
                     const urlsInContent = extractUrls(content);
                     const previewData = [];
-                    for (const url of urlsInContent) {
-                        // eslint-disable-next-line no-await-in-loop
-                        const preview = await fetchLinkPreview(url);
+                    try {
+                        for (const url of urlsInContent) {
+                            // eslint-disable-next-line no-await-in-loop
+                            const preview = await fetchLinkPreview(url);
 
-                        const previewDataEntity = manager.create(
-                            PreviewDataEntity,
-                            preview
-                        );
-                        previewData.push(previewDataEntity);
+                            console.log('preview:', preview);
+
+                            const previewDataEntity = manager.create(
+                                PreviewDataEntity,
+                                preview
+                            );
+                            previewData.push(previewDataEntity);
+                        }
+                    } catch (error) {
+                        console.log('Fetching preview data failed:', error);
                     }
 
                     message = manager.create(GroupChannelMessageMessageEntity, {

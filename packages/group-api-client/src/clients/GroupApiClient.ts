@@ -20,9 +20,9 @@ import {
 import { buildMultipartFormData } from '../utils';
 
 export class GroupApiClient {
-    // private baseURL = 'https://group-api-197277044151.us-west1.run.app';
+    private baseURL = 'https://group-api-197277044151.us-west1.run.app';
 
-    private baseURL = 'http://localhost:4002';
+    // private baseURL = 'http://localhost:4002';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {

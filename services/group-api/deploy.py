@@ -41,7 +41,7 @@ def main():
     env = os.environ.copy()
     env["DOCKER_BUILDKIT"] = "1"
     run_command(
-        f"docker --debug build -f {os.getcwd()}/Dockerfile -t gcr.io/{project_id}/{service_name}:latest --progress=plain ../..",
+        f"docker build -f {os.getcwd()}/Dockerfile -t gcr.io/{project_id}/{service_name}:latest --progress=plain ../..",
         env=env,
     )
     print(color_text("Pushing Docker image...", OKCYAN))
@@ -55,6 +55,7 @@ def main():
         service_name=service_name,
         env_vars=env_vars,  # Pass environment variables to Cloud Run
         force_recreate=True,
+        memory_limit="1Gi",
     )
 
 

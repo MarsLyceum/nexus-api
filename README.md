@@ -47,6 +47,7 @@ On Windows Docker takes up a lot of space so periodically you have to clear
 the space by first pruning the volumes with `docker system prune -a --volumes`
 and then shrinking the docker wsl hard drive with
 `Optimize-VHD -Path "$env:LOCALAPPDATA\Docker\wsl\disk\docker_data.vhdx" -Mode Full`.
+make sure you run this with administrator permissions.
 
 ## Required Development Tools
 

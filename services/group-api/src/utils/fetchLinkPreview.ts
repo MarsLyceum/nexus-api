@@ -1,7 +1,7 @@
-import puppeteer from 'puppeteer';
+import { chromium } from 'playwright-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import fetch from 'node-fetch';
 import { decode } from 'html-entities';
-
 import { PreviewData } from 'group-api-client';
 
 import {
@@ -9,6 +9,8 @@ import {
     getDomainFromUrl,
     getOEmbedEndpoint,
 } from './linkPreviewUtils';
+
+chromium.use(StealthPlugin());
 
 export async function fetchLinkPreview(url: string): Promise<PreviewData> {
     // 1. Check if the URL is an image.
@@ -89,11 +91,25 @@ export async function fetchLinkPreview(url: string): Promise<PreviewData> {
         }
     }
 
-    // 4. Fallback: Open Graph scraping from raw HTML.
+    // 4. Fallback: Open Graph scraping from raw HTML using Playwright.
     try {
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        await page.goto(url, { waitUntil: 'networkidle2' });
+        const browser = await chromium.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-blink-features=AutomationControlled',
+            ],
+            slowMo: 50,
+            timeout: 120_000,
+        });
+        const context = await browser.newContext({
+            userAgent:
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+            viewport: { width: 1280, height: 800 },
+        });
+        const page = await context.newPage();
+        await page.goto(url, { waitUntil: 'networkidle', timeout: 60_000 });
         const html = await page.content();
         await browser.close();
 
