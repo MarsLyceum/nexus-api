@@ -5,4 +5,3 @@ export * from './GroupChannelPostCommentEntity';
 export * from './GroupChannelPostEntity';
 export * from './GroupEntity';
 export * from './GroupMemberEntity';
-export * from './PreviewDataEntity';

@@ -1,7 +1,5 @@
 // Discriminated union for messages
 
-import { PreviewData } from './PreviewData';
-
 export type BaseGroupChannelMessage = {
     id: string;
     content: string;
@@ -11,7 +9,6 @@ export type BaseGroupChannelMessage = {
     channelId: string;
     postedByUserId: string;
     attachmentFilePaths?: string[];
-    previewData?: PreviewData[];
 };
 
 export type GroupChannelRegularMessage = BaseGroupChannelMessage & {

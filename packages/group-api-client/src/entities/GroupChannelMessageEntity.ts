@@ -11,7 +11,6 @@ import {
     JoinTable,
 } from 'typeorm';
 import type { GroupChannelEntity } from './GroupChannelEntity';
-import { PreviewDataEntity } from './PreviewDataEntity';
 
 @Index('idx_message_channel_postedat', ['channelId', 'postedAt'])
 @Entity('GroupChannelMessage')
@@ -50,8 +49,4 @@ export class GroupChannelMessageEntity {
 
     @Column({ type: 'jsonb', nullable: true })
     attachmentFilePaths?: string[];
-
-    @ManyToMany(() => PreviewDataEntity, { cascade: true, nullable: true })
-    @JoinTable()
-    previewData?: PreviewDataEntity[];
 }

@@ -32,7 +32,6 @@ export const getChannelMessages = async (
         // Fetch messages for the channel.
         const messages = await dataSource.manager
             .createQueryBuilder(GroupChannelMessageEntity, 'message')
-            .leftJoinAndSelect('message.previewData', 'previewData')
             .where('message.channelId = :channelId', { channelId })
             .orderBy('message.postedAt', 'DESC')
             .skip(offset)

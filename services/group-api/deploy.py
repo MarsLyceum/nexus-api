@@ -55,7 +55,6 @@ def main():
         service_name=service_name,
         env_vars=env_vars,  # Pass environment variables to Cloud Run
         force_recreate=True,
-        memory_limit="1Gi",
     )
 
 

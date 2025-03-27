@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 import {
     GroupChannelEntity,
     GroupChannelMessageMessageEntity,
-    PreviewDataEntity,
     GroupChannelPostEntity,
     CreateGroupChannelMessagePayload,
 } from 'group-api-client';
@@ -15,8 +14,6 @@ import {
     GooglePubSubClientSingleton,
     TypeOrmDataSourceSingleton,
 } from 'third-party-clients';
-
-import { extractUrls, fetchLinkPreview } from '../utils';
 
 /**
  * Handler to create a channel message.
@@ -91,20 +88,6 @@ export const createGroupChannelMessage = async (
                         thumbnail,
                     } = req.body;
 
-                    const urlsInContent = extractUrls(content);
-                    const previewData = [];
-                    // eslint-disable-next-line no-restricted-syntax, guard-for-in
-                    for (const url of urlsInContent) {
-                        // eslint-disable-next-line no-await-in-loop
-                        const preview = await fetchLinkPreview(url);
-
-                        const previewDataEntity = manager.create(
-                            PreviewDataEntity,
-                            preview
-                        );
-                        previewData.push(previewDataEntity);
-                    }
-
                     message = manager.create(GroupChannelPostEntity, {
                         id: id || uuidv4(),
                         content,
@@ -121,29 +104,9 @@ export const createGroupChannelMessage = async (
                         upvotes: 0,
                         commentsCount: 0,
                         shareCount: 0,
-                        previewData,
                     });
                 } else {
                     const { id, content, channelId, postedByUserId } = req.body;
-
-                    const urlsInContent = extractUrls(content);
-                    const previewData = [];
-                    try {
-                        for (const url of urlsInContent) {
-                            // eslint-disable-next-line no-await-in-loop
-                            const preview = await fetchLinkPreview(url);
-
-                            console.log('preview:', preview);
-
-                            const previewDataEntity = manager.create(
-                                PreviewDataEntity,
-                                preview
-                            );
-                            previewData.push(previewDataEntity);
-                        }
-                    } catch (error) {
-                        console.log('Fetching preview data failed:', error);
-                    }
 
                     message = manager.create(GroupChannelMessageMessageEntity, {
                         id: id || uuidv4(),
@@ -154,7 +117,6 @@ export const createGroupChannelMessage = async (
                         postedAt: new Date(),
                         edited: false,
                         channel: groupChannel,
-                        previewData,
                     });
                 }
 

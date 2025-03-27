@@ -55,7 +55,11 @@ export async function createService(
     const localPubSub = new InMemoryPubSub();
 
     const allowedOrigins = new Set([
+        // next local
+        'http://localhost:3000',
+        // react native local
         'http://localhost:8081',
+        // dev
         'https://dev.my-nexus.net',
     ]);
 
