@@ -17,6 +17,7 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "jsonwebtoken": "^9.0.2",
         "jwt-decode": "^4.0.0",
         "auth0": "^4.20.0",
         "third-party-clients": "workspace:*",

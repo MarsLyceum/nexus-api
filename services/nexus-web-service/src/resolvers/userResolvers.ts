@@ -1,5 +1,5 @@
 import { AuthenticationClient } from 'auth0';
-import jwtDecode from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 
 import {
     UserApiClient,
@@ -20,6 +20,7 @@ import {
     AUTH0_CLIENT_ID,
     AUTH0_AUDIENCE,
     AUTH0_CLIENT_SECRET,
+    JWT_SECRET,
 } from '../config';
 
 const auth0 = new AuthenticationClient({
@@ -28,7 +29,7 @@ const auth0 = new AuthenticationClient({
     clientSecret: AUTH0_CLIENT_SECRET ?? '',
 });
 
-async function loginUser({ email, password }: LoginUserPayload) {
+async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
     // Call the password grant endpoint via the new Node client
     const credentials = await auth0.oauth.passwordGrant({
         username: email,
@@ -46,6 +47,23 @@ async function loginUser({ email, password }: LoginUserPayload) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const user = await client.getUserByEmail(email);
 
+    const token = jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+        },
+        JWT_SECRET as string,
+        { expiresIn: '1h' }
+    );
+
+    // Set the token as a secure, HttpOnly cookie
+    ctx.res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 1000 * 60 * 60, // 1 hour expiration
+    });
+
     return { ...user, token: idToken };
 }
 
@@ -53,12 +71,14 @@ export const userResolvers = {
     Mutation: {
         loginUser: async (
             _: never,
-            payload: LoginUserPayload
-        ): Promise<LoginUserResponse> => loginUser(payload),
+            payload: LoginUserPayload,
+            ctx: any
+        ): Promise<LoginUserResponse> => loginUser(payload, ctx),
 
         registerUser: async (
             _: never,
-            payload: CreateUserPayload
+            payload: CreateUserPayload,
+            ctx: any
         ): Promise<CreateUserResponse> => {
             await auth0.database.signUp({
                 email: payload.email,
@@ -69,10 +89,13 @@ export const userResolvers = {
             const client = new UserApiClient();
             await client.createUser(payload);
 
-            return loginUser({
-                email: payload.email,
-                password: payload.password,
-            });
+            return loginUser(
+                {
+                    email: payload.email,
+                    password: payload.password,
+                },
+                ctx
+            );
         },
 
         updateUser: async (

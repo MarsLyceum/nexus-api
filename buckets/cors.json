@@ -1,7 +1,8 @@
 [
     {
         "origin": [
-            "https://dev.my-nexus.net"
+            "https://dev.my-nexus.net",
+            "http://localhost:3000"
         ],
         "method": [
             "GET",

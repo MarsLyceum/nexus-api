@@ -74,6 +74,7 @@ export async function createService(
                 ? callback(null, true)
                 : callback(new Error('Not allowed by CORS'), false);
         },
+        credentials: true,
     };
 
     app.use(cors(corsSetting));
@@ -206,10 +207,10 @@ export async function createService(
         cors<cors.CorsRequest>(corsSetting),
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await
-            context: async ({ req }) => {
+            context: async ({ req, res }) => {
                 // Extract user from JWT if it exists
                 const user = req.auth || null;
-                return { pubsub: localPubSub, user };
+                return { pubsub: localPubSub, user, res };
             },
         })
     );
