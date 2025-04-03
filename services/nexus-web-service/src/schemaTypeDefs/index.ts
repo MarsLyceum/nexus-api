@@ -53,7 +53,6 @@ type Mutation {
     attachments: [Upload!]
   ): GroupChannelMessage
 
-
   createPostComment(
     postedByUserId: String!
     content: String!
@@ -72,6 +71,7 @@ type Mutation {
 
   deleteGroup(id: String!): Boolean
 
+  # Friend API mutations
   sendFriendRequest(
     userId: String!
     friendUserId: String!
@@ -80,6 +80,29 @@ type Mutation {
   acceptFriendRequest(friendId: String!): Friend
 
   removeFriend(friendId: String!): Boolean!
+
+  # Direct Messaging API mutations
+  createConversation(
+    type: ConversationType!
+    participantsUserIds: [String!]!
+    channelId: String
+  ): Conversation!
+
+  sendMessage(
+    conversationId: String!
+    id: String!
+    content: String!
+    senderUserId: String!
+  ): Message!
+
+  updateMessage(
+    conversationId: String!
+    id: String!
+    content: String!
+    senderUserId: String!
+  ): Message!
+
+  deleteMessage(messageId: String!): Boolean!
 }
 
 ###########################
@@ -110,12 +133,11 @@ type Query {
   ): [GroupChannelPostComment!]!
 
   getFriends(userId: String!): [Friend!]!
+
+  getConversations(userId: String!): [Conversation!]!
+  getConversation(conversationId: String!): Conversation
 }
 
-type FriendStatusChangedPayload {
-  friendUserId: String!
-  status: String!
-}
 
 type Subscription {
   messageAdded(channelId: String!): GroupChannelMessage!
@@ -288,9 +310,37 @@ type Friend {
     user: User
     friend: User
     requestedBy: User
-    status: FriendStatus
+    status: FriendStatus!
     createdAt: String
     updatedAt: String
+}
+
+type FriendStatusChangedPayload {
+  friendUserId: String!
+  status: String!
+}
+
+enum ConversationType {
+  direct,
+  group,
+  moderator
+}
+
+type Message {
+    id: String!
+    content: String!
+    conversation: Conversation!
+    senderUserId: String!
+    createdAt: String!
+    edited: Boolean!
+}
+
+type Conversation {
+    id: String!
+    type: ConversationType!
+    participantsUserIds: [String!]!
+    messages: [Message!]!
+    channelId: String
 }
 
 `;
