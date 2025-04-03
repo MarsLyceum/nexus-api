@@ -1,3 +1,5 @@
+import { ParsedQs } from 'qs';
+
 export type CreateConversationPayload = {
     type: 'direct' | 'group' | 'moderator';
     participantsUserIds: string[];
@@ -16,8 +18,13 @@ export type GetConversationsParams = {
     userId: string;
 };
 
-export type GetConversationParams = {
+export type GetConversationMessagesParams = {
     conversationId: string;
+};
+
+export type GetConversationMessagesQueryParams = ParsedQs & {
+    offset?: string;
+    limit?: string;
 };
 
 export type SendMessageParams = {

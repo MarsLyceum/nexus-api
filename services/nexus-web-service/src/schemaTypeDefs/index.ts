@@ -135,7 +135,7 @@ type Query {
   getFriends(userId: String!): [Friend!]!
 
   getConversations(userId: String!): [Conversation!]!
-  getConversation(conversationId: String!): Conversation
+  getConversationMessages(conversationId: String!, offset: Int!, limit: Int!): [Message!]!
 }
 
 

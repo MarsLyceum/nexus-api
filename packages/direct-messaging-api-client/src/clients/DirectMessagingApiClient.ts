@@ -7,7 +7,7 @@ import {
 } from '../payloads';
 import {
     GetConversationsResponse,
-    GetConversationResponse,
+    GetConversationMessagesResponse,
     CreateConversationResponse,
     SendMessageResponse,
     UpdateMessageResponse,
@@ -40,11 +40,15 @@ export class DirectMessagingApiClient {
         return this.query(axios.get(`${this.baseURL}/conversations/${userId}`));
     }
 
-    async getConversation(
-        conversationId: string
-    ): Promise<GetConversationResponse> {
+    async getConversationMessages(
+        conversationId: string,
+        offset: number,
+        limit: number
+    ): Promise<GetConversationMessagesResponse> {
         return this.query(
-            axios.get(`${this.baseURL}/conversation/${conversationId}`)
+            axios.get(
+                `${this.baseURL}/conversation/${conversationId}?offset=${offset}&limit=${limit}`
+            )
         );
     }
 

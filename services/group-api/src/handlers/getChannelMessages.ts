@@ -25,7 +25,6 @@ export const getChannelMessages = async (
             res.status(400).send('Channel ID parameter is missing');
             return;
         }
-        // Step 1: Check Redis cache
 
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 

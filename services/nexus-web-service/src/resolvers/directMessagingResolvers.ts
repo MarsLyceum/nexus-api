@@ -2,8 +2,9 @@ import {
     DirectMessagingApiClient,
     GetConversationsParams,
     GetConversationsResponse,
-    GetConversationParams,
-    GetConversationResponse,
+    GetConversationMessagesParams,
+    GetConversationMessagesQueryParams,
+    GetConversationMessagesResponse,
     CreateConversationPayload,
     CreateConversationResponse,
     SendMessageParams,
@@ -61,12 +62,20 @@ export const directMessagingResolvers = {
             const client = new DirectMessagingApiClient();
             return client.getConversations(userId);
         },
-        getConversation: (
+        getConversationMessages: (
             _: never,
-            { conversationId }: GetConversationParams
-        ): Promise<GetConversationResponse> => {
+            {
+                conversationId,
+                offset,
+                limit,
+            }: GetConversationMessagesParams & { offset: number; limit: number }
+        ): Promise<GetConversationMessagesResponse> => {
             const client = new DirectMessagingApiClient();
-            return client.getConversation(conversationId);
+            return client.getConversationMessages(
+                conversationId,
+                offset,
+                limit
+            );
         },
     },
     Subscription: {},

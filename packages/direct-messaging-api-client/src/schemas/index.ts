@@ -29,7 +29,7 @@ export const getConversationsParamsSchema = Joi.object({
         .required(),
 });
 
-export const getConversationParamsSchema = Joi.object({
+export const getConversationMessagesParamsSchema = Joi.object({
     conversationId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),

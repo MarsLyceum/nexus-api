@@ -2,7 +2,7 @@ import { Conversation, Message } from '../models';
 
 export type GetConversationsResponse = Conversation[];
 
-export type GetConversationResponse = Conversation;
+export type GetConversationMessagesResponse = Message[];
 
 export type CreateConversationResponse = Conversation;
 

@@ -8,8 +8,9 @@ import cors from 'cors';
 import {
     GetConversationsParams,
     getConversationsParamsSchema,
-    GetConversationParams,
-    getConversationParamsSchema,
+    GetConversationMessagesParams,
+    GetConversationMessagesQueryParams,
+    getConversationMessagesParamsSchema,
     CreateConversationPayload,
     createConversationPayloadSchema,
     SendMessageParams,
@@ -29,7 +30,7 @@ import { applyCommonMiddleware } from 'common-middleware';
 
 import {
     getConversations,
-    getConversation,
+    getConversationMessages,
     createConversation,
     sendMessage,
     updateMessage,
@@ -93,10 +94,13 @@ export async function createService(
 
     app.get(
         '/conversation/:conversationId',
-        validateParams(getConversationParamsSchema),
-        asyncHandler<GetConversationParams, unknown, unknown, ParsedQs>(
-            (req, res) => getConversation(req, res)
-        )
+        validateParams(getConversationMessagesParamsSchema),
+        asyncHandler<
+            GetConversationMessagesParams,
+            unknown,
+            unknown,
+            GetConversationMessagesQueryParams
+        >((req, res) => getConversationMessages(req, res))
     );
 
     app.post(
