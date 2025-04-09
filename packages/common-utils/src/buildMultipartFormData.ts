@@ -29,10 +29,14 @@ export async function buildMultipartFormData<T extends Record<string, unknown>>(
 
         // Append each file to the FormData under the key filesKey
         resolvedFiles.forEach((file) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (typeof (file as any).createReadStream === 'function') {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const stream = (file as any).createReadStream();
                 formData.append(filesKey ?? 'attachments', stream, {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     filename: (file as any).filename || `${Date.now()}.jpg`,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     contentType: (file as any).mimetype || 'image/jpeg',
                 });
             } else {

@@ -17,6 +17,9 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "jsonwebtoken": "^9.0.2",
+        "jwt-decode": "^4.0.0",
+        "auth0": "^4.20.0",
         "third-party-clients": "workspace:*",
         "@upstash/redis": "^1.34.5",
         "uuid": "^11.1.0",
@@ -94,6 +97,7 @@
         "group-api-client": "workspace:*",
         "common-middleware": "workspace:*",
         "friends-api-client": "workspace:*",
+        "direct-messaging-api-client": "workspace:*",
         "ws": "^8.17.0",
         "yargs": "^17.7.2"
     },

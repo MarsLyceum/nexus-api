@@ -7,6 +7,8 @@ import {
     CreateDateColumn,
     TableInheritance,
     Index,
+    ManyToMany,
+    JoinTable,
 } from 'typeorm';
 import type { GroupChannelEntity } from './GroupChannelEntity';
 

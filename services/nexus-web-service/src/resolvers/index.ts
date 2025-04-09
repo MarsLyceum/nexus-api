@@ -4,6 +4,7 @@ import { IResolvers } from '@graphql-tools/utils';
 import { userResolvers } from './userResolvers';
 import { loadGroupResolvers } from './groupResolvers';
 import { friendsResolvers } from './friendsResolvers';
+import { directMessagingResolvers } from './directMessagingResolvers';
 
 export const loadResolvers: () => Promise<
     IResolvers<unknown, { pubsub: PubSub }>
@@ -12,4 +13,5 @@ export const loadResolvers: () => Promise<
         userResolvers,
         await loadGroupResolvers(),
         friendsResolvers,
+        directMessagingResolvers,
     ]) as IResolvers<unknown, { pubsub: PubSub }>;

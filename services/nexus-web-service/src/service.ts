@@ -19,13 +19,14 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupChannelMessage } from 'group-api-client';
+import { Message } from 'direct-messaging-api-client';
 
 import { GooglePubSubClientSingleton } from 'third-party-clients';
 import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
-import { fetchAttachmentsForMessage } from './utils';
+import { fetchAttachmentsForMessage, fetchAttachmentsForDm } from './utils';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -54,14 +55,30 @@ export async function createService(
     });
     const localPubSub = new InMemoryPubSub();
 
+    const allowedOrigins = new Set([
+        // next local
+        'http://localhost:3000',
+        // react native local
+        'http://localhost:8081',
+        // dev
+        'https://dev.my-nexus.net',
+    ]);
+
     const corsSetting = {
-        origin: 'http://localhost:8081', // Or '*' for all origins
+        origin(
+            origin: string | undefined,
+            callback: (err: Error | null, allow?: boolean) => void
+        ) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+            return allowedOrigins.has(origin)
+                ? callback(null, true)
+                : callback(new Error('Not allowed by CORS'), false);
+        },
+        credentials: true,
     };
 
-    app.use(
-        // enable cors for local development
-        cors(corsSetting)
-    );
+    app.use(cors(corsSetting));
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     applyCommonMiddleware(app);
@@ -72,6 +89,7 @@ export async function createService(
 
     const instanceId = uuidv4();
     const newMessageSubscriptionName = `new-message-${instanceId}`;
+    const newDmSubscriptionName = `new-dm-${instanceId}`;
     const friendStatusChangedSubscriptionName = `friend-status-changed-${instanceId}`;
     const [newMessageSubscription] =
         await GooglePubSubClientSingleton.getInstance()
@@ -79,6 +97,11 @@ export async function createService(
             .createSubscription(newMessageSubscriptionName, {
                 ackDeadlineSeconds: 30,
             });
+    const [newDmSubscription] = await GooglePubSubClientSingleton.getInstance()
+        .topic('new-dm')
+        .createSubscription(newDmSubscriptionName, {
+            ackDeadlineSeconds: 30,
+        });
     const [friendStatusChangedSubscription] =
         await GooglePubSubClientSingleton.getInstance()
             .topic('friend-status-changed')
@@ -102,6 +125,27 @@ export async function createService(
             // Publish to local in-memory PubSub so that active websockets get notified
             void localPubSub.publish('MESSAGE_ADDED', {
                 messageAdded: messageWithAttachments,
+            });
+
+            // Acknowledge the message to prevent redelivery
+            message.ack();
+        }
+    );
+
+    newDmSubscription.on(
+        'message',
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        async (message: {
+            data: { toString: () => string };
+            ack: () => void;
+        }) => {
+            const eventData = JSON.parse(message.data.toString()) as Message;
+
+            const messageWithAttachments =
+                await fetchAttachmentsForDm(eventData);
+            // Publish to local in-memory PubSub so that active websockets get notified
+            void localPubSub.publish('DM_ADDED', {
+                dmAdded: messageWithAttachments,
             });
 
             // Acknowledge the message to prevent redelivery
@@ -191,10 +235,10 @@ export async function createService(
         cors<cors.CorsRequest>(corsSetting),
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await
-            context: async ({ req }) => {
+            context: async ({ req, res }) => {
                 // Extract user from JWT if it exists
                 const user = req.auth || null;
-                return { pubsub: localPubSub, user };
+                return { pubsub: localPubSub, user, res };
             },
         })
     );

@@ -7,9 +7,15 @@ scalar Upload
 
 
 type Mutation {
+  loginUser(
+    email: String!
+    password: String!
+  ): User
+
   registerUser(
     email: String!
     username: String!
+    password: String!
     firstName: String!
     lastName: String!
     phoneNumber: String!
@@ -47,7 +53,6 @@ type Mutation {
     attachments: [Upload!]
   ): GroupChannelMessage
 
-
   createPostComment(
     postedByUserId: String!
     content: String!
@@ -66,6 +71,7 @@ type Mutation {
 
   deleteGroup(id: String!): Boolean
 
+  # Friend API mutations
   sendFriendRequest(
     userId: String!
     friendUserId: String!
@@ -74,6 +80,30 @@ type Mutation {
   acceptFriendRequest(friendId: String!): Friend
 
   removeFriend(friendId: String!): Boolean!
+
+  # Direct Messaging API mutations
+  createConversation(
+    type: ConversationType!
+    participantsUserIds: [String!]!
+    channelId: String
+  ): Conversation!
+
+  sendMessage(
+    conversationId: String!
+    id: String!
+    content: String!
+    senderUserId: String!
+    attachments: [Upload!]
+  ): Message!
+
+  updateMessage(
+    conversationId: String!
+    id: String!
+    content: String!
+    senderUserId: String!
+  ): Message!
+
+  deleteMessage(messageId: String!): Boolean!
 }
 
 ###########################
@@ -104,17 +134,18 @@ type Query {
   ): [GroupChannelPostComment!]!
 
   getFriends(userId: String!): [Friend!]!
+
+  getConversations(userId: String!): [Conversation!]!
+  getConversationMessages(conversationId: String!, offset: Int!, limit: Int!): [Message!]!
 }
 
-type FriendStatusChangedPayload {
-  friendUserId: String!
-  status: String!
-}
 
 type Subscription {
   messageAdded(channelId: String!): GroupChannelMessage!
 
   friendStatusChanged(userId: String!): FriendStatusChangedPayload!
+
+  dmAdded(conversationId: String!): Message!
 }
 
 enum UserOnlineStatus {
@@ -134,6 +165,7 @@ type User {
   lastName: String!
   phoneNumber: String!
   status: UserOnlineStatus!
+  token: String
 }
 
 ###########################
@@ -281,9 +313,38 @@ type Friend {
     user: User
     friend: User
     requestedBy: User
-    status: FriendStatus
+    status: FriendStatus!
     createdAt: String
     updatedAt: String
+}
+
+type FriendStatusChangedPayload {
+  friendUserId: String!
+  status: String!
+}
+
+enum ConversationType {
+  direct,
+  group,
+  moderator
+}
+
+type Message {
+    id: String!
+    content: String!
+    conversation: Conversation!
+    senderUserId: String!
+    createdAt: String!
+    edited: Boolean!
+    attachmentUrls: [String!]
+}
+
+type Conversation {
+    id: String!
+    type: ConversationType!
+    participantsUserIds: [String!]!
+    messages: [Message!]!
+    channelId: String
 }
 
 `;

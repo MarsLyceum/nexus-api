@@ -1,6 +1,11 @@
 import { User } from '../models';
 
-export type CreateUserPayload = User;
+export type LoginUserPayload = {
+    email: string;
+    password: string;
+};
+
+export type CreateUserPayload = User & { password: string };
 
 export type GetUserParams = {
     userId: string;

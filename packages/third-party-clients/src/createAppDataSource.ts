@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import * as fs from 'node:fs';
 
 import {
     GroupEntity,
@@ -13,6 +12,7 @@ import {
 } from 'group-api-client';
 import { UserEntity } from 'user-api-client';
 import { FriendEntity } from 'friends-api-client';
+import { ConversationEntity, MessageEntity } from 'direct-messaging-api-client';
 import { DATABASE_PASSWORD } from './config';
 
 export function createAppDataSource(): DataSource {
@@ -32,8 +32,11 @@ export function createAppDataSource(): DataSource {
         ...hostSettings,
         synchronize: false,
         migrationsRun: false,
-        logging: false,
+        logging: true,
         entities: [
+            // direct messaging api
+            ConversationEntity,
+            MessageEntity,
             // friends api
             FriendEntity,
             // user api
@@ -59,6 +62,7 @@ export function createAppDataSource(): DataSource {
                 rejectUnauthorized: false, // adjust this if you need strict certificate validation
                 // ca: caCert,
             },
+            options: '-c timezone=UTC',
         },
     });
 }
