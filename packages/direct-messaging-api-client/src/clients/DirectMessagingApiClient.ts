@@ -16,9 +16,10 @@ import {
 } from '../responses';
 
 export class DirectMessagingApiClient {
-    // private baseURL = 'https://friends-api-197277044151.us-west1.run.app';
+    private baseURL =
+        'https://direct-messaging-api-197277044151.us-west1.run.app';
 
-    private baseURL = 'http://localhost:4004';
+    // private baseURL = 'http://localhost:4004';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {
