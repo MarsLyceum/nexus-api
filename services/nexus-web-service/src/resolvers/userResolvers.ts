@@ -29,6 +29,7 @@ const auth0 = new AuthenticationClient({
     clientSecret: AUTH0_CLIENT_SECRET ?? '',
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
     // Call the password grant endpoint via the new Node client
     const credentials = await auth0.oauth.passwordGrant({
@@ -72,13 +73,13 @@ export const userResolvers = {
         loginUser: async (
             _: never,
             payload: LoginUserPayload,
-            ctx: any
+            ctx: unknown
         ): Promise<LoginUserResponse> => loginUser(payload, ctx),
 
         registerUser: async (
             _: never,
             payload: CreateUserPayload,
-            ctx: any
+            ctx: unknown
         ): Promise<CreateUserResponse> => {
             await auth0.database.signUp({
                 email: payload.email,
