@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { buildMultipartFormData } from 'common-utils';
+import { buildMultipartFormData, isRunningInCloudRun } from 'common-utils';
 
 import {
     CreateConversationPayload,
@@ -15,11 +15,13 @@ import {
     UpdateMessageResponse,
 } from '../responses';
 
+const useLocalApi = true;
+
 export class DirectMessagingApiClient {
     private baseURL =
-        'https://direct-messaging-api-197277044151.us-west1.run.app';
-
-    // private baseURL = 'http://localhost:4004';
+        isRunningInCloudRun() || !useLocalApi
+            ? 'https://direct-messaging-api-197277044151.us-west1.run.app'
+            : 'http://localhost:4004';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {
