@@ -18,7 +18,7 @@ module.exports = {
         'plugin:unicorn/recommended',
         'prettier',
     ],
-    ignorePatterns: ['dist/'],
+    ignorePatterns: ['dist/', 'migrations/'],
     env: {
         node: true,
         browser: true,
