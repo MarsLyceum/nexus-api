@@ -4,6 +4,7 @@ import express, { Request, Response, NextFunction, Application } from 'express';
 import { createServer } from 'node:http';
 import { ParsedQs } from 'qs';
 import cors from 'cors';
+import multer from 'multer';
 
 import {
     GetConversationsParams,
@@ -52,6 +53,7 @@ export async function createService(
 }> {
     const app = express();
     const httpServer = createServer(app);
+    const upload = multer({ storage: multer.memoryStorage() });
 
     app.use(express.json()); // Parse JSON bodies
     app.use(cors()); // Enable CORS
@@ -113,6 +115,7 @@ export async function createService(
 
     app.post(
         '/conversation/:conversationId/message',
+        upload.fields([{ name: 'attachments', maxCount: 10 }]),
         validateParams(sendMessageParamsSchema),
         validatePayload(sendMessagePayloadSchema),
         asyncHandler<SendMessageParams, unknown, SendMessagePayload, ParsedQs>(

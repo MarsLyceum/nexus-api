@@ -9,3 +9,7 @@ export type Message = {
     attachmentFilePaths?: string[];
     edited: boolean;
 };
+
+export type MessageWithAttachmentUrls = Omit<Message, 'attachmentFilePaths'> & {
+    attachmentUrls?: string[];
+};

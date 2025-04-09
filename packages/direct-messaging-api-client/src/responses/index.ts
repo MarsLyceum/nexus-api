@@ -1,8 +1,8 @@
-import { Conversation, Message } from '../models';
+import { Conversation, Message, MessageWithAttachmentUrls } from '../models';
 
 export type GetConversationsResponse = Conversation[];
 
-export type GetConversationMessagesResponse = Message[];
+export type GetConversationMessagesResponse = MessageWithAttachmentUrls[];
 
 export type CreateConversationResponse = Conversation;
 

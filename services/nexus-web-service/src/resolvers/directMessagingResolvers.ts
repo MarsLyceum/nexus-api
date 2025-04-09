@@ -1,9 +1,10 @@
+import { withFilter } from 'graphql-subscriptions';
+
 import {
     DirectMessagingApiClient,
     GetConversationsParams,
     GetConversationsResponse,
     GetConversationMessagesParams,
-    GetConversationMessagesQueryParams,
     GetConversationMessagesResponse,
     CreateConversationPayload,
     CreateConversationResponse,
@@ -14,7 +15,10 @@ import {
     UpdateMessagePayload,
     UpdateMessageResponse,
     DeleteMessageParams,
+    MessageWithAttachmentUrls,
 } from 'direct-messaging-api-client';
+
+import { fetchAttachmentsForDm } from '../utils';
 
 export const directMessagingResolvers = {
     Mutation: {
@@ -29,11 +33,15 @@ export const directMessagingResolvers = {
             _: never,
             {
                 conversationId,
+                attachments,
                 ...payload
-            }: SendMessageParams & SendMessagePayload
+            }: SendMessageParams &
+                SendMessagePayload & {
+                    attachments?: Promise<File>[];
+                }
         ): Promise<SendMessageResponse> => {
             const client = new DirectMessagingApiClient();
-            return client.sendMessage(conversationId, payload);
+            return client.sendMessage(conversationId, payload, attachments);
         },
         updateMessage: (
             _: never,
@@ -62,7 +70,7 @@ export const directMessagingResolvers = {
             const client = new DirectMessagingApiClient();
             return client.getConversations(userId);
         },
-        getConversationMessages: (
+        getConversationMessages: async (
             _: never,
             {
                 conversationId,
@@ -71,12 +79,29 @@ export const directMessagingResolvers = {
             }: GetConversationMessagesParams & { offset: number; limit: number }
         ): Promise<GetConversationMessagesResponse> => {
             const client = new DirectMessagingApiClient();
-            return client.getConversationMessages(
+            const messages = await client.getConversationMessages(
                 conversationId,
                 offset,
                 limit
             );
+
+            const messagesWithAttachments: MessageWithAttachmentUrls[] =
+                await Promise.all(
+                    messages.map((element) => fetchAttachmentsForDm(element))
+                );
+
+            return messagesWithAttachments;
         },
     },
-    Subscription: {},
+    Subscription: {
+        dmAdded: {
+            subscribe: withFilter(
+                (_, __, context) =>
+                    context.pubsub.asyncIterableIterator('DM_ADDED'),
+                (payload, variables) =>
+                    // Only forward the event if the channelIds match
+                    payload.dmAdded.conversation.id === variables.conversationId
+            ),
+        },
+    },
 };

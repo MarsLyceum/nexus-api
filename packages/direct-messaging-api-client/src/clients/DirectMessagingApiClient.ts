@@ -1,5 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { buildMultipartFormData } from 'common-utils';
+
 import {
     CreateConversationPayload,
     SendMessagePayload,
@@ -65,8 +67,27 @@ export class DirectMessagingApiClient {
 
     async sendMessage(
         conversationId: string,
-        sendMessagePayload: SendMessagePayload
+        sendMessagePayload: SendMessagePayload,
+        attachments?: Promise<File>[]
     ): Promise<SendMessageResponse> {
+        if (attachments && attachments.length > 0) {
+            const formData = await buildMultipartFormData(
+                sendMessagePayload,
+                attachments,
+                'attachments'
+            );
+
+            return this.query(
+                axios.post(
+                    `${this.baseURL}/conversation/${conversationId}/message`,
+                    formData,
+                    {
+                        headers: formData.getHeaders(),
+                    }
+                )
+            );
+        }
+
         return this.query(
             axios.post(
                 `${this.baseURL}/conversation/${conversationId}/message`,

@@ -60,7 +60,7 @@ export const updateMessage = async (
             }
         );
 
-        res.status(204).json(updatedMessage);
+        res.status(200).json(updatedMessage);
     } catch (error) {
         console.error('Error updating message:', error);
         res.status(500).json({ message: 'Internal Server Error' });

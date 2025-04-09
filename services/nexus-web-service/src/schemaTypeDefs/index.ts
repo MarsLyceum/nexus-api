@@ -93,6 +93,7 @@ type Mutation {
     id: String!
     content: String!
     senderUserId: String!
+    attachments: [Upload!]
   ): Message!
 
   updateMessage(
@@ -143,6 +144,8 @@ type Subscription {
   messageAdded(channelId: String!): GroupChannelMessage!
 
   friendStatusChanged(userId: String!): FriendStatusChangedPayload!
+
+  dmAdded(conversationId: String!): Message!
 }
 
 enum UserOnlineStatus {
@@ -333,6 +336,7 @@ type Message {
     senderUserId: String!
     createdAt: String!
     edited: Boolean!
+    attachmentUrls: [String!]
 }
 
 type Conversation {

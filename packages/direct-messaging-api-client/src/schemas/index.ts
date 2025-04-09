@@ -15,7 +15,7 @@ export const sendMessagePayloadSchema = Joi.object({
     id: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),
-    content: Joi.string().required(),
+    content: Joi.string().required().allow(''),
     senderUserId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),

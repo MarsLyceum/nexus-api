@@ -32,7 +32,7 @@ export function createAppDataSource(): DataSource {
         ...hostSettings,
         synchronize: false,
         migrationsRun: false,
-        logging: false,
+        logging: true,
         entities: [
             // direct messaging api
             ConversationEntity,
@@ -62,6 +62,7 @@ export function createAppDataSource(): DataSource {
                 rejectUnauthorized: false, // adjust this if you need strict certificate validation
                 // ca: caCert,
             },
+            options: '-c timezone=UTC',
         },
     });
 }

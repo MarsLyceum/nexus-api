@@ -1,10 +1,4 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    CreateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 
 import { Message } from '../models';
 import type { ConversationEntity } from './ConversationEntity';
@@ -23,7 +17,7 @@ export class MessageEntity implements Message {
     @Column({ type: 'uuid' })
     senderUserId!: string;
 
-    @CreateDateColumn()
+    @Column({ type: 'timestamptz' })
     createdAt!: Date;
 
     @Column({ type: 'jsonb', nullable: true })

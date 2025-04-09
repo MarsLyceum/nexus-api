@@ -19,13 +19,14 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupChannelMessage } from 'group-api-client';
+import { Message } from 'direct-messaging-api-client';
 
 import { GooglePubSubClientSingleton } from 'third-party-clients';
 import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
-import { fetchAttachmentsForMessage } from './utils';
+import { fetchAttachmentsForMessage, fetchAttachmentsForDm } from './utils';
 
 declare module 'express-serve-static-core' {
     interface Request {
@@ -88,6 +89,7 @@ export async function createService(
 
     const instanceId = uuidv4();
     const newMessageSubscriptionName = `new-message-${instanceId}`;
+    const newDmSubscriptionName = `new-dm-${instanceId}`;
     const friendStatusChangedSubscriptionName = `friend-status-changed-${instanceId}`;
     const [newMessageSubscription] =
         await GooglePubSubClientSingleton.getInstance()
@@ -95,6 +97,11 @@ export async function createService(
             .createSubscription(newMessageSubscriptionName, {
                 ackDeadlineSeconds: 30,
             });
+    const [newDmSubscription] = await GooglePubSubClientSingleton.getInstance()
+        .topic('new-dm')
+        .createSubscription(newDmSubscriptionName, {
+            ackDeadlineSeconds: 30,
+        });
     const [friendStatusChangedSubscription] =
         await GooglePubSubClientSingleton.getInstance()
             .topic('friend-status-changed')
@@ -118,6 +125,27 @@ export async function createService(
             // Publish to local in-memory PubSub so that active websockets get notified
             void localPubSub.publish('MESSAGE_ADDED', {
                 messageAdded: messageWithAttachments,
+            });
+
+            // Acknowledge the message to prevent redelivery
+            message.ack();
+        }
+    );
+
+    newDmSubscription.on(
+        'message',
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        async (message: {
+            data: { toString: () => string };
+            ack: () => void;
+        }) => {
+            const eventData = JSON.parse(message.data.toString()) as Message;
+
+            const messageWithAttachments =
+                await fetchAttachmentsForDm(eventData);
+            // Publish to local in-memory PubSub so that active websockets get notified
+            void localPubSub.publish('DM_ADDED', {
+                dmAdded: messageWithAttachments,
             });
 
             // Acknowledge the message to prevent redelivery

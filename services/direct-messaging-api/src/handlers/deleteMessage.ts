@@ -23,12 +23,6 @@ export const deleteMessage = async (
                 throw new Error('Invalid message id');
             }
 
-            message.conversation.messages =
-                message.conversation.messages.filter(
-                    (msg) => msg.id !== messageId
-                );
-            await manager.save(message.conversation);
-
             await manager.delete(MessageEntity, { id: messageId });
         });
 

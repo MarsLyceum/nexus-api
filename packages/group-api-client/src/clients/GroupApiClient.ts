@@ -1,5 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { buildMultipartFormData } from 'common-utils';
+
 import {
     CreateGroupPayload,
     UpdateGroupPayload,
@@ -17,7 +19,6 @@ import {
     GetPostResponse,
     CreatePostCommentResponse,
 } from '../responses';
-import { buildMultipartFormData } from '../utils';
 
 export class GroupApiClient {
     private baseURL = 'https://group-api-197277044151.us-west1.run.app';
