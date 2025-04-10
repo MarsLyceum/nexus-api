@@ -11,6 +11,7 @@
         "lerna:typecheck": "npx lerna run typecheck",
         "lerna:build": "npx lerna run build",
         "lerna:clean-pnpm": "npx lerna run clean-pnpm",
+        "lerna:deploy": "npx lerna run deploy",
         "cloud_sql_proxy": "cloud-sql-proxy hephaestus-418809:us-west1:user-api --port=5434",
         "authenticate_proxy": "gcloud auth application-default login",
         "lerna:migration:check": "npx lerna run typeorm:migration:check",

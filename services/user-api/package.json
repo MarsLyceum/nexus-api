@@ -41,6 +41,7 @@
     "user-api-client": "workspace:*",
     "group-api-client": "workspace:*",
     "common-middleware": "workspace:*",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "dotenv": "^16.4.7"
   }
 }

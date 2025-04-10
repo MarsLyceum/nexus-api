@@ -87,8 +87,6 @@ export const userResolvers = {
                 connection: 'Username-Password-Authentication',
             });
 
-            console.log('payload:', payload);
-
             const client = new UserApiClient();
             await client.createUser(payload);
 

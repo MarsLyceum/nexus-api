@@ -11,6 +11,7 @@
   },
   "author": "Mars Lyceum Inc.",
   "dependencies": {
+    "dotenv": "^16.4.7",
     "@google-cloud/pubsub": "^4.10.0",
     "@google-cloud/storage": "^7.15.2",
     "user-api-client": "workspace:*",

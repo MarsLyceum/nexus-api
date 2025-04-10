@@ -52,7 +52,8 @@
     "common-middleware": "workspace:*",
     "third-party-clients": "workspace:*",
     "yargs": "^17.7.2",
-    "@types/multer": "^1.4.12"
+    "@types/multer": "^1.4.12",
+    "dotenv": "^16.4.7"
   },
   "devDependencies": {}
 }

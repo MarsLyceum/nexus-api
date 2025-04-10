@@ -28,10 +28,10 @@ import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
 import { fetchAttachmentsForMessage, fetchAttachmentsForDm } from './utils';
 
-declare module 'express-serve-static-core' {
+declare module 'express' {
     interface Request {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        auth?: any; // Adjust the type as needed (e.g., `User` or a specific interface)
+        auth?: unknown; // Adjust the type as needed (e.g., `User` or a specific interface)
     }
 }
 
