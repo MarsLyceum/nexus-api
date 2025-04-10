@@ -78,14 +78,16 @@ export const userResolvers = {
 
         registerUser: async (
             _: never,
-            payload: CreateUserPayload,
+            { password, ...payload }: CreateUserPayload & { password: string },
             ctx: unknown
         ): Promise<CreateUserResponse> => {
             await auth0.database.signUp({
                 email: payload.email,
-                password: payload.password,
+                password,
                 connection: 'Username-Password-Authentication',
             });
+
+            console.log('payload:', payload);
 
             const client = new UserApiClient();
             await client.createUser(payload);
@@ -93,7 +95,7 @@ export const userResolvers = {
             return loginUser(
                 {
                     email: payload.email,
-                    password: payload.password,
+                    password,
                 },
                 ctx
             );

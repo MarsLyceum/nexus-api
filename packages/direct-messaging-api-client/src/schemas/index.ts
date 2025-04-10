@@ -6,6 +6,9 @@ export const createConversationPayloadSchema = Joi.object({
         .items(Joi.string().guid({ version: ['uuidv4'] }))
         .min(1)
         .required(),
+    requestedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
     channelId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .optional(),
@@ -49,6 +52,18 @@ export const updateMessageParamsSchema = Joi.object({
 
 export const deleteMessageParamsSchema = Joi.object({
     messageId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
+export const closeConversationParamsSchema = Joi.object({
+    conversationId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
+export const closeConversationPayloadSchema = Joi.object({
+    closedByUserId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),
 });

@@ -1,5 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { isRunningInCloudRun } from 'common-utils';
+
 import { SendFriendRequestPayload } from '../payloads';
 import {
     SendFriendRequestResponse,
@@ -7,8 +9,13 @@ import {
     GetFriendsResponse,
 } from '../responses';
 
+const useLocalApi = false;
+
 export class FriendsApiClient {
-    private baseURL = 'https://friends-api-197277044151.us-west1.run.app';
+    private baseURL =
+        isRunningInCloudRun() || !useLocalApi
+            ? 'https://friends-api-197277044151.us-west1.run.app'
+            : 'http://localhost:4003';
 
     // private baseURL = 'http://localhost:4003';
 

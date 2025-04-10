@@ -41,6 +41,9 @@ export const getConversations = async (
             .where(':userId = ANY(conversation.participantsUserIds)', {
                 userId,
             })
+            .andWhere('NOT (:userId = ANY(conversation.closedByUserIds))', {
+                userId,
+            })
             .orderBy('message.createdAt', 'DESC')
             .getMany();
 

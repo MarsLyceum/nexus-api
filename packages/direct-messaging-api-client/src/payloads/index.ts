@@ -4,6 +4,7 @@ export type CreateConversationPayload = {
     type: 'direct' | 'group' | 'moderator';
     participantsUserIds: string[];
     channelId?: string;
+    requestedByUserId: string;
 };
 
 export type SendMessagePayload = {
@@ -37,4 +38,12 @@ export type UpdateMessageParams = {
 
 export type DeleteMessageParams = {
     messageId: string;
+};
+
+export type CloseConversationParams = {
+    conversationId: string;
+};
+
+export type CloseConversationPayload = {
+    closedByUserId: string;
 };

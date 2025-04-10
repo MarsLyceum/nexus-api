@@ -6,6 +6,7 @@ import {
     CreateConversationPayload,
     SendMessagePayload,
     UpdateMessagePayload,
+    CloseConversationPayload,
 } from '../payloads';
 import {
     GetConversationsResponse,
@@ -113,5 +114,17 @@ export class DirectMessagingApiClient {
 
     async deleteMessage(messageId: string): Promise<undefined> {
         return this.query(axios.delete(`${this.baseURL}/message/${messageId}`));
+    }
+
+    async closeConversation(
+        conversationId: string,
+        closeConversationPayload: CloseConversationPayload
+    ): Promise<undefined> {
+        return this.query(
+            axios.post(
+                `${this.baseURL}/conversation/${conversationId}`,
+                closeConversationPayload
+            )
+        );
     }
 }

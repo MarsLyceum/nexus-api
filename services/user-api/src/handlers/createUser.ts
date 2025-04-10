@@ -9,28 +9,36 @@ export const createUser = async (
     try {
         const { email, username, firstName, lastName, phoneNumber } = req.body;
 
+        console.log('req.body:', req.body);
+
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
-        const foundUser =
-            (await dataSource.manager.findOne(UserEntity, {
-                where: { email },
-            })) ?? undefined;
+        const newUser = await dataSource.manager.transaction(
+            async (manager) => {
+                const foundUser = await manager.findOne(UserEntity, {
+                    where: { email },
+                });
 
-        if (foundUser) {
-            res.status(400).json({ message: 'User already exists' });
-        } else {
-            const newUser = dataSource.manager.create(UserEntity, {
-                email,
-                username,
-                firstName,
-                lastName,
-                phoneNumber,
-            });
+                if (foundUser) {
+                    return foundUser;
+                }
+                const newUserInner = manager.create(UserEntity, {
+                    email,
+                    username,
+                    firstName,
+                    lastName,
+                    phoneNumber,
+                });
 
-            await dataSource.manager.save(newUser);
+                await manager.save(newUserInner);
 
-            res.status(201).json(newUser);
-        }
+                return newUserInner;
+            }
+        );
+
+        console.log('newUser:', newUser);
+
+        res.status(201).json(newUser);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }

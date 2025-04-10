@@ -5,7 +5,7 @@ export type LoginUserPayload = {
     password: string;
 };
 
-export type CreateUserPayload = User & { password: string };
+export type CreateUserPayload = User;
 
 export type GetUserParams = {
     userId: string;

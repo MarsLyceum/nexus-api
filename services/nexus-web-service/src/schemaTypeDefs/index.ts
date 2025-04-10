@@ -85,6 +85,7 @@ type Mutation {
   createConversation(
     type: ConversationType!
     participantsUserIds: [String!]!
+    requestedByUserId: String!
     channelId: String
   ): Conversation!
 
@@ -104,6 +105,7 @@ type Mutation {
   ): Message!
 
   deleteMessage(messageId: String!): Boolean!
+  closeConversation(conversationId: String!, closedByUserId: String!): Boolean!
 }
 
 ###########################
@@ -343,6 +345,7 @@ type Conversation {
     id: String!
     type: ConversationType!
     participantsUserIds: [String!]!
+    closedByUserIds: [String!]!
     messages: [Message!]!
     channelId: String
 }

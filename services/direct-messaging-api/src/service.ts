@@ -24,6 +24,10 @@ import {
     UpdateMessagePayload,
     DeleteMessageParams,
     deleteMessageParamsSchema,
+    closeConversationParamsSchema,
+    CloseConversationParams,
+    CloseConversationPayload,
+    closeConversationPayloadSchema,
 } from 'direct-messaging-api-client';
 import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
@@ -36,6 +40,7 @@ import {
     sendMessage,
     updateMessage,
     deleteMessage,
+    closeConversation,
 } from './handlers';
 
 import {
@@ -141,6 +146,18 @@ export async function createService(
         asyncHandler<DeleteMessageParams, unknown, unknown, ParsedQs>(
             (req, res) => deleteMessage(req, res)
         )
+    );
+
+    app.post(
+        '/conversation/:conversationId',
+        validateParams(closeConversationParamsSchema),
+        validatePayload(closeConversationPayloadSchema),
+        asyncHandler<
+            CloseConversationParams,
+            unknown,
+            CloseConversationPayload,
+            ParsedQs
+        >((req, res) => closeConversation(req, res))
     );
 
     // Health check route
