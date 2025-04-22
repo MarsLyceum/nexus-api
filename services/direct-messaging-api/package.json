@@ -8,7 +8,7 @@
     "start": "ts-node src/index.ts",
     "deploy": "python deploy.py",
     "compile": "tsc",
-    "build": "python ../../scripts/test-build.py",
+    "build": "python ../../scripts/test-build.py direct-messaging-api",
     "docker-shell": "python ../../scripts/test-docker-shell.py && docker run --name local-test-container -it local-test sh",
     "clean-pnpm": "python clean_pnpm.py",
     "typecheck": "tsc --noEmit",
