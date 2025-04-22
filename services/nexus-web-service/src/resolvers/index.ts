@@ -1,17 +1,16 @@
 import { mergeResolvers } from '@graphql-tools/merge';
-import { PubSub } from 'graphql-subscriptions';
 import { IResolvers } from '@graphql-tools/utils';
 import { userResolvers } from './userResolvers';
 import { loadGroupResolvers } from './groupResolvers';
 import { friendsResolvers } from './friendsResolvers';
 import { directMessagingResolvers } from './directMessagingResolvers';
 
-export const loadResolvers: () => Promise<
-    IResolvers<unknown, { pubsub: PubSub }>
-> = async () =>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const loadResolvers: () => Promise<IResolvers<any, any>> = async () =>
     mergeResolvers([
         userResolvers,
         await loadGroupResolvers(),
         friendsResolvers,
         directMessagingResolvers,
-    ]) as IResolvers<unknown, { pubsub: PubSub }>;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ]) as IResolvers<any, any>;

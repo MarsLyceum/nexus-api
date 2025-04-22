@@ -8,7 +8,7 @@
     "start": "ts-node src/index.ts",
     "deploy": "python deploy.py",
     "compile": "tsc",
-    "build": "python ../../scripts/test-build.py",
+    "build": "python ../../scripts/test-build.py group-api",
     "docker-shell": "python ../../scripts/test-docker-shell.py && docker run --name local-test-container -it local-test sh",
     "clean-pnpm": "python clean_pnpm.py",
     "typecheck": "tsc --noEmit",
@@ -52,7 +52,8 @@
     "common-middleware": "workspace:*",
     "third-party-clients": "workspace:*",
     "yargs": "^17.7.2",
-    "@types/multer": "^1.4.12"
+    "@types/multer": "^1.4.12",
+    "dotenv": "^16.4.7"
   },
   "devDependencies": {}
 }

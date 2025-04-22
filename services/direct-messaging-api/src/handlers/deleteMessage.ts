@@ -13,18 +13,7 @@ export const deleteMessage = async (
         const { messageId } = req.params;
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
-        await dataSource.manager.transaction(async (manager) => {
-            const message = await manager.findOne(MessageEntity, {
-                where: { id: messageId },
-                relations: ['conversation'],
-            });
-
-            if (!message) {
-                throw new Error('Invalid message id');
-            }
-
-            await manager.delete(MessageEntity, { id: messageId });
-        });
+        await dataSource.manager.delete(MessageEntity, { id: messageId });
 
         res.status(204).send();
     } catch (error) {

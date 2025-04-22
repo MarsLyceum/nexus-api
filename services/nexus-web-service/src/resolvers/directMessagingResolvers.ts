@@ -15,6 +15,8 @@ import {
     UpdateMessagePayload,
     UpdateMessageResponse,
     DeleteMessageParams,
+    CloseConversationParams,
+    CloseConversationPayload,
     MessageWithAttachmentUrls,
 } from 'direct-messaging-api-client';
 
@@ -59,6 +61,17 @@ export const directMessagingResolvers = {
         ): Promise<boolean> => {
             const client = new DirectMessagingApiClient();
             await client.deleteMessage(messageId);
+            return true;
+        },
+        closeConversation: async (
+            _: never,
+            {
+                conversationId,
+                ...payload
+            }: CloseConversationParams & CloseConversationPayload
+        ): Promise<boolean> => {
+            const client = new DirectMessagingApiClient();
+            await client.closeConversation(conversationId, payload);
             return true;
         },
     },

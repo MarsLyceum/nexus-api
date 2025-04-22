@@ -78,12 +78,12 @@ export const userResolvers = {
 
         registerUser: async (
             _: never,
-            payload: CreateUserPayload,
+            { password, ...payload }: CreateUserPayload & { password: string },
             ctx: unknown
         ): Promise<CreateUserResponse> => {
             await auth0.database.signUp({
                 email: payload.email,
-                password: payload.password,
+                password,
                 connection: 'Username-Password-Authentication',
             });
 
@@ -93,7 +93,7 @@ export const userResolvers = {
             return loginUser(
                 {
                     email: payload.email,
-                    password: payload.password,
+                    password,
                 },
                 ctx
             );

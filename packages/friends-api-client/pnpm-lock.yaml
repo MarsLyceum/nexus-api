@@ -14,6 +14,9 @@ importers:
       common-middleware:
         specifier: workspace:*
         version: link:../common-middleware
+      common-utils:
+        specifier: workspace:*
+        version: link:../common-utils
       joi:
         specifier: ^17.13.3
         version: 17.13.3

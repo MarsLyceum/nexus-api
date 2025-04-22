@@ -11,6 +11,7 @@ The backend API for Nexus.
 -   Squarespace for Domain: my-nexus.net
 -   Cloudflare for CDN
 -   Upstash for Redis Cache Around DB and Storage Requests
+-   I am using forwardemail.net to forward emails to dbpiper@marslyceum.com to my gmail
 
 ## DB
 

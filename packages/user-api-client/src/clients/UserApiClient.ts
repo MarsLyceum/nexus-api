@@ -1,5 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { isRunningInCloudRun } from 'common-utils';
+
 import { CreateUserPayload, UpdateUserPayload } from '../payloads';
 import {
     CreateUserResponse,
@@ -8,10 +10,13 @@ import {
     SearchForUsersResponse,
 } from '../responses';
 
-export class UserApiClient {
-    private baseURL = 'https://user-api-iwesf7iypq-uw.a.run.app';
+const useLocalApi = false;
 
-    // private baseURL = 'http://localhost:4001';
+export class UserApiClient {
+    private baseURL =
+        isRunningInCloudRun() || !useLocalApi
+            ? 'https://user-api-iwesf7iypq-uw.a.run.app'
+            : 'http://localhost:4001';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {

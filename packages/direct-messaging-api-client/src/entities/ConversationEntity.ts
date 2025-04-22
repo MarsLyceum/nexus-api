@@ -18,6 +18,9 @@ export class ConversationEntity implements Conversation {
     @Column({ type: 'uuid', array: true })
     participantsUserIds!: string[];
 
+    @Column({ type: 'uuid', array: true, default: () => "'{}'" })
+    closedByUserIds!: string[];
+
     // Messages within the conversation.
     @OneToMany('Message', 'conversation', { cascade: true })
     messages!: MessageEntity[];

@@ -1,3 +1,4 @@
+export * from './closeConversation';
 export * from './createConversation';
 export * from './deleteMessage';
 export * from './getConversationMessages';

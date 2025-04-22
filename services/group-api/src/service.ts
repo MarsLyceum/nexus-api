@@ -178,6 +178,7 @@ export async function createService(
         '/channels/:channelId/messages',
         validateParams(getChannelMessagesParamsSchema),
         validateQueryParams(getChannelMessagesQueryParamsSchema),
+        // @ts-expect-error query params
         asyncHandler<
             GetChannelMessagesParams,
             unknown,
