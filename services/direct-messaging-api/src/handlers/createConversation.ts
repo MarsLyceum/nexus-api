@@ -76,12 +76,15 @@ export const createConversation = async (
                 }
 
                 // No matching conversation found, create a new one.
-                return conversationRepository.create({
+                const newConv = conversationRepository.create({
                     type,
-                    participantsUserIds, // Store as provided or sorted, depending on your needs.
+                    participantsUserIds: sortedInputParticipants, // Store as provided or sorted, depending on your needs.
                     channelId: channelId || null,
                     messages: [],
                 });
+                await conversationRepository.save(newConv);
+
+                return newConv;
             }
         );
 
