@@ -29,6 +29,7 @@ module.exports = {
         project: './tsconfig.json',
     },
     rules: {
+        'no-await-in-loop': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',
         '@typescript-eslint/no-redundant-type-constituents': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',

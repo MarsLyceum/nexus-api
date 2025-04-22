@@ -13,4 +13,6 @@ export type User = {
         | 'offline_dnd'
         | 'online_dnd';
     token?: string;
+    accessToken?: string;
+    refreshToken?: string;
 };

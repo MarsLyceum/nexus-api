@@ -20,7 +20,8 @@ import {
     AUTH0_CLIENT_ID,
     AUTH0_AUDIENCE,
     AUTH0_CLIENT_SECRET,
-    JWT_SECRET,
+    ACCESS_JWT_SECRET,
+    REFRESH_TOKEN_SECRET,
 } from '../config';
 
 const auth0 = new AuthenticationClient({
@@ -48,24 +49,43 @@ async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const user = await client.getUserByEmail(email);
 
-    const token = jwt.sign(
+    const accessJwt = jwt.sign(
         {
             id: user.id,
             email: user.email,
         },
-        JWT_SECRET as string,
+        ACCESS_JWT_SECRET as string,
         { expiresIn: '1h' }
     );
 
-    // Set the token as a secure, HttpOnly cookie
-    ctx.res.cookie('token', token, {
+    const refreshJwt = jwt.sign(
+        { id: user.id },
+        REFRESH_TOKEN_SECRET as string,
+        { expiresIn: '7d' }
+    );
+
+    const isProd = process.env.NODE_ENV === 'production';
+
+    ctx.res.cookie('access_token', accessJwt, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProd,
         sameSite: 'strict',
-        maxAge: 1000 * 60 * 60, // 1 hour expiration
+        maxAge: 1000 * 60 * 60, // 1 hour
     });
 
-    return { ...user, token: idToken };
+    ctx.res.cookie('refresh_token', refreshJwt, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    });
+
+    return {
+        ...user,
+        token: idToken,
+        accessToken: accessJwt,
+        refreshToken: refreshJwt,
+    };
 }
 
 export const userResolvers = {

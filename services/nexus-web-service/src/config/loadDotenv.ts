@@ -43,5 +43,6 @@ export const {
     AUTH0_CLIENT_ID,
     AUTH0_AUDIENCE,
     AUTH0_CLIENT_SECRET,
-    JWT_SECRET,
+    ACCESS_JWT_SECRET,
+    REFRESH_TOKEN_SECRET,
 } = process.env;

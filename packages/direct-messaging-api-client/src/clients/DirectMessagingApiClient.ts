@@ -16,7 +16,7 @@ import {
     UpdateMessageResponse,
 } from '../responses';
 
-const useLocalApi = false;
+const useLocalApi = true;
 
 export class DirectMessagingApiClient {
     private baseURL =

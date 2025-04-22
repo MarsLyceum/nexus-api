@@ -21,6 +21,7 @@ export const sendMessage = async (
         const { conversationId } = req.params;
         const { id, content, senderUserId } = req.body;
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
+        const pubsub = GooglePubSubClientSingleton.getInstance();
         const filePaths: string[] = [];
 
         if (req.files) {
@@ -80,10 +81,33 @@ export const sendMessage = async (
             }
         );
 
-        const dataBuffer = Buffer.from(JSON.stringify(newMessage));
-        await GooglePubSubClientSingleton.getInstance()
-            .topic('new-dm')
-            .publishMessage({ data: dataBuffer });
+        const conversation = await dataSource.manager.findOne(
+            ConversationEntity,
+            {
+                where: { id: conversationId },
+            }
+        );
+
+        if (conversation?.participantsUserIds) {
+            const dataBuffer = Buffer.from(
+                JSON.stringify({
+                    type: 'new-dm',
+                    payload: newMessage,
+                })
+            );
+
+            for (const userId of conversation.participantsUserIds) {
+                const topicName = `u-${userId}`;
+                const topic = pubsub.topic(topicName);
+
+                const [exists] = await topic.exists();
+                if (!exists) {
+                    await pubsub.createTopic(topicName);
+                }
+
+                await topic.publishMessage({ data: dataBuffer });
+            }
+        }
 
         res.status(201).json(newMessage);
     } catch (error) {

@@ -2,6 +2,8 @@
 
 import '@google-cloud/trace-agent';
 
+import jwt from 'jsonwebtoken';
+import * as cookie from 'cookie';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { config } from 'dotenv';
 import 'reflect-metadata';
@@ -27,11 +29,12 @@ import { applyCommonMiddleware } from 'common-middleware';
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
 import { fetchAttachmentsForMessage, fetchAttachmentsForDm } from './utils';
+import { ACCESS_JWT_SECRET } from './config';
 
 declare module 'express' {
     interface Request {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        auth?: unknown; // Adjust the type as needed (e.g., `User` or a specific interface)
+        auth?: unknown;
     }
 }
 
@@ -87,94 +90,102 @@ export async function createService(
 
     app.set('port', port);
 
+    const activeSubscriptions = new Set<string>();
     const instanceId = uuidv4();
-    const newMessageSubscriptionName = `new-message-${instanceId}`;
-    const newDmSubscriptionName = `new-dm-${instanceId}`;
-    const friendStatusChangedSubscriptionName = `friend-status-changed-${instanceId}`;
-    const [newMessageSubscription] =
-        await GooglePubSubClientSingleton.getInstance()
-            .topic('new-message')
-            .createSubscription(newMessageSubscriptionName, {
-                ackDeadlineSeconds: 30,
-            });
-    const [newDmSubscription] = await GooglePubSubClientSingleton.getInstance()
-        .topic('new-dm')
-        .createSubscription(newDmSubscriptionName, {
+
+    async function ensureUserSubscription(userId: string) {
+        const topicName = `u-${userId}`;
+        const subscriptionName = `${topicName}-${instanceId}`;
+        const pubsub = GooglePubSubClientSingleton.getInstance();
+
+        const topic = pubsub.topic(topicName);
+        const [topicExists] = await topic.exists();
+        if (!topicExists) {
+            // swallow ALREADY_EXISTS races
+            try {
+                await pubsub.createTopic(topicName);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                if (error.code !== 6) {
+                    // 6 = ALREADY_EXISTS
+                    throw error;
+                }
+            }
+        }
+
+        if (activeSubscriptions.has(subscriptionName)) return;
+        activeSubscriptions.add(subscriptionName);
+
+        const [pubsubSub] = await topic.createSubscription(subscriptionName, {
             ackDeadlineSeconds: 30,
         });
-    const [friendStatusChangedSubscription] =
-        await GooglePubSubClientSingleton.getInstance()
-            .topic('friend-status-changed')
-            .createSubscription(friendStatusChangedSubscriptionName, {
-                ackDeadlineSeconds: 30,
-            });
 
-    newMessageSubscription.on(
-        'message',
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        async (message: {
-            data: { toString: () => string };
-            ack: () => void;
-        }) => {
-            const eventData = JSON.parse(
-                message.data.toString()
-            ) as GroupChannelMessage;
+        pubsubSub.on('message', async (message) => {
+            const envelope = JSON.parse(message.data.toString()) as {
+                type: 'new-dm' | 'new-message' | 'friend-status-changed';
+                payload: GroupChannelMessage | Message | unknown;
+            };
 
-            const messageWithAttachments =
-                await fetchAttachmentsForMessage(eventData);
-            // Publish to local in-memory PubSub so that active websockets get notified
-            void localPubSub.publish('MESSAGE_ADDED', {
-                messageAdded: messageWithAttachments,
-            });
+            switch (envelope.type) {
+                case 'new-message': {
+                    const messageWithAttachments =
+                        await fetchAttachmentsForMessage(
+                            envelope.payload as GroupChannelMessage
+                        );
+                    // Publish to local in-memory PubSub so that active websockets get notified
+                    void localPubSub.publish('MESSAGE_ADDED', {
+                        messageAdded: messageWithAttachments,
+                    });
+                    break;
+                }
 
-            // Acknowledge the message to prevent redelivery
+                case 'new-dm': {
+                    const messageWithAttachments = await fetchAttachmentsForDm(
+                        envelope.payload as Message
+                    );
+
+                    void localPubSub.publish('DM_ADDED', {
+                        dmAdded: messageWithAttachments,
+                    });
+                    break;
+                }
+
+                case 'friend-status-changed': {
+                    void localPubSub.publish('FRIEND_STATUS_CHANGED', {
+                        friendStatusChanged: envelope.payload,
+                    });
+                    break;
+                }
+
+                default: {
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    console.warn(`Unknown event type: ${envelope.type}`);
+                }
+            }
+
             message.ack();
-        }
-    );
-
-    newDmSubscription.on(
-        'message',
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        async (message: {
-            data: { toString: () => string };
-            ack: () => void;
-        }) => {
-            const eventData = JSON.parse(message.data.toString()) as Message;
-
-            const messageWithAttachments =
-                await fetchAttachmentsForDm(eventData);
-            // Publish to local in-memory PubSub so that active websockets get notified
-            void localPubSub.publish('DM_ADDED', {
-                dmAdded: messageWithAttachments,
-            });
-
-            // Acknowledge the message to prevent redelivery
-            message.ack();
-        }
-    );
-
-    friendStatusChangedSubscription.on(
-        'message',
-        (message: { data: { toString: () => string }; ack: () => void }) => {
-            const eventData = JSON.parse(message.data.toString());
-
-            // Publish to local in-memory PubSub so that active websockets get notified
-            void localPubSub.publish('FRIEND_STATUS_CHANGED', {
-                friendStatusChanged: eventData,
-            });
-
-            // Acknowledge the message to prevent redelivery
-            message.ack();
-        }
-    );
+        });
+    }
 
     const serverCleanup = useServer(
         {
             schema,
-            // eslint-disable-next-line @typescript-eslint/require-await
-            context: async () =>
-                // Return the context that you need for subscriptions
-                ({ pubsub: localPubSub }),
+            context: async (ctx) => {
+                // parse cookie + verify JWT
+                const { cookie: rawCookie } = ctx.extra.request.headers;
+                const cookies = cookie.parse(rawCookie || '');
+                console.log('cookies:', cookies);
+                const payload = jwt.verify(
+                    cookies.access_token ?? '',
+                    ACCESS_JWT_SECRET as jwt.Secret
+                ) as jwt.JwtPayload;
+
+                // ensure Pub/Sub subscription here too
+                await ensureUserSubscription(payload.id);
+
+                return { pubsub: localPubSub, user: payload };
+            },
         },
         wsServer
     );
@@ -228,6 +239,24 @@ export async function createService(
             express.json()(req, res, next);
         }
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    app.use(async (req, _res, next) => {
+        // @ts-expect-error auth
+        const user = req.auth as jwt.JwtPayload | undefined;
+        if (user?.id) {
+            try {
+                await ensureUserSubscription(user.id);
+            } catch (error) {
+                console.error(
+                    'Failed to ensure subscription for user',
+                    user.id,
+                    error
+                );
+            }
+        }
+        next();
+    });
 
     app.post(
         '/graphql',

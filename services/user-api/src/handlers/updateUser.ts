@@ -8,6 +8,7 @@ import {
     TypeOrmDataSourceSingleton,
     GooglePubSubClientSingleton,
 } from 'third-party-clients';
+import { FriendsApiClient } from 'friends-api-client';
 
 export const updateUser = async (
     req: Request<UpdateUserParams, unknown, UpdateUserPayload>,
@@ -18,16 +19,34 @@ export const updateUser = async (
         const { userId } = req.params;
         const { firstName, lastName, phoneNumber, email, status } = req.body;
 
+        const pubsub = GooglePubSubClientSingleton.getInstance();
+
         if (status) {
+            const friendsApiClient = new FriendsApiClient();
+
+            const friends = await friendsApiClient.getFriends(userId);
+
             const dataBuffer = Buffer.from(
                 JSON.stringify({
-                    friendUserId: userId,
-                    status,
+                    type: 'friend-status-changed',
+                    payload: {
+                        friendUserId: userId,
+                        status,
+                    },
                 })
             );
-            await GooglePubSubClientSingleton.getInstance()
-                .topic('friend-status-changed')
-                .publishMessage({ data: dataBuffer });
+
+            for (const friend of friends) {
+                const topicName = `u-${friend.user.id}`;
+                const topic = pubsub.topic(topicName);
+
+                const [exists] = await topic.exists();
+                if (!exists) {
+                    await pubsub.createTopic(topicName);
+                }
+
+                await topic.publishMessage({ data: dataBuffer });
+            }
         }
 
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();

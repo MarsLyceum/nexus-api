@@ -29,6 +29,7 @@ export const createGroupChannelMessage = async (
     try {
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const filePaths: string[] = [];
+        const pubsub = GooglePubSubClientSingleton.getInstance();
 
         if (req.files) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -131,10 +132,34 @@ export const createGroupChannelMessage = async (
             }
         );
 
-        const dataBuffer = Buffer.from(JSON.stringify(newMessage));
-        await GooglePubSubClientSingleton.getInstance()
-            .topic('new-message')
-            .publishMessage({ data: dataBuffer });
+        const groupChannel = await dataSource.manager.findOne(
+            GroupChannelEntity,
+            {
+                where: { id: req.body.channelId },
+                relations: ['group', 'messages'],
+            }
+        );
+
+        if (groupChannel?.group.members) {
+            const dataBuffer = Buffer.from(
+                JSON.stringify({
+                    type: 'new-message',
+                    payload: newMessage,
+                })
+            );
+
+            for (const member of groupChannel.group.members) {
+                const topicName = `u-${member.userId}`;
+                const topic = pubsub.topic(topicName);
+
+                const [exists] = await topic.exists();
+                if (!exists) {
+                    await pubsub.createTopic(topicName);
+                }
+
+                await topic.publishMessage({ data: dataBuffer });
+            }
+        }
 
         res.status(201).json(newMessage);
     } catch (error) {

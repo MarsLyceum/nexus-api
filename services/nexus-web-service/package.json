@@ -17,6 +17,7 @@
         "clean-pnpm": "python clean_pnpm.py"
     },
     "dependencies": {
+        "cookie": "^1.0.2",
         "@graphql-tools/merge": "^9.0.24",
         "jwt-decode": "^4.0.0",
         "auth0": "^4.20.0",

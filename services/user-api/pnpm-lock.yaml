@@ -47,6 +47,9 @@ importers:
       express-serve-static-core:
         specifier: ^0.1.1
         version: 0.1.1
+      friends-api-client:
+        specifier: workspace:*
+        version: link:../../packages/friends-api-client
       group-api-client:
         specifier: workspace:*
         version: link:../../packages/group-api-client
