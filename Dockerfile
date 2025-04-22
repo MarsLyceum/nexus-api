@@ -49,7 +49,7 @@ RUN pnpm install --prod --no-frozen-lockfile --filter ./services/${SERVICE_NAME}
 #################################
 # Stage 2: Distroless Production
 #################################
-FROM gcr.io/distroless/nodejs22-debian12
+FROM gcr.io/distroless/nodejs22-debian12 AS production
 ARG SERVICE_NAME
 WORKDIR /app
 
