@@ -3,7 +3,6 @@
 import '@google-cloud/trace-agent';
 
 import jwt from 'jsonwebtoken';
-import * as cookie from 'cookie';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { config } from 'dotenv';
 import 'reflect-metadata';
@@ -14,8 +13,6 @@ import { createServer } from 'node:http';
 import cors from 'cors';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { expressjwt, GetVerificationKey } from 'express-jwt';
-import jwksRsa from 'jwks-rsa';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
@@ -28,8 +25,13 @@ import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
-import { fetchAttachmentsForMessage, fetchAttachmentsForDm } from './utils';
+import {
+    fetchAttachmentsForMessage,
+    fetchAttachmentsForDm,
+    getAccessToken,
+} from './utils';
 import { ACCESS_JWT_SECRET } from './config';
+import { authGuard } from './middleware';
 
 declare module 'express' {
     interface Request {
@@ -173,11 +175,9 @@ export async function createService(
             schema,
             context: async (ctx) => {
                 // parse cookie + verify JWT
-                const { cookie: rawCookie } = ctx.extra.request.headers;
-                const cookies = cookie.parse(rawCookie || '');
-                console.log('cookies:', cookies);
+                const token = getAccessToken(ctx.extra.request);
                 const payload = jwt.verify(
-                    cookies.access_token ?? '',
+                    token ?? '',
                     ACCESS_JWT_SECRET as jwt.Secret
                 ) as jwt.JwtPayload;
 
@@ -189,23 +189,6 @@ export async function createService(
         },
         wsServer
     );
-
-    // JWT authentication middleware
-    const authenticateJWT = expressjwt({
-        secret: jwksRsa.expressJwtSecret({
-            cache: true,
-            rateLimit: true,
-            jwksRequestsPerMinute: 5,
-            jwksUri:
-                'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json',
-        }) as GetVerificationKey,
-        audience: 'JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8',
-        issuer: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/',
-        algorithms: ['RS256'],
-        credentialsRequired: false,
-    });
-
-    app.use(authenticateJWT);
 
     const apolloServer = new ApolloServer({
         schema,
@@ -265,9 +248,16 @@ export async function createService(
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await
             context: async ({ req, res }) => {
+                const { operationName } = req.body as {
+                    operationName?: string;
+                    variables?: { accessToken?: string };
+                };
+
+                authGuard({ operationName, req });
+
                 // Extract user from JWT if it exists
                 const user = req.auth || null;
-                return { pubsub: localPubSub, user, res };
+                return { pubsub: localPubSub, user, res, req };
             },
         })
     );

@@ -100,11 +100,6 @@ export const sendMessage = async (
                 const topicName = `u-${userId}`;
                 const topic = pubsub.topic(topicName);
 
-                const [exists] = await topic.exists();
-                if (!exists) {
-                    await pubsub.createTopic(topicName);
-                }
-
                 await topic.publishMessage({ data: dataBuffer });
             }
         }

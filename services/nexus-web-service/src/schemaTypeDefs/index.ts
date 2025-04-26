@@ -12,6 +12,8 @@ type Mutation {
     password: String!
   ): User
 
+  refreshToken(refreshToken: String): RefreshTokenResponse
+
   registerUser(
     email: String!
     username: String!
@@ -159,6 +161,11 @@ enum UserOnlineStatus {
   invisible
 }
 
+type RefreshTokenResponse {
+  accessToken: String!
+  refreshToken: String!
+}
+
 type User {
   id: String!
   email: String!
@@ -168,6 +175,8 @@ type User {
   phoneNumber: String!
   status: UserOnlineStatus!
   token: String
+  accessToken: String!
+  refreshToken: String!
 }
 
 ###########################

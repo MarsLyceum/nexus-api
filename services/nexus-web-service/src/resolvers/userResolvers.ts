@@ -1,5 +1,6 @@
 import { AuthenticationClient } from 'auth0';
 import jwt from 'jsonwebtoken';
+import * as cookie from 'cookie';
 
 import {
     UserApiClient,
@@ -23,6 +24,7 @@ import {
     ACCESS_JWT_SECRET,
     REFRESH_TOKEN_SECRET,
 } from '../config';
+import { UnauthenticatedError } from '../utils';
 
 const auth0 = new AuthenticationClient({
     domain: AUTH0_DOMAIN ?? '',
@@ -55,11 +57,11 @@ async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
             email: user.email,
         },
         ACCESS_JWT_SECRET as string,
-        { expiresIn: '1h' }
+        { expiresIn: '15m' }
     );
 
     const refreshJwt = jwt.sign(
-        { id: user.id },
+        { id: user.id, email: user.email },
         REFRESH_TOKEN_SECRET as string,
         { expiresIn: '7d' }
     );
@@ -70,7 +72,7 @@ async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
         httpOnly: true,
         secure: isProd,
         sameSite: 'strict',
-        maxAge: 1000 * 60 * 60, // 1 hour
+        maxAge: 1000 * 60 * 15, // 15 minutes
     });
 
     ctx.res.cookie('refresh_token', refreshJwt, {
@@ -96,6 +98,62 @@ export const userResolvers = {
             ctx: unknown
         ): Promise<LoginUserResponse> => loginUser(payload, ctx),
 
+        refreshToken: (
+            _: never,
+            { refreshToken }: { refreshToken?: string },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ctx: any
+        ): { accessToken: string; refreshToken: string } => {
+            const raw = ctx.req.headers.cookie ?? '';
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const { refresh_token } = cookie.parse(raw);
+
+            if (!refresh_token && !refreshToken) {
+                throw new UnauthenticatedError('No refresh token available');
+            }
+            const refreshTokenJwt = (refresh_token ?? refreshToken) as string;
+
+            let payload: jwt.JwtPayload;
+            try {
+                payload = jwt.verify(
+                    refreshTokenJwt,
+                    REFRESH_TOKEN_SECRET as string
+                ) as jwt.JwtPayload;
+            } catch {
+                throw new UnauthenticatedError('Invalid refresh token');
+            }
+
+            // 2. issue a fresh short‐lived access token
+            const newAccessToken = jwt.sign(
+                { id: payload.id, email: payload.email },
+                ACCESS_JWT_SECRET as string,
+                { expiresIn: '15m' }
+            );
+
+            const newRefreshJwt = jwt.sign(
+                { id: payload.id, email: payload.email },
+                REFRESH_TOKEN_SECRET as string,
+                { expiresIn: '7d' }
+            );
+
+            // 3. set it as an HttpOnly cookie
+            const isProd = process.env.NODE_ENV === 'production';
+            ctx.res.cookie('access_token', newAccessToken, {
+                httpOnly: true,
+                secure: isProd,
+                sameSite: 'strict',
+                maxAge: 1000 * 60 * 15, // 15 minutes
+            });
+
+            ctx.res.cookie('refresh_token', newRefreshJwt, {
+                httpOnly: true,
+                secure: isProd,
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+            });
+
+            return { accessToken: newAccessToken, refreshToken: newRefreshJwt };
+        },
         registerUser: async (
             _: never,
             { password, ...payload }: CreateUserPayload & { password: string },

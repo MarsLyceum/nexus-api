@@ -40,11 +40,6 @@ export const updateUser = async (
                 const topicName = `u-${friend.user.id}`;
                 const topic = pubsub.topic(topicName);
 
-                const [exists] = await topic.exists();
-                if (!exists) {
-                    await pubsub.createTopic(topicName);
-                }
-
                 await topic.publishMessage({ data: dataBuffer });
             }
         }
