@@ -75,11 +75,12 @@ async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
         maxAge: 1000 * 60 * 15, // 15 minutes
     });
 
+    const refreshTokenExpiresIn = 7 * 24 * 60 * 60 * 1000; // 1 week
     ctx.res.cookie('refresh_token', refreshJwt, {
         httpOnly: true,
         secure: isProd,
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+        maxAge: refreshTokenExpiresIn, // 1 week
     });
 
     return {
@@ -87,6 +88,7 @@ async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
         token: idToken,
         accessToken: accessJwt,
         refreshToken: refreshJwt,
+        refreshTokenExpiresAt: `${Math.floor(Date.now() / 1000) + refreshTokenExpiresIn}`,
     };
 }
 
@@ -103,7 +105,11 @@ export const userResolvers = {
             { refreshToken }: { refreshToken?: string },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ctx: any
-        ): { accessToken: string; refreshToken: string } => {
+        ): {
+            accessToken: string;
+            refreshToken: string;
+            refreshTokenExpiresAt: string;
+        } => {
             const raw = ctx.req.headers.cookie ?? '';
             // eslint-disable-next-line @typescript-eslint/naming-convention
             const { refresh_token } = cookie.parse(raw);
@@ -145,14 +151,20 @@ export const userResolvers = {
                 maxAge: 1000 * 60 * 15, // 15 minutes
             });
 
+            const refreshTokenExpiresIn = 7 * 24 * 60 * 60 * 1000; // 1 week
+
             ctx.res.cookie('refresh_token', newRefreshJwt, {
                 httpOnly: true,
                 secure: isProd,
                 sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+                maxAge: refreshTokenExpiresIn, // 1 week
             });
 
-            return { accessToken: newAccessToken, refreshToken: newRefreshJwt };
+            return {
+                accessToken: newAccessToken,
+                refreshToken: newRefreshJwt,
+                refreshTokenExpiresAt: `${Math.floor(Date.now() / 1000) + refreshTokenExpiresIn}`,
+            };
         },
         registerUser: async (
             _: never,

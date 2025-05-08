@@ -10,7 +10,7 @@ type Mutation {
   loginUser(
     email: String!
     password: String!
-  ): User
+  ): LoginResponse
 
   refreshToken(refreshToken: String): RefreshTokenResponse
 
@@ -22,7 +22,7 @@ type Mutation {
     lastName: String!
     phoneNumber: String!
     status: UserOnlineStatus
-  ): User
+  ): LoginResponse
 
   updateUser(
     id: String!
@@ -164,6 +164,7 @@ enum UserOnlineStatus {
 type RefreshTokenResponse {
   accessToken: String!
   refreshToken: String!
+  refreshTokenExpiresAt: String!
 }
 
 type User {
@@ -174,9 +175,20 @@ type User {
   lastName: String!
   phoneNumber: String!
   status: UserOnlineStatus!
+}
+
+type LoginResponse {
+  id: String!
+  email: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+  status: UserOnlineStatus!
   token: String
   accessToken: String!
   refreshToken: String!
+  refreshTokenExpiresAt: String!
 }
 
 ###########################
