@@ -20,8 +20,18 @@ export const updateUser = async (
         const { firstName, lastName, phoneNumber, email, status } = req.body;
 
         const pubsub = GooglePubSubClientSingleton.getInstance();
+        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
+        const user = await dataSource.manager.findOne(UserEntity, {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            where: { id: userId },
+        });
 
-        if (status) {
+        if (!user) {
+            res.status(404).send('User not found');
+            return;
+        }
+
+        if (status && user) {
             const friendsApiClient = new FriendsApiClient();
 
             const friends = await friendsApiClient.getFriends(userId);
@@ -37,22 +47,13 @@ export const updateUser = async (
             );
 
             for (const friend of friends) {
-                const topicName = `u-${friend.user.id}`;
-                const topic = pubsub.topic(topicName);
+                if (friend.user) {
+                    const topicName = `u-${friend.user.id}`;
+                    const topic = pubsub.topic(topicName);
 
-                await topic.publishMessage({ data: dataBuffer });
+                    await topic.publishMessage({ data: dataBuffer });
+                }
             }
-        }
-
-        const dataSource = await TypeOrmDataSourceSingleton.getInstance();
-        const user = await dataSource.manager.findOne(UserEntity, {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            where: { id: userId },
-        });
-
-        if (!user) {
-            res.status(404).send('User not found');
-            return;
         }
 
         user.firstName = firstName ?? user.firstName;

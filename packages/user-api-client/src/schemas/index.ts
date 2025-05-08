@@ -56,6 +56,13 @@ export const updateUserPayloadSchema: ObjectSchema<UpdateUserPayload> =
         lastName: Joi.string().optional(),
         phoneNumber: Joi.string().optional(),
         status: Joi.string()
-            .valid('online', 'offline', 'idle', 'invisible', 'dnd')
+            .valid(
+                'online',
+                'offline',
+                'idle',
+                'invisible',
+                'offline_dnd',
+                'online_dnd'
+            )
             .optional(),
     });
