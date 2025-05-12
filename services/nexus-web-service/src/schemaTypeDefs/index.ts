@@ -5,7 +5,6 @@ export const schemaTypeDefs = `#graphql
 ###########################
 scalar Upload
 
-
 type Mutation {
   loginUser(
     email: String!
@@ -142,7 +141,6 @@ type Query {
   getConversations(userId: String!): [Conversation!]!
   getConversationMessages(conversationId: String!, offset: Int!, limit: Int!): [Message!]!
 }
-
 
 type Subscription {
   messageAdded(channelId: String!): GroupChannelMessage!

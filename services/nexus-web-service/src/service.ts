@@ -2,6 +2,7 @@
 
 import '@google-cloud/trace-agent';
 
+import { parse, getOperationAST, DocumentNode } from 'graphql';
 import jwt from 'jsonwebtoken';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { config } from 'dotenv';
@@ -241,6 +242,21 @@ export async function createService(
         next();
     });
 
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const extractOperationName = (query: string): string | undefined => {
+        try {
+            const document: DocumentNode = parse(query);
+            const op = getOperationAST(document);
+            return op?.name?.value ?? undefined;
+        } catch (error) {
+            console.warn(
+                '[extractOperationName] failed to parse query:',
+                error
+            );
+            return undefined;
+        }
+    };
+
     app.post(
         '/graphql',
         conditionalParser,
@@ -248,10 +264,14 @@ export async function createService(
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await
             context: async ({ req, res }) => {
-                const { operationName } = req.body as {
+                let { operationName } = req.body as {
                     operationName?: string;
                     variables?: { accessToken?: string };
                 };
+
+                if (!operationName) {
+                    operationName = extractOperationName(req.body.query);
+                }
 
                 authGuard({ operationName, req });
 
