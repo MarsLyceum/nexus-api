@@ -157,7 +157,7 @@ type Query {
 }
 
 type Subscription {
-  messageAdded(channelId: String!): GroupChannelMessage!
+  messageAdded(channelId: String!): TextChannelMessage!
 
   friendStatusChanged(userId: String!): FriendStatusChangedPayload!
 

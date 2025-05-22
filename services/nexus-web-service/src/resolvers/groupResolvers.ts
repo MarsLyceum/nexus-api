@@ -21,8 +21,8 @@ import {
     GetFeedChannelPostsResponseWithAttachmentUrls,
 } from 'group-api-client';
 import {
-    fetchAttachmentsForTextChannelMessages,
-    fetchAttachmentsForFeedChannelPosts,
+    fetchAttachmentsForTextChannelMessage,
+    fetchAttachmentsForFeedChannelPost,
     getCachedSignedUrl,
     fetchAttachmentsForCommentsRecursive,
 } from '../utils';
@@ -142,7 +142,7 @@ export const loadGroupResolvers = async () => {
                 const messagesWithAttachments: GetTextChannelMessagesResponseWithAttachmentUrls =
                     await Promise.all(
                         messages.map((element) =>
-                            fetchAttachmentsForTextChannelMessages(element)
+                            fetchAttachmentsForTextChannelMessage(element)
                         )
                     );
 
@@ -167,7 +167,7 @@ export const loadGroupResolvers = async () => {
                 const messagesWithAttachments: GetFeedChannelPostsResponseWithAttachmentUrls =
                     await Promise.all(
                         posts.map((element) =>
-                            fetchAttachmentsForFeedChannelPosts(element)
+                            fetchAttachmentsForFeedChannelPost(element)
                         )
                     );
 

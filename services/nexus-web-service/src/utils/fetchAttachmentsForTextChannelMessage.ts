@@ -1,9 +1,9 @@
-import { FeedChannelPost } from 'group-api-client';
+import { TextChannelMessage } from 'group-api-client';
 
 import { getCachedSignedUrl } from './getCachedSignedUrl';
 
-export const fetchAttachmentsForFeedChannelPosts = async (
-    message: FeedChannelPost
+export const fetchAttachmentsForTextChannelMessage = async (
+    message: TextChannelMessage
 ) => {
     const { attachmentFilePaths, ...messageWithoutFilePaths } = message;
 
@@ -16,7 +16,7 @@ export const fetchAttachmentsForFeedChannelPosts = async (
 
     const attachmentUrls = await Promise.all(
         attachmentFilePaths.map(async (attachmentFilePath: string) =>
-            getCachedSignedUrl('nexus-post-attachments', attachmentFilePath)
+            getCachedSignedUrl('message-attachments', attachmentFilePath)
         )
     );
 

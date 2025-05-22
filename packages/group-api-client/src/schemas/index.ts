@@ -74,7 +74,6 @@ export const groupChannelSchema = Joi.object({
     name: Joi.string().max(100).required(),
     type: Joi.string().valid('text', 'voice', 'feed').required(),
     createdAt: Joi.date().iso().required(),
-    messages: Joi.array().items(groupChannelMessageSchema),
 });
 
 /**
