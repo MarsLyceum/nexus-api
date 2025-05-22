@@ -127,10 +127,10 @@ type Query {
 
   # Group queries
   fetchGroup(id: String!): Group
-  fetchPost(id: String!): PostMessage
+  fetchPost(id: String!): FeedChannelPost
   fetchUserGroups(userId: String!): [GroupWithImage!]!
 
-  fetchTextChannelMessages(
+  getTextChannelMessages(
     channelId: String!
     offset: Int
     limit: Int

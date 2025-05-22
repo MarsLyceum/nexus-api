@@ -1,7 +1,7 @@
 // handlers.ts
 
 import { Request, Response } from 'express';
-import { GroupChannelMessageEntity, GetPostParams } from 'group-api-client';
+import { FeedChannelPostEntity, GetPostParams } from 'group-api-client';
 import {
     RedisClientSingleton,
     TypeOrmDataSourceSingleton,
@@ -20,7 +20,7 @@ export const getPost = async (req: Request<GetPostParams>, res: Response) => {
         if (!cachedPost) {
             const dataSource = await TypeOrmDataSourceSingleton.getInstance();
             const post = await dataSource.manager.findOne(
-                GroupChannelMessageEntity,
+                FeedChannelPostEntity,
                 {
                     where: { id },
                 }

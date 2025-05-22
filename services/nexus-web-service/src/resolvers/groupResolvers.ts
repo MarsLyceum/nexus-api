@@ -124,7 +124,7 @@ export const loadGroupResolvers = async () => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return groupsWithAvatars;
             },
-            fetchTextChannelMessages: async (
+            getTextChannelMessages: async (
                 _: unknown,
                 {
                     channelId,
