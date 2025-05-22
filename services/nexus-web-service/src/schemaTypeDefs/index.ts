@@ -5,12 +5,13 @@ export const schemaTypeDefs = `#graphql
 ###########################
 scalar Upload
 
-
 type Mutation {
   loginUser(
     email: String!
     password: String!
-  ): User
+  ): LoginResponse
+
+  refreshToken(refreshToken: String): RefreshTokenResponse
 
   registerUser(
     email: String!
@@ -20,7 +21,7 @@ type Mutation {
     lastName: String!
     phoneNumber: String!
     status: UserOnlineStatus
-  ): User
+  ): LoginResponse
 
   updateUser(
     id: String!
@@ -141,7 +142,6 @@ type Query {
   getConversationMessages(conversationId: String!, offset: Int!, limit: Int!): [Message!]!
 }
 
-
 type Subscription {
   messageAdded(channelId: String!): GroupChannelMessage!
 
@@ -159,6 +159,12 @@ enum UserOnlineStatus {
   invisible
 }
 
+type RefreshTokenResponse {
+  accessToken: String!
+  refreshToken: String!
+  refreshTokenExpiresAt: String!
+}
+
 type User {
   id: String!
   email: String!
@@ -167,7 +173,20 @@ type User {
   lastName: String!
   phoneNumber: String!
   status: UserOnlineStatus!
+}
+
+type LoginResponse {
+  id: String!
+  email: String!
+  username: String!
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+  status: UserOnlineStatus!
   token: String
+  accessToken: String!
+  refreshToken: String!
+  refreshTokenExpiresAt: String!
 }
 
 ###########################

@@ -2,6 +2,8 @@
 
 import '@google-cloud/trace-agent';
 
+import { parse, getOperationAST, DocumentNode } from 'graphql';
+import jwt from 'jsonwebtoken';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { config } from 'dotenv';
 import 'reflect-metadata';
@@ -12,8 +14,6 @@ import { createServer } from 'node:http';
 import cors from 'cors';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { expressjwt, GetVerificationKey } from 'express-jwt';
-import jwksRsa from 'jwks-rsa';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
@@ -26,12 +26,18 @@ import { applyCommonMiddleware } from 'common-middleware';
 
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
-import { fetchAttachmentsForMessage, fetchAttachmentsForDm } from './utils';
+import {
+    fetchAttachmentsForMessage,
+    fetchAttachmentsForDm,
+    getAccessToken,
+} from './utils';
+import { ACCESS_JWT_SECRET } from './config';
+import { authGuard } from './middleware';
 
 declare module 'express' {
     interface Request {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        auth?: unknown; // Adjust the type as needed (e.g., `User` or a specific interface)
+        auth?: unknown;
     }
 }
 
@@ -87,114 +93,103 @@ export async function createService(
 
     app.set('port', port);
 
+    const activeSubscriptions = new Set<string>();
     const instanceId = uuidv4();
-    const newMessageSubscriptionName = `new-message-${instanceId}`;
-    const newDmSubscriptionName = `new-dm-${instanceId}`;
-    const friendStatusChangedSubscriptionName = `friend-status-changed-${instanceId}`;
-    const [newMessageSubscription] =
-        await GooglePubSubClientSingleton.getInstance()
-            .topic('new-message')
-            .createSubscription(newMessageSubscriptionName, {
-                ackDeadlineSeconds: 30,
-            });
-    const [newDmSubscription] = await GooglePubSubClientSingleton.getInstance()
-        .topic('new-dm')
-        .createSubscription(newDmSubscriptionName, {
+
+    async function ensureUserSubscription(userId: string) {
+        const topicName = `u-${userId}`;
+        const subscriptionName = `${topicName}-${instanceId}`;
+        const pubsub = GooglePubSubClientSingleton.getInstance();
+
+        const topic = pubsub.topic(topicName);
+        const [topicExists] = await topic.exists();
+        if (!topicExists) {
+            // swallow ALREADY_EXISTS races
+            try {
+                await pubsub.createTopic(topicName);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                if (error.code !== 6) {
+                    // 6 = ALREADY_EXISTS
+                    throw error;
+                }
+            }
+        }
+
+        if (activeSubscriptions.has(subscriptionName)) return;
+        activeSubscriptions.add(subscriptionName);
+
+        const [pubsubSub] = await topic.createSubscription(subscriptionName, {
             ackDeadlineSeconds: 30,
         });
-    const [friendStatusChangedSubscription] =
-        await GooglePubSubClientSingleton.getInstance()
-            .topic('friend-status-changed')
-            .createSubscription(friendStatusChangedSubscriptionName, {
-                ackDeadlineSeconds: 30,
-            });
 
-    newMessageSubscription.on(
-        'message',
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        async (message: {
-            data: { toString: () => string };
-            ack: () => void;
-        }) => {
-            const eventData = JSON.parse(
-                message.data.toString()
-            ) as GroupChannelMessage;
+        pubsubSub.on('message', async (message) => {
+            const envelope = JSON.parse(message.data.toString()) as {
+                type: 'new-dm' | 'new-message' | 'friend-status-changed';
+                payload: GroupChannelMessage | Message | unknown;
+            };
 
-            const messageWithAttachments =
-                await fetchAttachmentsForMessage(eventData);
-            // Publish to local in-memory PubSub so that active websockets get notified
-            void localPubSub.publish('MESSAGE_ADDED', {
-                messageAdded: messageWithAttachments,
-            });
+            switch (envelope.type) {
+                case 'new-message': {
+                    const messageWithAttachments =
+                        await fetchAttachmentsForMessage(
+                            envelope.payload as GroupChannelMessage
+                        );
+                    // Publish to local in-memory PubSub so that active websockets get notified
+                    void localPubSub.publish('MESSAGE_ADDED', {
+                        messageAdded: messageWithAttachments,
+                    });
+                    break;
+                }
 
-            // Acknowledge the message to prevent redelivery
+                case 'new-dm': {
+                    const messageWithAttachments = await fetchAttachmentsForDm(
+                        envelope.payload as Message
+                    );
+
+                    void localPubSub.publish('DM_ADDED', {
+                        dmAdded: messageWithAttachments,
+                    });
+                    break;
+                }
+
+                case 'friend-status-changed': {
+                    void localPubSub.publish('FRIEND_STATUS_CHANGED', {
+                        friendStatusChanged: envelope.payload,
+                    });
+                    break;
+                }
+
+                default: {
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    console.warn(`Unknown event type: ${envelope.type}`);
+                }
+            }
+
             message.ack();
-        }
-    );
-
-    newDmSubscription.on(
-        'message',
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        async (message: {
-            data: { toString: () => string };
-            ack: () => void;
-        }) => {
-            const eventData = JSON.parse(message.data.toString()) as Message;
-
-            const messageWithAttachments =
-                await fetchAttachmentsForDm(eventData);
-            // Publish to local in-memory PubSub so that active websockets get notified
-            void localPubSub.publish('DM_ADDED', {
-                dmAdded: messageWithAttachments,
-            });
-
-            // Acknowledge the message to prevent redelivery
-            message.ack();
-        }
-    );
-
-    friendStatusChangedSubscription.on(
-        'message',
-        (message: { data: { toString: () => string }; ack: () => void }) => {
-            const eventData = JSON.parse(message.data.toString());
-
-            // Publish to local in-memory PubSub so that active websockets get notified
-            void localPubSub.publish('FRIEND_STATUS_CHANGED', {
-                friendStatusChanged: eventData,
-            });
-
-            // Acknowledge the message to prevent redelivery
-            message.ack();
-        }
-    );
+        });
+    }
 
     const serverCleanup = useServer(
         {
             schema,
-            // eslint-disable-next-line @typescript-eslint/require-await
-            context: async () =>
-                // Return the context that you need for subscriptions
-                ({ pubsub: localPubSub }),
+            context: async (ctx) => {
+                // parse cookie + verify JWT
+                const token = getAccessToken(ctx.extra.request);
+                const payload = jwt.verify(
+                    token ?? '',
+                    ACCESS_JWT_SECRET as jwt.Secret
+                ) as jwt.JwtPayload;
+
+                // ensure Pub/Sub subscription here too
+                await ensureUserSubscription(payload.id);
+
+                return { pubsub: localPubSub, user: payload };
+            },
         },
         wsServer
     );
-
-    // JWT authentication middleware
-    const authenticateJWT = expressjwt({
-        secret: jwksRsa.expressJwtSecret({
-            cache: true,
-            rateLimit: true,
-            jwksRequestsPerMinute: 5,
-            jwksUri:
-                'https://dev-upkzwvoukjr1xaus.us.auth0.com/.well-known/jwks.json',
-        }) as GetVerificationKey,
-        audience: 'JIAbKzkhl7hFKLpYnIJ5gyrKr3ZG3uw8',
-        issuer: 'https://dev-upkzwvoukjr1xaus.us.auth0.com/',
-        algorithms: ['RS256'],
-        credentialsRequired: false,
-    });
-
-    app.use(authenticateJWT);
 
     const apolloServer = new ApolloServer({
         schema,
@@ -229,6 +224,39 @@ export async function createService(
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    app.use(async (req, _res, next) => {
+        // @ts-expect-error auth
+        const user = req.auth as jwt.JwtPayload | undefined;
+        if (user?.id) {
+            try {
+                await ensureUserSubscription(user.id);
+            } catch (error) {
+                console.error(
+                    'Failed to ensure subscription for user',
+                    user.id,
+                    error
+                );
+            }
+        }
+        next();
+    });
+
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const extractOperationName = (query: string): string | undefined => {
+        try {
+            const document: DocumentNode = parse(query);
+            const op = getOperationAST(document);
+            return op?.name?.value ?? undefined;
+        } catch (error) {
+            console.warn(
+                '[extractOperationName] failed to parse query:',
+                error
+            );
+            return undefined;
+        }
+    };
+
     app.post(
         '/graphql',
         conditionalParser,
@@ -236,9 +264,20 @@ export async function createService(
         expressMiddleware(apolloServer, {
             // eslint-disable-next-line @typescript-eslint/require-await
             context: async ({ req, res }) => {
+                let { operationName } = req.body as {
+                    operationName?: string;
+                    variables?: { accessToken?: string };
+                };
+
+                if (!operationName) {
+                    operationName = extractOperationName(req.body.query);
+                }
+
+                authGuard({ operationName, req });
+
                 // Extract user from JWT if it exists
                 const user = req.auth || null;
-                return { pubsub: localPubSub, user, res };
+                return { pubsub: localPubSub, user, res, req };
             },
         })
     );

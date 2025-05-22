@@ -12,5 +12,4 @@ export type User = {
         | 'invisible'
         | 'offline_dnd'
         | 'online_dnd';
-    token?: string;
 };

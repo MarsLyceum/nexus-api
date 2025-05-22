@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { buildMultipartFormData } from 'common-utils';
+import { buildMultipartFormData, isRunningInCloudRun } from 'common-utils';
 
 import {
     CreateGroupPayload,
@@ -20,10 +20,13 @@ import {
     CreatePostCommentResponse,
 } from '../responses';
 
-export class GroupApiClient {
-    private baseURL = 'https://group-api-197277044151.us-west1.run.app';
+const useLocalApi = false;
 
-    // private baseURL = 'http://localhost:4002';
+export class GroupApiClient {
+    private baseURL =
+        isRunningInCloudRun() || !useLocalApi
+            ? 'https://group-api-197277044151.us-west1.run.app'
+            : 'http://localhost:4002';
 
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {

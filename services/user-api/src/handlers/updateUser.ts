@@ -8,6 +8,7 @@ import {
     TypeOrmDataSourceSingleton,
     GooglePubSubClientSingleton,
 } from 'third-party-clients';
+import { FriendsApiClient } from 'friends-api-client';
 
 export const updateUser = async (
     req: Request<UpdateUserParams, unknown, UpdateUserPayload>,
@@ -18,18 +19,7 @@ export const updateUser = async (
         const { userId } = req.params;
         const { firstName, lastName, phoneNumber, email, status } = req.body;
 
-        if (status) {
-            const dataBuffer = Buffer.from(
-                JSON.stringify({
-                    friendUserId: userId,
-                    status,
-                })
-            );
-            await GooglePubSubClientSingleton.getInstance()
-                .topic('friend-status-changed')
-                .publishMessage({ data: dataBuffer });
-        }
-
+        const pubsub = GooglePubSubClientSingleton.getInstance();
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
         const user = await dataSource.manager.findOne(UserEntity, {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -41,6 +31,31 @@ export const updateUser = async (
             return;
         }
 
+        if (status && user) {
+            const friendsApiClient = new FriendsApiClient();
+
+            const friends = await friendsApiClient.getFriends(userId);
+
+            const dataBuffer = Buffer.from(
+                JSON.stringify({
+                    type: 'friend-status-changed',
+                    payload: {
+                        friendUserId: userId,
+                        status,
+                    },
+                })
+            );
+
+            for (const friend of friends) {
+                if (friend.user) {
+                    const topicName = `u-${friend.user.id}`;
+                    const topic = pubsub.topic(topicName);
+
+                    await topic.publishMessage({ data: dataBuffer });
+                }
+            }
+        }
+
         user.firstName = firstName ?? user.firstName;
         user.lastName = lastName ?? user.lastName;
         user.phoneNumber = phoneNumber ?? user.phoneNumber;
@@ -49,7 +64,7 @@ export const updateUser = async (
 
         await dataSource.manager.save(user);
 
-        res.status(204).json(user);
+        res.status(200).json(user);
     } catch (error) {
         res.status(500).send((error as Error).message);
     }

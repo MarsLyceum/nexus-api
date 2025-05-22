@@ -20,6 +20,7 @@
   "keywords": [],
   "author": "Mars Lyceum Inc.",
   "dependencies": {
+    "friends-api-client": "workspace:*",
     "third-party-clients": "workspace:*",
     "@google-cloud/trace-agent": "^8.0.0",
     "@google-cloud/api-gateway": "^3.3.0",
