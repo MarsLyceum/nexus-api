@@ -12,6 +12,7 @@ The backend API for Nexus.
 -   Cloudflare for CDN
 -   Upstash for Redis Cache Around DB and Storage Requests
 -   I am using forwardemail.net to forward emails to dbpiper@marslyceum.com to my gmail
+-   Doppler for secrets management
 
 ## DB
 

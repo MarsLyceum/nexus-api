@@ -17,8 +17,6 @@ export class FriendsApiClient {
             ? 'https://friends-api-197277044151.us-west1.run.app'
             : 'http://localhost:4003';
 
-    // private baseURL = 'http://localhost:4003';
-
     // eslint-disable-next-line class-methods-use-this
     private async query<T>(request: Promise<AxiosResponse<T>>): Promise<T> {
         try {
