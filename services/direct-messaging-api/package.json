@@ -42,7 +42,7 @@
     "reflect-metadata": "^0.2.2",
     "ts-node": "^10.9.2",
     "typeorm": "^0.3.20",
-    "typescript": "^5.4.5",
+    "typescript": "^5.8.3",
     "user-api-client": "workspace:*",
     "common-middleware": "workspace:*",
     "third-party-clients": "workspace:*",

@@ -1,9 +1,9 @@
-import { GroupChannelMessage } from 'group-api-client';
+import { TextChannelMessage } from 'group-api-client';
 
 import { getCachedSignedUrl } from './getCachedSignedUrl';
 
-export const fetchAttachmentsForMessage = async (
-    message: GroupChannelMessage
+export const fetchAttachmentsForTextChannelMessages = async (
+    message: TextChannelMessage
 ) => {
     const { attachmentFilePaths, ...messageWithoutFilePaths } = message;
 

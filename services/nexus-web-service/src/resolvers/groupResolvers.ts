@@ -7,18 +7,22 @@ import {
     CreateGroupResponse,
     GetGroupResponse,
     GetUserGroupsWithImagesResponse,
-    GetChannelMessagesResponseWithAttachmentUrls,
+    GetTextChannelMessagesResponseWithAttachmentUrls,
     UpdateGroupResponse,
-    CreateGroupChannelMessagePayload,
-    CreateGroupChannelMessageResponse,
+    CreateTextChannelMessagePayload,
+    CreateFeedChannelPostPayload,
+    CreateTextChannelMessageResponse,
+    CreateFeedChannelPostResponse,
     GetPostCommentsResponse,
     GetPostResponseWithAttachmentUrls,
-    CreateGroupChannelPostCommentPayload,
+    CreateFeedChannelPostCommentPayload,
     GetPostCommentsResponseWithAttachmentUrls,
     CreatePostCommentResponse,
+    GetFeedChannelPostsResponseWithAttachmentUrls,
 } from 'group-api-client';
 import {
-    fetchAttachmentsForMessage,
+    fetchAttachmentsForTextChannelMessages,
+    fetchAttachmentsForFeedChannelPosts,
     getCachedSignedUrl,
     fetchAttachmentsForCommentsRecursive,
 } from '../utils';
@@ -65,7 +69,7 @@ export const loadGroupResolvers = async () => {
                             attachmentFilePaths.map(
                                 async (attachmentFilePath) =>
                                     getCachedSignedUrl(
-                                        'message-attachments',
+                                        'nexus-post-attachments',
                                         attachmentFilePath
                                     )
                             )
@@ -120,30 +124,56 @@ export const loadGroupResolvers = async () => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return groupsWithAvatars;
             },
-            fetchChannelMessages: async (
+            fetchTextChannelMessages: async (
                 _: unknown,
                 {
                     channelId,
                     offset,
                     limit,
                 }: { channelId: string; offset: number; limit: number }
-            ): Promise<GetChannelMessagesResponseWithAttachmentUrls> => {
+            ): Promise<GetTextChannelMessagesResponseWithAttachmentUrls> => {
                 const client = new GroupApiClient();
-                const messages = await client.getChannelMessages(
+                const messages = await client.getTextChannelMessages(
                     channelId,
                     offset,
                     limit
                 );
 
-                const messagesWithAttachments: GetChannelMessagesResponseWithAttachmentUrls =
+                const messagesWithAttachments: GetTextChannelMessagesResponseWithAttachmentUrls =
                     await Promise.all(
                         messages.map((element) =>
-                            fetchAttachmentsForMessage(element)
+                            fetchAttachmentsForTextChannelMessages(element)
                         )
                     );
 
                 return messagesWithAttachments;
             },
+
+            getFeedChannelPosts: async (
+                _: unknown,
+                {
+                    channelId,
+                    offset,
+                    limit,
+                }: { channelId: string; offset: number; limit: number }
+            ): Promise<GetFeedChannelPostsResponseWithAttachmentUrls> => {
+                const client = new GroupApiClient();
+                const posts = await client.getFeedChannelPosts(
+                    channelId,
+                    offset,
+                    limit
+                );
+
+                const messagesWithAttachments: GetFeedChannelPostsResponseWithAttachmentUrls =
+                    await Promise.all(
+                        posts.map((element) =>
+                            fetchAttachmentsForFeedChannelPosts(element)
+                        )
+                    );
+
+                return messagesWithAttachments;
+            },
+
             fetchPostComments: async (
                 _: unknown,
                 {
@@ -191,28 +221,46 @@ export const loadGroupResolvers = async () => {
                 return group;
             },
 
-            createGroupChannelMessage: async (
+            createTextChannelMessage: async (
                 _: unknown,
                 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-                payload: CreateGroupChannelMessagePayload & {
+                payload: CreateTextChannelMessagePayload & {
                     attachments?: Promise<File>[];
                 }
-            ): Promise<CreateGroupChannelMessageResponse> => {
+            ): Promise<CreateTextChannelMessageResponse> => {
                 const client = new GroupApiClient();
 
                 const { attachments = [] } = payload;
 
-                const message = await client.createGroupChannelMessage(
+                const message = await client.createTextChannelMessage(
                     payload,
                     attachments
                 );
                 return message;
             },
 
+            createFeedChannelPost: async (
+                _: unknown,
+                // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+                payload: CreateFeedChannelPostPayload & {
+                    attachments?: Promise<File>[];
+                }
+            ): Promise<CreateFeedChannelPostResponse> => {
+                const client = new GroupApiClient();
+
+                const { attachments = [] } = payload;
+
+                const post = await client.createFeedChannelPost(
+                    payload,
+                    attachments
+                );
+                return post;
+            },
+
             createPostComment: async (
                 _: unknown,
                 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-                payload: CreateGroupChannelPostCommentPayload & {
+                payload: CreateFeedChannelPostCommentPayload & {
                     attachments?: Promise<File>[];
                 }
             ): Promise<CreatePostCommentResponse> => {
@@ -255,31 +303,6 @@ export const loadGroupResolvers = async () => {
                         // Only forward the event if the channelIds match
                         payload.messageAdded.channelId === variables.channelId
                 ),
-            },
-        },
-        // __resolveType on the GroupChannelMessage interface
-        GroupChannelMessage: {
-            // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
-            __resolveType(obj: any) {
-                // Use messageType if provided.
-                if (obj.messageType === 'post') {
-                    return 'PostMessage';
-                }
-                if (obj.messageType === 'message') {
-                    return 'RegularMessage';
-                }
-                // Otherwise, infer based on extra fields.
-                if (
-                    Object.prototype.hasOwnProperty.call(obj, 'upvotes') ||
-                    Object.prototype.hasOwnProperty.call(
-                        obj,
-                        'commentsCount'
-                    ) ||
-                    Object.prototype.hasOwnProperty.call(obj, 'shareCount')
-                ) {
-                    return 'PostMessage';
-                }
-                return 'RegularMessage';
             },
         },
     };

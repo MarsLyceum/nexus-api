@@ -5,22 +5,25 @@ import { buildMultipartFormData, isRunningInCloudRun } from 'common-utils';
 import {
     CreateGroupPayload,
     UpdateGroupPayload,
-    CreateGroupChannelMessagePayload,
-    CreateGroupChannelPostCommentPayload,
+    CreateTextChannelMessagePayload,
+    CreateFeedChannelPostPayload,
+    CreateFeedChannelPostCommentPayload,
 } from '../payloads';
 import {
     CreateGroupResponse,
-    CreateGroupChannelMessageResponse,
+    CreateTextChannelMessageResponse,
     GetGroupResponse,
     UpdateGroupResponse,
     GetUserGroupsResponse,
-    GetChannelMessagesResponse,
+    GetTextChannelMessagesResponse,
     GetPostCommentsResponse,
     GetPostResponse,
     CreatePostCommentResponse,
+    CreateFeedChannelPostResponse,
+    GetFeedChannelPostsResponse,
 } from '../responses';
 
-const useLocalApi = false;
+const useLocalApi = true;
 
 export class GroupApiClient {
     private baseURL =
@@ -58,14 +61,26 @@ export class GroupApiClient {
         return this.query(axios.get(`${this.baseURL}/user-groups/${userId}`));
     }
 
-    async getChannelMessages(
+    async getTextChannelMessages(
         channelId: string,
         offset: number,
         limit: number
-    ): Promise<GetChannelMessagesResponse> {
+    ): Promise<GetTextChannelMessagesResponse> {
         return this.query(
             axios.get(
                 `${this.baseURL}/channels/${channelId}/messages?offset=${offset}&limit=${limit}`
+            )
+        );
+    }
+
+    async getFeedChannelPosts(
+        channelId: string,
+        offset: number,
+        limit: number
+    ): Promise<GetFeedChannelPostsResponse> {
+        return this.query(
+            axios.get(
+                `${this.baseURL}/channels/${channelId}/posts?offset=${offset}&limit=${limit}`
             )
         );
     }
@@ -100,19 +115,19 @@ export class GroupApiClient {
         );
     }
 
-    async createGroupChannelMessage(
-        createGroupChannelMessagePayload: CreateGroupChannelMessagePayload,
+    async createTextChannelMessage(
+        createTextChannelMessagePayload: CreateTextChannelMessagePayload,
         attachments?: Promise<File>[]
-    ): Promise<CreateGroupChannelMessageResponse> {
+    ): Promise<CreateTextChannelMessageResponse> {
         if (attachments && attachments.length > 0) {
             const formData = await buildMultipartFormData(
-                createGroupChannelMessagePayload,
+                createTextChannelMessagePayload,
                 attachments,
                 'attachments'
             );
 
             return this.query(
-                axios.post(`${this.baseURL}/group-channel-message`, formData, {
+                axios.post(`${this.baseURL}/text-channel-message`, formData, {
                     headers: formData.getHeaders(),
                 })
             );
@@ -120,19 +135,45 @@ export class GroupApiClient {
 
         return this.query(
             axios.post(
-                `${this.baseURL}/group-channel-message`,
-                createGroupChannelMessagePayload
+                `${this.baseURL}/text-channel-message`,
+                createTextChannelMessagePayload
+            )
+        );
+    }
+
+    async createFeedChannelPost(
+        createFeedChannelPostPayload: CreateFeedChannelPostPayload,
+        attachments?: Promise<File>[]
+    ): Promise<CreateFeedChannelPostResponse> {
+        if (attachments && attachments.length > 0) {
+            const formData = await buildMultipartFormData(
+                createFeedChannelPostPayload,
+                attachments,
+                'attachments'
+            );
+
+            return this.query(
+                axios.post(`${this.baseURL}/feed-channel-post`, formData, {
+                    headers: formData.getHeaders(),
+                })
+            );
+        }
+
+        return this.query(
+            axios.post(
+                `${this.baseURL}/feed-channel-post`,
+                createFeedChannelPostPayload
             )
         );
     }
 
     async createPostComment(
-        createGroupChannelPostCommentPayload: CreateGroupChannelPostCommentPayload,
+        createFeedChannelPostCommentPayload: CreateFeedChannelPostCommentPayload,
         attachments?: Promise<File>[]
     ): Promise<CreatePostCommentResponse> {
         if (attachments && attachments.length > 0) {
             const formData = await buildMultipartFormData(
-                createGroupChannelPostCommentPayload,
+                createFeedChannelPostCommentPayload,
                 attachments,
                 'attachments'
             );
@@ -147,7 +188,7 @@ export class GroupApiClient {
         return this.query(
             axios.post(
                 `${this.baseURL}/comment`,
-                createGroupChannelPostCommentPayload
+                createFeedChannelPostCommentPayload
             )
         );
     }

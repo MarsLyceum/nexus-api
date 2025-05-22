@@ -73,7 +73,7 @@
         "reflect-metadata": "^0.2.2",
         "ts-node": "^10.9.2",
         "typeorm": "^0.3.20",
-        "typescript": "^5.4.3"
+        "typescript": "^5.8.3"
     },
     "devDependencies": {
         "chokidar-cli": "^3.0.0",

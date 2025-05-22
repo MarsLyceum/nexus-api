@@ -1,17 +1,17 @@
 import { Request, Response } from 'express';
 import {
-    GroupChannelMessageEntity,
-    GetChannelMessagesParams,
-    GetChannelMessagesQueryParams,
+    FeedChannelPostEntity,
+    GetFeedChannelPostsParams,
+    GetFeedChannelPostsQueryParams,
 } from 'group-api-client';
 import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
-export const getChannelMessages = async (
+export const getFeedChannelPosts = async (
     req: Request<
-        GetChannelMessagesParams,
+        GetFeedChannelPostsParams,
         unknown,
         unknown,
-        GetChannelMessagesQueryParams
+        GetFeedChannelPostsQueryParams
     >,
     res: Response
 ) => {
@@ -30,9 +30,9 @@ export const getChannelMessages = async (
 
         // Fetch messages for the channel.
         const messages = await dataSource.manager
-            .createQueryBuilder(GroupChannelMessageEntity, 'message')
-            .where('message.channelId = :channelId', { channelId })
-            .orderBy('message.postedAt', 'DESC')
+            .createQueryBuilder(FeedChannelPostEntity, 'post')
+            .where('post.channelId = :channelId', { channelId })
+            .orderBy('post.postedAt', 'DESC')
             .skip(offset)
             .take(limit)
             .getMany();

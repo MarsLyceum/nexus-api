@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import {
-    GroupChannelPostCommentEntity,
+    FeedChannelPostCommentEntity,
     GetPostCommentsParams,
     GetPostCommentsQueryParams,
 } from 'group-api-client';
@@ -31,7 +31,7 @@ export const getPostComments = async (
         const dataSource = await TypeOrmDataSourceSingleton.getInstance();
 
         const commentsQuery = dataSource.manager
-            .createQueryBuilder(GroupChannelPostCommentEntity, 'comment')
+            .createQueryBuilder(FeedChannelPostCommentEntity, 'comment')
             .where('comment.postId = :postId', { postId });
 
         if (parentCommentId) {
@@ -52,7 +52,7 @@ export const getPostComments = async (
         // Recursively fetch nested replies
         const fetchReplies = async (_parentCommentId: string) => {
             const replies = await dataSource.manager.find(
-                GroupChannelPostCommentEntity,
+                FeedChannelPostCommentEntity,
                 // eslint-disable-next-line unicorn/no-array-method-this-argument
                 {
                     where: { parentCommentId: _parentCommentId },

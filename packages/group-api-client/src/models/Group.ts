@@ -1,6 +1,7 @@
-// Discriminated union for messages
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable no-use-before-define */
 
-export type BaseGroupChannelMessage = {
+export type TextChannelMessage = {
     id: string;
     content: string;
     postedAt: Date;
@@ -11,12 +12,16 @@ export type BaseGroupChannelMessage = {
     attachmentFilePaths?: string[];
 };
 
-export type GroupChannelRegularMessage = BaseGroupChannelMessage & {
-    messageType: 'message'; // for regular messages
-};
+export type FeedChannelPost = {
+    id: string;
+    content: string;
+    postedAt: Date;
+    edited: boolean;
+    channel: GroupChannel;
+    channelId: string;
+    postedByUserId: string;
+    attachmentFilePaths?: string[];
 
-export type GroupChannelPostMessage = BaseGroupChannelMessage & {
-    messageType: 'post'; // discriminator value for posts
     title: string;
     flair?: string;
     domain?: string;
@@ -26,22 +31,18 @@ export type GroupChannelPostMessage = BaseGroupChannelMessage & {
     shareCount: number;
 };
 
-export type GroupChannelMessage =
-    | GroupChannelRegularMessage
-    | GroupChannelPostMessage;
-
-export type GroupChannelMessageWithAttachmentUrls = Omit<
-    GroupChannelMessage,
+export type TextChannelMessageWithAttachmentUrls = Omit<
+    TextChannelMessage,
     'attachmentFilePaths'
 > & { attachmentUrls?: string[] };
 
 export type PostWithAttachmentUrls = Omit<
-    GroupChannelPostMessage,
+    FeedChannelPost,
     'attachmentFilePaths'
 > & { attachmentUrls?: string[] };
 
-// New type for post comments (reflecting GroupChannelPostCommentEntity)
-export type GroupChannelPostComment = {
+// New type for post comments (reflecting FeedChannelPostCommentEntity)
+export type FeedChannelPostComment = {
     id: string;
     content: string;
     postedAt: Date;
@@ -52,13 +53,13 @@ export type GroupChannelPostComment = {
     // For threaded replies, optional parent comment id
     parentCommentId?: string | null;
     // Nested replies
-    children?: GroupChannelPostComment[];
+    children?: FeedChannelPostComment[];
     upvotes: number;
     attachmentFilePaths?: string[];
 };
 
-export type GroupChannelPostCommentWithAttachmentUrls = Omit<
-    GroupChannelPostComment,
+export type FeedChannelPostCommentWithAttachmentUrls = Omit<
+    FeedChannelPostComment,
     'attachmentFilePaths'
 > & { attachmentUrls?: string[] };
 
@@ -78,8 +79,6 @@ export type GroupChannel = {
     name: string;
     type: ChannelType;
     createdAt: Date;
-    // The messages on a channel can be either regular messages or posts.
-    messages: GroupChannelMessage[];
     groupId: string;
     group: Group;
     orderIndex: number;
