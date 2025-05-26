@@ -56,7 +56,7 @@ export const createFeedChannelPost = async (
                 // Retrieve the channel within the transaction.
                 const groupChannel = await manager.findOne(GroupChannelEntity, {
                     where: { id: req.body.channelId },
-                    relations: ['group', 'messages'],
+                    relations: ['group'],
                 });
 
                 if (!groupChannel) {
@@ -106,7 +106,7 @@ export const createFeedChannelPost = async (
             GroupChannelEntity,
             {
                 where: { id: req.body.channelId },
-                relations: ['group', 'messages'],
+                relations: ['group'],
             }
         );
 
