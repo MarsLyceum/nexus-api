@@ -10,6 +10,7 @@
         "lerna:lint": "npx lerna run lint",
         "lerna:typecheck": "npx lerna run typecheck",
         "lerna:build": "npx lerna run build",
+        "lerna:test": "npx lerna run test",
         "lerna:clean-pnpm": "npx lerna run clean-pnpm",
         "lerna:deploy": "npx lerna run deploy",
         "cloud_sql_proxy": "cloud-sql-proxy hephaestus-418809:us-west1:user-api --port=5434",
