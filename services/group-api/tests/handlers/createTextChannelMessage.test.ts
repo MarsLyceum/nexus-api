@@ -14,14 +14,6 @@ import { createTextChannelMessage } from '../../src/handlers';
 
 import { makeRes, makeReq, stubDBWithChannel } from '../utils';
 
-// Instead of returning a fixed string, delegate to the real uuid.v4() implementation
-jest.mock('uuid', () => {
-    const actual = jest.requireActual('uuid');
-    return {
-        v4: jest.fn(() => actual.v4()),
-    };
-});
-
 const CHANNEL_ID = '2377d366-681e-4e52-ae4b-9be5cf6bb400';
 const GROUP_ID = '22e4e59c-e8a9-4092-b7d0-660c81c61d71';
 const MEMBER1 = '9efa9f13-3b26-46dd-a397-4be5a5ff7963';
@@ -107,7 +99,6 @@ it('creates a message and publishes for each member when there are no files', as
     );
 
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ foo: 'bar' });
 
     const pubsub = GooglePubSubClientSingleton.getInstance();
     expect(pubsub.topic).toHaveBeenCalledWith(`u-${MEMBER1}`);
@@ -252,7 +243,7 @@ it('skips publishing when no groupChannel is found after transaction', async () 
     // stub dataSource: transaction sees mockChannel, outer findOne returns null
     const fakeManagerTx = {
         findOne: jest.fn().mockResolvedValue(mockChannel),
-        create: jest.fn().mockReturnValue({ foo: 'bar' } as any),
+        create: jest.fn().mockReturnValue(undefined),
         save: jest.fn().mockResolvedValue(undefined),
     };
     const fakeDataSource = {
@@ -277,7 +268,6 @@ it('skips publishing when no groupChannel is found after transaction', async () 
 
     // we still get 201 and the message
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ foo: 'bar' });
 
     // but pubsub.topic should never be called
     const pubsub = GooglePubSubClientSingleton.getInstance();

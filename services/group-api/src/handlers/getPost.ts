@@ -1,5 +1,3 @@
-// handlers.ts
-
 import { Request, Response } from 'express';
 import { FeedChannelPostEntity, GetPostParams } from 'group-api-client';
 import {

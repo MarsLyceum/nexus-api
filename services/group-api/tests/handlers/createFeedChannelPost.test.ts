@@ -54,7 +54,9 @@ beforeEach(() => {
 
 it('creates a post and publishes for each member when there are no files', async () => {
     const mockChannel = new GroupChannelEntity();
-    mockChannel.id = 'chan-1';
+    const CHANNEL_ID = '2377d366-681e-4e52-ae4b-9be5cf6bb400';
+    const MEMBER1 = '9efa9f13-3b26-46dd-a397-4be5a5ff7963';
+    mockChannel.id = CHANNEL_ID;
     mockChannel.group = {
         id: '22e4e59c-e8a9-4092-b7d0-660c81c61d71',
         name: 'my group',
@@ -84,7 +86,7 @@ it('creates a post and publishes for each member when there are no files', async
 
     const req = makeReq({
         content: 'hey',
-        channelId: 'chan-1',
+        channelId: CHANNEL_ID,
         postedByUserId: '9efa9f13-3b26-46dd-a397-4be5a5ff7963',
     });
     const res = makeRes();
@@ -93,7 +95,17 @@ it('creates a post and publishes for each member when there are no files', async
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ foo: 'bar' })
+        expect.objectContaining({
+            id: expect.stringMatching(
+                /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/
+            ),
+            content: 'hey',
+            channelId: CHANNEL_ID,
+            postedByUserId: MEMBER1,
+            attachmentFilePaths: [],
+            edited: false,
+            channel: mockChannel,
+        })
     );
     // each member got a publish
     const pubsub = GooglePubSubClientSingleton.getInstance();

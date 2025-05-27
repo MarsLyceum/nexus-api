@@ -93,7 +93,6 @@ export const createPostComment = async (
                     hasChildren,
                     children: [],
                 });
-                console.log('Children property:', comment.children);
 
                 await manager.save(comment);
 

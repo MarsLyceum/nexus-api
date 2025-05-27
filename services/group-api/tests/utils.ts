@@ -24,7 +24,7 @@ export function makeReq<T>(body: T, files?: any): Request {
 export function stubDBWithChannel(channel: GroupChannelEntity) {
     const fakeManager = {
         findOne: jest.fn().mockResolvedValue(channel),
-        create: jest.fn().mockReturnValue({ foo: 'bar' } as any),
+        create: jest.fn((_, data) => data),
         save: jest.fn().mockResolvedValue(undefined),
     };
     const fakeDataSource = {
