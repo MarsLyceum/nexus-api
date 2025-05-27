@@ -1,33 +1,39 @@
 import {
     Group,
-    GroupChannelMessage,
-    GroupChannelPostComment,
-    GroupChannelPostMessage,
+    TextChannelMessage,
+    FeedChannelPostComment,
+    FeedChannelPost,
     GroupWithImage,
-    GroupChannelMessageWithAttachmentUrls,
-    GroupChannelPostCommentWithAttachmentUrls,
+    TextChannelMessageWithAttachmentUrls,
+    FeedChannelPostCommentWithAttachmentUrls,
     PostWithAttachmentUrls,
 } from '../models';
 
-export type CreateGroupChannelMessageResponse = GroupChannelMessage;
+export type CreateTextChannelMessageResponse = TextChannelMessage;
+
+export type CreateFeedChannelPostResponse = FeedChannelPost;
 
 export type CreateGroupResponse = Group;
 
 export type GetGroupResponse = Group;
 
-export type GetPostResponse = GroupChannelPostMessage;
+export type GetPostResponse = FeedChannelPost;
 export type GetPostResponseWithAttachmentUrls = PostWithAttachmentUrls;
 
 export type GetUserGroupsResponse = Group[];
 export type GetUserGroupsWithImagesResponse = GroupWithImage[];
 
-export type GetChannelMessagesResponse = GroupChannelMessage[];
-export type GetChannelMessagesResponseWithAttachmentUrls =
-    GroupChannelMessageWithAttachmentUrls[];
+export type GetTextChannelMessagesResponse = TextChannelMessage[];
+export type GetTextChannelMessagesResponseWithAttachmentUrls =
+    TextChannelMessageWithAttachmentUrls[];
 
-export type GetPostCommentsResponse = GroupChannelPostComment[];
+export type GetFeedChannelPostsResponse = FeedChannelPost[];
+export type GetFeedChannelPostsResponseWithAttachmentUrls =
+    PostWithAttachmentUrls[];
+
+export type GetPostCommentsResponse = FeedChannelPostComment[];
 export type GetPostCommentsResponseWithAttachmentUrls =
-    GroupChannelPostCommentWithAttachmentUrls[];
-export type CreatePostCommentResponse = GroupChannelPostComment;
+    FeedChannelPostCommentWithAttachmentUrls[];
+export type CreatePostCommentResponse = FeedChannelPostComment;
 
 export type UpdateGroupResponse = Group;

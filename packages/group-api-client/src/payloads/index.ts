@@ -1,35 +1,7 @@
 import { ParsedQs } from 'qs';
 import { Group, ChannelType } from '../models';
 
-/**
- * Create a channel message payload.
- * We define two variants:
- *  - Regular message: just content.
- *  - Post message: includes extra post fields.
- */
-
-type CreateMessageCommonPayload = {
-    id?: string;
-    postedByUserId: string;
-    channelId: string;
-    content: string;
-};
-
-export type CreateGroupChannelRegularMessagePayload =
-    CreateMessageCommonPayload & {
-        messageType: 'message'; // regular message discriminator
-    };
-
-export type CreateGroupChannelPostMessagePayload =
-    CreateMessageCommonPayload & {
-        messageType: 'post'; // discriminator value for posts
-        title: string;
-        flair?: string;
-        domain?: string;
-        thumbnail?: string;
-    };
-
-export type CreateGroupChannelPostCommentPayload = {
+export type CreateFeedChannelPostCommentPayload = {
     content: string;
     postedByUserId: string;
     postId: string;
@@ -38,9 +10,24 @@ export type CreateGroupChannelPostCommentPayload = {
     upvotes?: number; // Defaults to 0 if not provided
 };
 
-export type CreateGroupChannelMessagePayload =
-    | CreateGroupChannelRegularMessagePayload
-    | CreateGroupChannelPostMessagePayload;
+export type CreateTextChannelMessagePayload = {
+    id?: string;
+    postedByUserId: string;
+    channelId: string;
+    content: string;
+};
+
+export type CreateFeedChannelPostPayload = {
+    id?: string;
+    postedByUserId: string;
+    channelId: string;
+    content: string;
+
+    title: string;
+    flair?: string;
+    domain?: string;
+    thumbnail?: string;
+};
 
 export type CreateGroupPayload = {
     createdByUserId: string;
@@ -66,7 +53,11 @@ export type GetUserGroupsParams = {
     userId: string;
 };
 
-export type GetChannelMessagesParams = {
+export type GetTextChannelMessagesParams = {
+    channelId: string;
+};
+
+export type GetFeedChannelPostsParams = {
     channelId: string;
 };
 
@@ -80,7 +71,12 @@ export type GetPostCommentsQueryParams = ParsedQs & {
     parentCommentId?: string;
 };
 
-export type GetChannelMessagesQueryParams = ParsedQs & {
+export type GetTextChannelMessagesQueryParams = ParsedQs & {
+    offset: string;
+    limit?: string;
+};
+
+export type GetFeedChannelPostsQueryParams = ParsedQs & {
     offset: string;
     limit?: string;
 };

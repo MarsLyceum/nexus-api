@@ -30,8 +30,8 @@ importers:
         specifier: ^0.3.20
         version: 0.3.20
       typescript:
-        specifier: ^5.5.2
-        version: 5.5.2
+        specifier: ^5.8.3
+        version: 5.8.3
 
 packages:
 
@@ -434,8 +434,8 @@ packages:
       typeorm-aurora-data-api-driver:
         optional: true
 
-  typescript@5.5.2:
-    resolution: {integrity: sha512-NcRtPEOsPFFWjobJEtfihkLCZCXZt/os3zf8nTxjVH3RvTSxjrCamJpbExGvYOF+tFHc3pA65qpdwPbzjohhew==}
+  typescript@5.8.3:
+    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -836,7 +836,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  typescript@5.5.2: {}
+  typescript@5.8.3: {}
 
   undici-types@5.26.5: {}
 

@@ -18,7 +18,7 @@ import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub as InMemoryPubSub } from 'graphql-subscriptions';
 import { v4 as uuidv4 } from 'uuid';
-import { GroupChannelMessage } from 'group-api-client';
+import { TextChannelMessage } from 'group-api-client';
 import { Message } from 'direct-messaging-api-client';
 
 import { GooglePubSubClientSingleton } from 'third-party-clients';
@@ -27,7 +27,7 @@ import { applyCommonMiddleware } from 'common-middleware';
 import { schemaTypeDefs } from './schemaTypeDefs';
 import { loadResolvers } from './resolvers/index';
 import {
-    fetchAttachmentsForMessage,
+    fetchAttachmentsForTextChannelMessage,
     fetchAttachmentsForDm,
     getAccessToken,
 } from './utils';
@@ -127,14 +127,14 @@ export async function createService(
         pubsubSub.on('message', async (message) => {
             const envelope = JSON.parse(message.data.toString()) as {
                 type: 'new-dm' | 'new-message' | 'friend-status-changed';
-                payload: GroupChannelMessage | Message | unknown;
+                payload: TextChannelMessage | Message | unknown;
             };
 
             switch (envelope.type) {
                 case 'new-message': {
                     const messageWithAttachments =
-                        await fetchAttachmentsForMessage(
-                            envelope.payload as GroupChannelMessage
+                        await fetchAttachmentsForTextChannelMessage(
+                            envelope.payload as TextChannelMessage
                         );
                     // Publish to local in-memory PubSub so that active websockets get notified
                     void localPubSub.publish('MESSAGE_ADDED', {

@@ -18,7 +18,7 @@ module.exports = {
         'plugin:unicorn/recommended',
         'prettier',
     ],
-    ignorePatterns: ['dist/', 'migrations/'],
+    ignorePatterns: ['dist/', 'migrations/', 'coverage/', 'jest.config.js'],
     env: {
         node: true,
         browser: true,
@@ -90,6 +90,12 @@ module.exports = {
                 // Allow CJS until ESM support improves
                 '@typescript-eslint/no-var-requires': 'off',
                 'unicorn/prefer-module': 'off',
+            },
+        },
+        {
+            files: ['**/*.test.ts', '**/tests/**/*.ts', '**/mocks/**/*.ts'],
+            parserOptions: {
+                project: './tsconfig.test.json',
             },
         },
     ],

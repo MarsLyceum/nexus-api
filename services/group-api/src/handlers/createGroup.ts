@@ -75,7 +75,6 @@ export const createGroup = async (
                     type: 'text',
                     createdAt: new Date(),
                     group,
-                    messages: [],
                     orderIndex: 0,
                 });
                 await manager.save(generalChannel);
@@ -86,7 +85,6 @@ export const createGroup = async (
                     type: 'feed',
                     createdAt: new Date(),
                     group,
-                    messages: [],
                     orderIndex: 1,
                 });
                 await manager.save(feedChannel);

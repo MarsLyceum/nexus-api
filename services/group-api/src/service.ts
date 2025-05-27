@@ -7,32 +7,38 @@ import cors from 'cors';
 import multer from 'multer';
 
 import {
+    GetFeedChannelPostsParams,
+    GetFeedChannelPostsQueryParams,
     DeleteGroupParams,
     GetGroupParams,
     GetUserGroupsParams,
-    GetChannelMessagesParams,
-    GetChannelMessagesQueryParams,
+    GetTextChannelMessagesParams,
+    GetTextChannelMessagesQueryParams,
     UpdateGroupParams,
     UpdateGroupPayload,
     CreateGroupPayload,
     CreateGroupChannelPayload,
-    CreateGroupChannelMessagePayload,
+    CreateTextChannelMessagePayload,
+    CreateFeedChannelPostPayload,
     createGroupPayloadSchema,
     createGroupChannelPayloadSchema,
-    createGroupChannelMessagePayloadSchema,
+    createTextChannelMessagePayloadSchema,
+    createFeedChannelPostPayloadSchema,
     getGroupParamsSchema,
     updateGroupParamsSchema,
     updateGroupPayloadSchema,
     deleteGroupParamsSchema,
     getUserGroupsParamsSchema,
-    getChannelMessagesParamsSchema,
+    getTextChannelMessagesParamsSchema,
+    getFeedChannelPostsParamsSchema,
+    getFeedChannelPostsQueryParamsSchema,
     GetPostCommentsParams,
     GetPostCommentsQueryParams,
     getPostCommentsParamsSchema,
     getPostCommentsQueryParamsSchema,
-    getChannelMessagesQueryParamsSchema,
-    CreateGroupChannelPostCommentPayload,
-    createGroupChannelPostCommentPayloadSchema,
+    getTextChannelMessagesQueryParamsSchema,
+    CreateFeedChannelPostCommentPayload,
+    createFeedChannelPostCommentPayloadSchema,
     getPostParamsSchema,
     GetPostParams,
 } from 'group-api-client';
@@ -43,8 +49,10 @@ import { applyCommonMiddleware } from 'common-middleware';
 import {
     createGroup,
     createGroupChannel,
-    createGroupChannelMessage,
-    getChannelMessages,
+    createTextChannelMessage,
+    createFeedChannelPost,
+    getTextChannelMessages,
+    getFeedChannelPosts,
     getGroup,
     updateGroup,
     deleteGroup,
@@ -123,27 +131,35 @@ export async function createService(
         )
     );
 
-    // Create a new group channel message
     app.post(
-        '/group-channel-message',
+        '/text-channel-message',
         upload.fields([{ name: 'attachments', maxCount: 10 }]),
-        validatePayload(createGroupChannelMessagePayloadSchema),
+        validatePayload(createTextChannelMessagePayloadSchema),
         asyncHandler<
             unknown,
             unknown,
-            CreateGroupChannelMessagePayload,
+            CreateTextChannelMessagePayload,
             ParsedQs
-        >((req, res) => createGroupChannelMessage(req, res))
+        >((req, res) => createTextChannelMessage(req, res))
+    );
+
+    app.post(
+        '/feed-channel-post',
+        upload.fields([{ name: 'attachments', maxCount: 10 }]),
+        validatePayload(createFeedChannelPostPayloadSchema),
+        asyncHandler<unknown, unknown, CreateFeedChannelPostPayload, ParsedQs>(
+            (req, res) => createFeedChannelPost(req, res)
+        )
     );
 
     app.post(
         '/comment',
         upload.fields([{ name: 'attachments', maxCount: 10 }]),
-        validatePayload(createGroupChannelPostCommentPayloadSchema),
+        validatePayload(createFeedChannelPostCommentPayloadSchema),
         asyncHandler<
             unknown,
             unknown,
-            CreateGroupChannelPostCommentPayload,
+            CreateFeedChannelPostCommentPayload,
             ParsedQs
         >((req, res) => createPostComment(req, res))
     );
@@ -176,15 +192,28 @@ export async function createService(
     // GET /channels/:channelId/messages?offset=0
     app.get(
         '/channels/:channelId/messages',
-        validateParams(getChannelMessagesParamsSchema),
-        validateQueryParams(getChannelMessagesQueryParamsSchema),
+        validateParams(getTextChannelMessagesParamsSchema),
+        validateQueryParams(getTextChannelMessagesQueryParamsSchema),
         // @ts-expect-error query params
         asyncHandler<
-            GetChannelMessagesParams,
+            GetTextChannelMessagesParams,
             unknown,
             unknown,
-            GetChannelMessagesQueryParams
-        >((req, res) => getChannelMessages(req, res))
+            GetTextChannelMessagesQueryParams
+        >((req, res) => getTextChannelMessages(req, res))
+    );
+
+    app.get(
+        '/channels/:channelId/posts',
+        validateParams(getFeedChannelPostsParamsSchema),
+        validateQueryParams(getFeedChannelPostsQueryParamsSchema),
+        // @ts-expect-error query params
+        asyncHandler<
+            GetFeedChannelPostsParams,
+            unknown,
+            unknown,
+            GetFeedChannelPostsQueryParams
+        >((req, res) => getFeedChannelPosts(req, res))
     );
 
     // GET /post/:postId/comments?offset=0&limit=10&parentCommentId=NULL
