@@ -31,14 +31,14 @@ beforeEach(() => {
     fakeFile = { save: jest.fn().mockResolvedValue(undefined) };
     const fakeBucket = { file: jest.fn().mockReturnValue(fakeFile) };
     bucketMock = jest.fn().mockReturnValue(fakeBucket);
-    (GoogleCloudStorageSingleton.getInstance as jest.Mock).mockReturnValue({
+    (GoogleCloudStorageSingleton.getInstance).mockReturnValue({
         bucket: bucketMock,
     });
 
     // PubSub mock
     const fakeTopic = { publishMessage: jest.fn().mockResolvedValue('msgId') };
     const fakePubsub = { topic: jest.fn().mockReturnValue(fakeTopic) };
-    (GooglePubSubClientSingleton.getInstance as jest.Mock).mockReturnValue(
+    (GooglePubSubClientSingleton.getInstance).mockReturnValue(
         fakePubsub
     );
 });
@@ -167,7 +167,7 @@ it('uploads attachments before creating message', async () => {
 });
 
 it('returns 404 when channel id is invalid', async () => {
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue({
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue({
         manager: {
             transaction: () => {
                 throw new Error('Invalid channel id');
@@ -188,7 +188,7 @@ it('returns 404 when channel id is invalid', async () => {
 });
 
 it('handles unexpected errors with 500', async () => {
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue({
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue({
         manager: {
             transaction: () => {
                 throw new Error('something broke');
@@ -215,7 +215,7 @@ it('returns 404 when manager.findOne returns null inside transaction', async () 
         create: jest.fn(),
         save: jest.fn(),
     };
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue({
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue({
         manager: {
             transaction: (cb: any) => cb(fakeManager),
             findOne: fakeManager.findOne,
@@ -252,7 +252,7 @@ it('skips publishing when no groupChannel is found after transaction', async () 
             findOne: jest.fn().mockResolvedValue(null),
         },
     };
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
         fakeDataSource
     );
 

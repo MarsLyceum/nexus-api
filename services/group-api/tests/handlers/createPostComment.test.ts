@@ -31,7 +31,7 @@ describe('createPostComment handler', () => {
         fakeFile = { save: jest.fn().mockResolvedValue(undefined) };
         const fakeBucket = { file: jest.fn().mockReturnValue(fakeFile) };
         bucketMock = jest.fn().mockReturnValue(fakeBucket);
-        (GoogleCloudStorageSingleton.getInstance as jest.Mock).mockReturnValue({
+        (GoogleCloudStorageSingleton.getInstance).mockReturnValue({
             bucket: bucketMock,
         });
 
@@ -47,7 +47,7 @@ describe('createPostComment handler', () => {
                 transaction: async (cb: any) => cb(fakeManager),
             },
         };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
     });
@@ -171,7 +171,7 @@ describe('createPostComment handler', () => {
 
     it('handles unexpected errors with 500', async () => {
         (
-            TypeOrmDataSourceSingleton.getInstance as jest.Mock
+            TypeOrmDataSourceSingleton.getInstance
         ).mockRejectedValueOnce(new Error('database down'));
         const req = makeReq({
             content: '',

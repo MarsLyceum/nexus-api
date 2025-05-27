@@ -1,4 +1,4 @@
-// __mocks__/third-party-clients.ts
+// mocks/third-party-clients.ts
 
 const fakeFile = {
     // eslint-disable-next-line unicorn/no-useless-undefined
@@ -6,6 +6,7 @@ const fakeFile = {
 };
 
 const fakeBucket = {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     file: jest.fn().mockImplementation((_: string) => fakeFile),
 };
 
@@ -34,3 +35,5 @@ export const TypeOrmDataSourceSingleton = {
 export const RedisClientSingleton = {
     getInstance: jest.fn(),
 };
+
+export const DATA_SOURCE = () => {};

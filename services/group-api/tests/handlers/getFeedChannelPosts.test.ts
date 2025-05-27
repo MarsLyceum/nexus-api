@@ -34,7 +34,7 @@ describe('getFeedChannelPosts handler', () => {
         const fakeDataSource = {
             manager: { createQueryBuilder: fakeCreateQueryBuilder },
         };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
     });
@@ -95,7 +95,7 @@ describe('getFeedChannelPosts handler', () => {
 
     it('handles errors by returning 500', async () => {
         (
-            TypeOrmDataSourceSingleton.getInstance as jest.Mock
+            TypeOrmDataSourceSingleton.getInstance
         ).mockRejectedValueOnce(new Error('fail'));
 
         const req = { params: { channelId: 'c1' }, query: {} } as any;

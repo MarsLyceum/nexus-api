@@ -40,7 +40,7 @@ describe('getPostComments handler', () => {
                 find: fakeFind,
             },
         };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
     });
@@ -148,7 +148,7 @@ describe('getPostComments handler', () => {
 
     it('returns 500 on errors', async () => {
         (
-            TypeOrmDataSourceSingleton.getInstance as jest.Mock
+            TypeOrmDataSourceSingleton.getInstance
         ).mockRejectedValueOnce(new Error('boom'));
         const req = { params: { postId: 'p4' }, query: {} } as any;
         const res = makeRes();

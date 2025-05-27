@@ -33,7 +33,7 @@ beforeEach(() => {
             findOne: fakeManager.findOne,
         },
     };
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
         fakeDataSource
     );
 
@@ -42,7 +42,7 @@ beforeEach(() => {
     const bucketMock = jest.fn().mockReturnValue({
         file: jest.fn().mockReturnValue(fakeFile),
     });
-    (GoogleCloudStorageSingleton.getInstance as jest.Mock).mockReturnValue({
+    (GoogleCloudStorageSingleton.getInstance).mockReturnValue({
         bucket: bucketMock,
     });
 
@@ -189,7 +189,7 @@ it('uploads each attachment before creating post', async () => {
 
 it('returns 404 when the channel id is not found inside the transaction', async () => {
     // Stub getInstance so that inside transaction, findOne returns null
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue({
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue({
         manager: {
             transaction: (cb: any) =>
                 cb({
@@ -232,7 +232,7 @@ it('skips publishing when post is created but groupChannel is null on second loo
             findOne: jest.fn().mockResolvedValue(null),
         },
     };
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
         fakeDataSource
     );
 

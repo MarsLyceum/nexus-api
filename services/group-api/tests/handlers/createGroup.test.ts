@@ -53,7 +53,7 @@ describe('createGroup handler', () => {
             save: jest.fn().mockResolvedValue(undefined),
         };
 
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             {
                 manager: {
                     transaction: (cb: any) => cb(fakeManager),
@@ -83,7 +83,7 @@ describe('createGroup handler', () => {
         saveMock = jest.fn().mockResolvedValue(undefined);
         const fileMock = jest.fn().mockReturnValue({ save: saveMock });
         bucketMock = jest.fn().mockReturnValue({ file: fileMock });
-        (GoogleCloudStorageSingleton.getInstance as jest.Mock).mockReturnValue({
+        (GoogleCloudStorageSingleton.getInstance).mockReturnValue({
             bucket: bucketMock,
         });
 
@@ -92,7 +92,7 @@ describe('createGroup handler', () => {
             create: jest.fn().mockReturnValue({} as any),
             save: jest.fn().mockResolvedValue(undefined),
         };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             {
                 manager: { transaction: (cb: any) => cb(fakeManager) },
             }
@@ -132,7 +132,7 @@ describe('createGroup handler', () => {
     });
 
     it('returns 500 when transaction throws', async () => {
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             {
                 manager: {
                     transaction: () => {

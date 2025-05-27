@@ -31,7 +31,7 @@ describe('createGroupChannel handler', () => {
             manager: fakeManager,
         };
 
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
     });
@@ -87,7 +87,7 @@ describe('createGroupChannel handler', () => {
 
     it('handles unexpected errors with 500', async () => {
         (
-            TypeOrmDataSourceSingleton.getInstance as jest.Mock
+            TypeOrmDataSourceSingleton.getInstance
         ).mockRejectedValueOnce(new Error('db down'));
 
         const req = makeReq({

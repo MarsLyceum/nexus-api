@@ -51,7 +51,7 @@ describe('deleteGroup handler', () => {
         );
 
         fakeDataSource = { manager: initialManager };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
 
@@ -65,7 +65,7 @@ describe('deleteGroup handler', () => {
         bucketMock = jest
             .fn()
             .mockReturnValue({ file: jest.fn().mockReturnValue(fileMock) });
-        (GoogleCloudStorageSingleton.getInstance as jest.Mock).mockReturnValue({
+        (GoogleCloudStorageSingleton.getInstance).mockReturnValue({
             bucket: bucketMock,
         });
     });

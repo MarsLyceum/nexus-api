@@ -22,14 +22,14 @@ describe('getGroup handler', () => {
 
         fakeGet = jest.fn();
         fakeSet = jest.fn().mockResolvedValue(undefined);
-        (RedisClientSingleton.getInstance as jest.Mock).mockReturnValue({
+        (RedisClientSingleton.getInstance).mockReturnValue({
             get: fakeGet,
             set: fakeSet,
         });
 
         fakeManager = { findOne: jest.fn() };
         const fakeDataSource = { manager: fakeManager };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
     });
@@ -94,7 +94,7 @@ describe('getGroup handler', () => {
     });
 
     it('handles errors with 500', async () => {
-        (RedisClientSingleton.getInstance as jest.Mock).mockImplementation(
+        (RedisClientSingleton.getInstance).mockImplementation(
             () => {
                 throw new Error('redis fail');
             }

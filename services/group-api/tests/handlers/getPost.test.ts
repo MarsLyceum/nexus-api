@@ -22,14 +22,14 @@ describe('getPost handler', () => {
 
         fakeGet = jest.fn();
         fakeSet = jest.fn().mockResolvedValue(undefined);
-        (RedisClientSingleton.getInstance as jest.Mock).mockReturnValue({
+        (RedisClientSingleton.getInstance).mockReturnValue({
             get: fakeGet,
             set: fakeSet,
         });
 
         fakeFindOne = jest.fn();
         const fakeDataSource = { manager: { findOne: fakeFindOne } };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
     });

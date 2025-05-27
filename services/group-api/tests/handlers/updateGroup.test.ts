@@ -23,7 +23,7 @@ describe('updateGroup handler', () => {
             save: fakeSave,
         };
         const fakeDataSource = { manager: fakeManager };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
     });
@@ -132,7 +132,7 @@ describe('updateGroup handler', () => {
 
     it('handles errors with 500', async () => {
         (
-            TypeOrmDataSourceSingleton.getInstance as jest.Mock
+            TypeOrmDataSourceSingleton.getInstance
         ).mockRejectedValueOnce(new Error('fail'));
         const req = { params: { id: 'g1' }, body: {} } as any;
         const res = makeRes();

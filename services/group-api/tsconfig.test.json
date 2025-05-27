@@ -8,5 +8,5 @@
             "third-party-clients": ["__mocks__/third-party-clients.ts"]
         }
     },
-    "include": ["src/**/*", "test/**/*", "__mocks__/**/*"]
+    "include": ["src/**/*", "tests/**/*", "__mocks__/**/*"]
 }

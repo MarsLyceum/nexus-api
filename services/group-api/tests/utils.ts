@@ -34,7 +34,7 @@ export function stubDBWithChannel(channel: GroupChannelEntity) {
             findOne: fakeManager.findOne,
         },
     };
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+    (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
         fakeDataSource
     );
     return { fakeManager };

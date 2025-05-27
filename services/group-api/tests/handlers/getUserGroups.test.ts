@@ -38,12 +38,12 @@ describe('getUserGroups handler', () => {
         const fakeDataSource = {
             manager: { createQueryBuilder: fakeCreateQueryBuilder },
         };
-        (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        (TypeOrmDataSourceSingleton.getInstance).mockResolvedValue(
             fakeDataSource
         );
 
         fakeSet = jest.fn().mockResolvedValue(undefined);
-        (RedisClientSingleton.getInstance as jest.Mock).mockReturnValue({
+        (RedisClientSingleton.getInstance).mockReturnValue({
             set: fakeSet,
         });
     });
@@ -99,7 +99,7 @@ describe('getUserGroups handler', () => {
 
     it('handles errors by returning 500', async () => {
         (
-            TypeOrmDataSourceSingleton.getInstance as jest.Mock
+            TypeOrmDataSourceSingleton.getInstance
         ).mockRejectedValueOnce(new Error('fail'));
 
         const req = { params: { userId: 'u1' } } as any;
