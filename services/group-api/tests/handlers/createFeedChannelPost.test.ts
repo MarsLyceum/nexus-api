@@ -1,10 +1,9 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/unbound-method */
-// eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable unicorn/no-useless-undefined */
 
 // createFeedChannelPost.test.ts
-import { Request, Response } from 'express';
 import {
     TypeOrmDataSourceSingleton,
     GoogleCloudStorageSingleton,
@@ -14,22 +13,7 @@ import { GroupChannelEntity, GroupEntity } from 'group-api-client';
 
 import { createFeedChannelPost } from '../../src/handlers';
 
-type ResSpy = {
-    status: jest.Mock;
-    json: jest.Mock;
-    send: jest.Mock;
-};
-
-function makeRes(): ResSpy & Response {
-    const status = jest.fn().mockReturnThis();
-    const json = jest.fn().mockReturnThis();
-    const send = jest.fn().mockReturnThis();
-    return { status, json, send } as any;
-}
-
-function makeReq<T>(body: T, files?: any): Request {
-    return { body, files } as any;
-}
+import { makeRes, makeReq, stubDBWithChannel } from '../utils';
 
 beforeEach(() => {
     jest.resetAllMocks();
@@ -54,7 +38,6 @@ beforeEach(() => {
     );
 
     // fake storage bucket
-    // eslint-disable-next-line unicorn/no-useless-undefined
     const fakeFile = { save: jest.fn().mockResolvedValue(undefined) };
     const bucketMock = jest.fn().mockReturnValue({
         file: jest.fn().mockReturnValue(fakeFile),
@@ -97,18 +80,7 @@ it('creates a post and publishes for each member when there are no files', async
         ],
     };
 
-    // manager.findOne first in transaction
-    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue({
-        manager: {
-            transaction: (cb: any) =>
-                cb({
-                    findOne: jest.fn().mockResolvedValue(mockChannel),
-                    create: jest.fn().mockReturnValue({ foo: 'bar' } as any),
-                    save: jest.fn(),
-                }),
-            findOne: jest.fn().mockResolvedValue(mockChannel),
-        },
-    });
+    stubDBWithChannel(mockChannel);
 
     const req = makeReq({
         content: 'hey',
@@ -201,4 +173,71 @@ it('uploads each attachment before creating post', async () => {
         expect.any(Buffer),
         expect.objectContaining({ metadata: { contentType: 'image/png' } })
     );
+});
+
+it('returns 404 when the channel id is not found inside the transaction', async () => {
+    // Stub getInstance so that inside transaction, findOne returns null
+    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue({
+        manager: {
+            transaction: (cb: any) =>
+                cb({
+                    findOne: jest.fn().mockResolvedValue(null),
+                    create: jest.fn(),
+                    save: jest.fn(),
+                }),
+        },
+    });
+
+    const req = makeReq({
+        content: '',
+        channelId: 'nonexistent',
+        postedByUserId: 'user-x',
+    });
+    const res = makeRes();
+
+    await createFeedChannelPost(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Invalid channel id' });
+});
+
+it('skips publishing when post is created but groupChannel is null on second lookup', async () => {
+    // Arrange: transaction succeeds, but outer findOne returns null
+    const fakeManagerTx = {
+        findOne: jest.fn().mockResolvedValue(
+            // inside transaction we need a valid channel so create succeeds
+            new GroupChannelEntity()
+        ),
+        create: jest.fn().mockReturnValue({ foo: 'bar' } as any),
+        save: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const fakeDataSource = {
+        manager: {
+            // first, use fakeManagerTx for transaction
+            transaction: (cb: any) => cb(fakeManagerTx),
+            // then, simulate groupChannel lookup returning null
+            findOne: jest.fn().mockResolvedValue(null),
+        },
+    };
+    (TypeOrmDataSourceSingleton.getInstance as jest.Mock).mockResolvedValue(
+        fakeDataSource
+    );
+
+    // Act
+    const req = makeReq({
+        content: 'hey',
+        channelId: 'chan-1',
+        postedByUserId: 'u1',
+    });
+    const res = makeRes();
+    await createFeedChannelPost(req, res);
+
+    // Assert: post was created and returned
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ foo: 'bar' });
+
+    // And because groupChannel is null, we never publish
+    const pubsub = GooglePubSubClientSingleton.getInstance();
+    expect(pubsub.topic).not.toHaveBeenCalled();
 });
