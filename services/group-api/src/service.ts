@@ -43,6 +43,8 @@ import {
     GetPostParams,
     updateTextChannelMessagePayloadSchema,
     UpdateTextChannelMessagePayload,
+    deleteTextChannelMessageParamsSchema,
+    DeleteTextChannelMessageParams,
 } from 'group-api-client';
 import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
@@ -63,6 +65,7 @@ import {
     getPostComments,
     getPost,
     updateTextChannelMessage,
+    deleteTextChannelMessage,
 } from './handlers';
 
 import {
@@ -260,6 +263,17 @@ export async function createService(
         asyncHandler<DeleteGroupParams, unknown, unknown, ParsedQs>(
             (req, res) => deleteGroup(req, res)
         )
+    );
+
+    app.delete(
+        '/text-channel-message/:id',
+        validateParams(deleteTextChannelMessageParamsSchema),
+        asyncHandler<
+            DeleteTextChannelMessageParams,
+            unknown,
+            unknown,
+            ParsedQs
+        >((req, res) => deleteTextChannelMessage(req, res))
     );
 
     // Health check route

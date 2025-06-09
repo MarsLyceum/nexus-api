@@ -156,6 +156,12 @@ export const getPostParamsSchema = groupIdentifierSchema;
 export const deleteGroupParamsSchema = groupIdentifierSchema;
 export const updateGroupParamsSchema = groupIdentifierSchema;
 
+export const deleteTextChannelMessageParamsSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
 export const getUserGroupsParamsSchema = Joi.object({
     userId: Joi.string()
         .guid({ version: ['uuidv4'] })

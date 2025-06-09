@@ -213,4 +213,10 @@ export class GroupApiClient {
     async deleteGroup(id: string): Promise<undefined> {
         return this.query(axios.delete(`${this.baseURL}/group/${id}`));
     }
+
+    async deleteTextChannelMessage(id: string): Promise<undefined> {
+        return this.query(
+            axios.delete(`${this.baseURL}/text-channel-message/${id}`)
+        );
+    }
 }

@@ -55,6 +55,8 @@ type Mutation {
     content: String!
   ): TextChannelMessage
 
+  deleteTextChannelMessage(id: String!): Boolean!
+
   createFeedChannelPost(
     id: String
     postedByUserId: String!

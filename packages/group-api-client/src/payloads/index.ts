@@ -59,6 +59,10 @@ export type GetUserGroupsParams = {
     userId: string;
 };
 
+export type DeleteTextChannelMessageParams = {
+    id: string;
+};
+
 export type GetTextChannelMessagesParams = {
     channelId: string;
 };

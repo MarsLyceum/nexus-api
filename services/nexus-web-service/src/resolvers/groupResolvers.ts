@@ -21,6 +21,7 @@ import {
     GetFeedChannelPostsResponseWithAttachmentUrls,
     UpdateTextChannelMessagePayload,
     UpdateTextChannelMessageResponse,
+    DeleteTextChannelMessageParams,
 } from 'group-api-client';
 import {
     fetchAttachmentsForTextChannelMessage,
@@ -250,6 +251,17 @@ export const loadGroupResolvers = async () => {
                 const message = await client.updateTextChannelMessage(payload);
 
                 return message;
+            },
+
+            deleteTextChannelMessage: async (
+                _: never,
+                { id }: DeleteTextChannelMessageParams
+            ): Promise<boolean> => {
+                const client = new GroupApiClient();
+
+                await client.deleteTextChannelMessage(id);
+
+                return true;
             },
 
             createFeedChannelPost: async (
