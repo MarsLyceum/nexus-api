@@ -8,6 +8,7 @@ import {
     CreateTextChannelMessagePayload,
     CreateFeedChannelPostPayload,
     CreateFeedChannelPostCommentPayload,
+    UpdateTextChannelMessagePayload,
 } from '../payloads';
 import {
     CreateGroupResponse,
@@ -21,6 +22,7 @@ import {
     CreatePostCommentResponse,
     CreateFeedChannelPostResponse,
     GetFeedChannelPostsResponse,
+    UpdateTextChannelMessageResponse,
 } from '../responses';
 
 const useLocalApi = true;
@@ -197,10 +199,18 @@ export class GroupApiClient {
         id: string,
         data: UpdateGroupPayload
     ): Promise<UpdateGroupResponse> {
-        return this.query(axios.put(`${this.baseURL}/${id}`, data));
+        return this.query(axios.put(`${this.baseURL}/group/${id}`, data));
+    }
+
+    async updateTextChannelMessage(
+        payload: UpdateTextChannelMessagePayload
+    ): Promise<UpdateTextChannelMessageResponse> {
+        return this.query(
+            axios.put(`${this.baseURL}/text-channel-message`, payload)
+        );
     }
 
     async deleteGroup(id: string): Promise<undefined> {
-        return this.query(axios.delete(`${this.baseURL}/${id}`));
+        return this.query(axios.delete(`${this.baseURL}/group/${id}`));
     }
 }

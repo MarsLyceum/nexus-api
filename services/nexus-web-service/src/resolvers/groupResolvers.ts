@@ -19,6 +19,8 @@ import {
     GetPostCommentsResponseWithAttachmentUrls,
     CreatePostCommentResponse,
     GetFeedChannelPostsResponseWithAttachmentUrls,
+    UpdateTextChannelMessagePayload,
+    UpdateTextChannelMessageResponse,
 } from 'group-api-client';
 import {
     fetchAttachmentsForTextChannelMessage,
@@ -236,6 +238,17 @@ export const loadGroupResolvers = async () => {
                     payload,
                     attachments
                 );
+                return message;
+            },
+
+            updateTextChannelMessage: async (
+                _: unknown,
+                payload: UpdateTextChannelMessagePayload
+            ): Promise<UpdateTextChannelMessageResponse> => {
+                const client = new GroupApiClient();
+
+                const message = await client.updateTextChannelMessage(payload);
+
                 return message;
             },
 

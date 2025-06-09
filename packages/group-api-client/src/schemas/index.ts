@@ -137,6 +137,16 @@ export const updateGroupPayloadSchema = Joi.object({
     description: Joi.string().optional(),
 });
 
+export const updateTextChannelMessagePayloadSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required().allow(''),
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
 /**
  * Schemas for route parameters that identify a group.
  * These are reused for GET, DELETE, and UPDATE operations.

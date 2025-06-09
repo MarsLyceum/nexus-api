@@ -49,6 +49,12 @@ type Mutation {
     attachments: [Upload!]
   ): TextChannelMessage
 
+  updateTextChannelMessage(
+    id: String!
+    postedByUserId: String!
+    content: String!
+  ): TextChannelMessage
+
   createFeedChannelPost(
     id: String
     postedByUserId: String!

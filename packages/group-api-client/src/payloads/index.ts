@@ -41,6 +41,12 @@ export type CreateGroupChannelPayload = {
     name: string;
 };
 
+export type UpdateTextChannelMessagePayload = {
+    id: string;
+    content: string;
+    postedByUserId: string;
+};
+
 export type GetGroupParams = {
     id: string;
 };
