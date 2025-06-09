@@ -1,0 +1,12 @@
+// tsconfig.test.json
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "paths": {
+            // only tests will pick this up
+            "third-party-clients": ["__mocks__/third-party-clients.ts"]
+        }
+    },
+    "include": ["src/**/*", "tests/**/*", "__mocks__/**/*"]
+}

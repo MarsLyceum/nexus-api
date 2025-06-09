@@ -9,10 +9,10 @@ import {
     Index,
 } from 'typeorm';
 // Use a type‑only import to avoid a runtime dependency cycle.
-import type { GroupChannelPostEntity } from './GroupChannelPostEntity';
+import type { FeedChannelPostEntity } from './FeedChannelPostEntity';
 
-@Entity('GroupChannelPostComment')
-export class GroupChannelPostCommentEntity {
+@Entity('FeedChannelPostComment')
+export class FeedChannelPostCommentEntity {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
@@ -41,9 +41,9 @@ export class GroupChannelPostCommentEntity {
      * Many comments belong to a single post.
      * When the post is removed, its comments will be deleted as well.
      */
-    @ManyToOne('GroupChannelPostEntity', 'comments', { onDelete: 'CASCADE' })
+    @ManyToOne('FeedChannelPostEntity', 'comments', { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'postId' })
-    post!: GroupChannelPostEntity;
+    post!: FeedChannelPostEntity;
 
     // Store the post's id.
     @Column({ type: 'uuid' })
@@ -55,12 +55,13 @@ export class GroupChannelPostCommentEntity {
      * This represents the parent comment (if any) for threaded discussions.
      * If null, then this comment is a top-level comment.
      */
-    @ManyToOne('GroupChannelPostCommentEntity', 'children', {
+    @ManyToOne('FeedChannelPostCommentEntity', 'children', {
         nullable: true,
         onDelete: 'CASCADE',
     })
     @JoinColumn({ name: 'parentCommentId' })
-    parentComment?: GroupChannelPostCommentEntity | null;
+    // eslint-disable-next-line no-use-before-define
+    parentComment?: FeedChannelPostCommentEntity | null;
 
     // Optionally store the parent comment's id.
     @Column({ type: 'uuid', nullable: true })
@@ -72,8 +73,9 @@ export class GroupChannelPostCommentEntity {
     /**
      * One comment can have many child comments (i.e. replies).
      */
-    @OneToMany('GroupChannelPostCommentEntity', 'parentComment')
-    children!: GroupChannelPostCommentEntity[];
+    @OneToMany('FeedChannelPostCommentEntity', 'parentComment')
+    // eslint-disable-next-line no-use-before-define
+    children!: FeedChannelPostCommentEntity[];
 
     @Column({ type: 'jsonb', nullable: true })
     attachmentFilePaths?: string[];

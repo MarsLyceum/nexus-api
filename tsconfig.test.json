@@ -1,0 +1,21 @@
+// nexus-api/tsconfig.test.json
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        // tests live outside of your normal ./src
+        "rootDir": ".",
+        "baseUrl": ".",
+        "moduleResolution": "node",
+        "paths": {
+            // make sure your mocks resolve correctly
+            "third-party-clients": ["mocks/third-party-clients.ts"]
+        }
+    },
+    "include": [
+        "services/**/*",
+        "packages/**/*",
+        "mocks/**/*",
+        "**/*.test.ts",
+        "services/**/tests/**/*"
+    ]
+}

@@ -5,9 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
     GroupChannelEntity,
-    GroupChannelMessageMessageEntity,
-    GroupChannelPostEntity,
-    CreateGroupChannelMessagePayload,
+    TextChannelMessageEntity,
+    CreateTextChannelMessagePayload,
 } from 'group-api-client';
 import {
     GoogleCloudStorageSingleton,
@@ -15,15 +14,8 @@ import {
     TypeOrmDataSourceSingleton,
 } from 'third-party-clients';
 
-/**
- * Handler to create a channel message.
- * Supports two types:
- *   - Regular message (messageType: 'message')
- *   - Post message (messageType: 'post') with additional post fields.
- * All related operations are wrapped in a transaction.
- */
-export const createGroupChannelMessage = async (
-    req: Request<unknown, unknown, CreateGroupChannelMessagePayload>,
+export const createTextChannelMessage = async (
+    req: Request<unknown, unknown, CreateTextChannelMessagePayload>,
     res: Response
 ) => {
     try {
@@ -64,7 +56,7 @@ export const createGroupChannelMessage = async (
                 // Retrieve the channel within the transaction.
                 const groupChannel = await manager.findOne(GroupChannelEntity, {
                     where: { id: req.body.channelId },
-                    relations: ['group', 'messages'],
+                    relations: ['group'],
                 });
 
                 if (!groupChannel) {
@@ -72,60 +64,23 @@ export const createGroupChannelMessage = async (
                     throw new Error('Invalid channel id');
                 }
 
-                let message:
-                    | GroupChannelMessageMessageEntity
-                    | GroupChannelPostEntity;
-
                 // Check the payload type discriminator.
-                if (req.body.messageType === 'post') {
-                    const {
-                        id,
-                        content,
-                        channelId,
-                        postedByUserId,
-                        title,
-                        flair,
-                        domain,
-                        thumbnail,
-                    } = req.body;
+                const { id, content, channelId, postedByUserId } = req.body;
 
-                    message = manager.create(GroupChannelPostEntity, {
-                        id: id || uuidv4(),
-                        content,
-                        channelId,
-                        postedByUserId,
-                        postedAt: new Date(),
-                        attachmentFilePaths: filePaths,
-                        edited: false,
-                        channel: groupChannel,
-                        title,
-                        flair,
-                        domain,
-                        thumbnail,
-                        upvotes: 0,
-                        commentsCount: 0,
-                        shareCount: 0,
-                    });
-                } else {
-                    const { id, content, channelId, postedByUserId } = req.body;
-
-                    message = manager.create(GroupChannelMessageMessageEntity, {
-                        id: id || uuidv4(),
-                        content,
-                        channelId,
-                        postedByUserId,
-                        attachmentFilePaths: filePaths,
-                        postedAt: new Date(),
-                        edited: false,
-                        channel: groupChannel,
-                    });
-                }
+                const message = manager.create(TextChannelMessageEntity, {
+                    id: id || uuidv4(),
+                    content,
+                    channelId,
+                    postedByUserId,
+                    attachmentFilePaths: filePaths,
+                    postedAt: new Date(),
+                    edited: false,
+                    channel: groupChannel,
+                });
 
                 // Save the new message.
                 await manager.save(message);
 
-                // Optionally, update the channel's messages array.
-                groupChannel.messages = [...groupChannel.messages, message];
                 await manager.save(groupChannel);
 
                 return message;
@@ -136,7 +91,7 @@ export const createGroupChannelMessage = async (
             GroupChannelEntity,
             {
                 where: { id: req.body.channelId },
-                relations: ['group', 'messages'],
+                relations: ['group'],
             }
         );
 

@@ -6,10 +6,10 @@ import {
     GroupEntity,
     GroupMemberEntity,
     GroupChannelEntity,
-    GroupChannelMessageMessageEntity,
-    GroupChannelPostEntity,
+    TextChannelMessageEntity,
+    FeedChannelPostEntity,
     DeleteGroupParams,
-    GroupChannelPostCommentEntity,
+    FeedChannelPostCommentEntity,
 } from 'group-api-client';
 import {
     GoogleCloudStorageSingleton,
@@ -52,29 +52,31 @@ export const deleteGroup = async (
             const channels = await manager.find(GroupChannelEntity, {
                 where: { group: { id: group.id } },
             });
-            const channelIds = channels.map((channel) => channel.id);
+            const channelIds: string[] = channels.map((channel) => channel.id);
 
             if (channelIds.length > 0) {
                 // a. Find all "post" messages in these channels.
-                const posts = await manager.find(GroupChannelPostEntity, {
-                    where: { channelId: In(channelIds) },
-                });
+                const posts = await manager
+                    .createQueryBuilder(FeedChannelPostEntity, 'post')
+                    .where('post.channelId IN (:...ids)', { ids: channelIds })
+                    .getMany();
+
                 const postIds = posts.map((post) => post.id);
 
                 // b. Delete all comments for these posts.
                 if (postIds.length > 0) {
-                    await manager.delete(GroupChannelPostCommentEntity, {
+                    await manager.delete(FeedChannelPostCommentEntity, {
                         postId: In(postIds),
                     });
                 }
 
                 // c. Delete all post messages in these channels.
-                await manager.delete(GroupChannelPostEntity, {
+                await manager.delete(FeedChannelPostEntity, {
                     channelId: In(channelIds),
                 });
 
                 // d. Delete all regular channel messages.
-                await manager.delete(GroupChannelMessageMessageEntity, {
+                await manager.delete(TextChannelMessageEntity, {
                     channelId: In(channelIds),
                 });
 
