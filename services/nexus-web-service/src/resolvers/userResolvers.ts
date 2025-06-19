@@ -88,7 +88,7 @@ async function loginUser({ email, password }: LoginUserPayload, ctx: any) {
         token: idToken,
         accessToken: accessJwt,
         refreshToken: refreshJwt,
-        refreshTokenExpiresAt: `${Math.floor(Date.now() / 1000) + refreshTokenExpiresIn}`,
+        refreshTokenExpiresAt: `${Date.now() + refreshTokenExpiresIn * 1000}`,
     };
 }
 
