@@ -41,18 +41,44 @@ type Mutation {
     avatar: Upload!
   ): Group
 
-  createGroupChannelMessage(
+  createTextChannelMessage(
     id: String
     postedByUserId: String!
     channelId: String!
     content: String!
-    messageType: String!   # "message" for a regular message or "post" for a post message
-    title: String
+    attachments: [Upload!]
+  ): TextChannelMessage
+
+  updateTextChannelMessage(
+    id: String!
+    postedByUserId: String!
+    content: String!
+  ): TextChannelMessage
+
+  updateFeedChannelPost(
+    id: String!
+    postedByUserId: String!
+    channelId: String!
+    content: String!
+    title: String!
+    flair: String
+    domain: String
+    thumbnail: String
+  ): FeedChannelPost
+
+  deleteTextChannelMessage(id: String!): Boolean!
+
+  createFeedChannelPost(
+    id: String
+    postedByUserId: String!
+    channelId: String!
+    content: String!
+    title: String!
     flair: String
     domain: String
     thumbnail: String
     attachments: [Upload!]
-  ): GroupChannelMessage
+  ): FeedChannelPost
 
   createPostComment(
     postedByUserId: String!
@@ -62,7 +88,7 @@ type Mutation {
     parentCommentId: String
     hasChildren: Boolean!
     upvotes: Int
-  ): GroupChannelPostComment
+  ): FeedChannelPostComment
 
   updateGroup(
     id: String!
@@ -120,13 +146,20 @@ type Query {
 
   # Group queries
   fetchGroup(id: String!): Group
-  fetchPost(id: String!): PostMessage
+  fetchPost(id: String!): FeedChannelPost
   fetchUserGroups(userId: String!): [GroupWithImage!]!
-  fetchChannelMessages(
+
+  getTextChannelMessages(
     channelId: String!
     offset: Int
     limit: Int
-  ): [GroupChannelMessage!]!
+  ): [TextChannelMessage!]!
+
+  getFeedChannelPosts(
+    channelId: String!
+    offset: Int
+    limit: Int
+  ): [FeedChannelPost!]!
 
   # Fetch paginated post comments
   fetchPostComments(
@@ -134,7 +167,7 @@ type Query {
     parentCommentId: String
     offset: Int
     limit: Int
-  ): [GroupChannelPostComment!]!
+  ): [FeedChannelPostComment!]!
 
   getFriends(userId: String!): [Friend!]!
 
@@ -143,7 +176,7 @@ type Query {
 }
 
 type Subscription {
-  messageAdded(channelId: String!): GroupChannelMessage!
+  messageAdded(channelId: String!): TextChannelMessage!
 
   friendStatusChanged(userId: String!): FriendStatusChangedPayload!
 
@@ -251,20 +284,8 @@ enum GroupChannelType {
 # Message Types
 ###########################
 
-# An interface representing the common fields of any channel message.
-interface GroupChannelMessage {
-  id: String!
-  content: String!
-  postedAt: String!
-  edited: Boolean!
-  channelId: String!
-  postedByUserId: String!
-  messageType: String!   # Either "message" or "post"
-  attachmentUrls: [String!]
-}
 
-# A regular message implements the interface.
-type RegularMessage implements GroupChannelMessage {
+type TextChannelMessage {
   id: String!
   content: String!
   postedAt: String!
@@ -275,15 +296,13 @@ type RegularMessage implements GroupChannelMessage {
   attachmentUrls: [String!]
 }
 
-# A post message implements the interface and adds extra fields.
-type PostMessage implements GroupChannelMessage {
+type FeedChannelPost {
   id: String!
   content: String!
   postedAt: String!
   edited: Boolean!
   channelId: String!
   postedByUserId: String!
-  messageType: String!   # Expected value: "post"
   title: String!
   flair: String
   domain: String
@@ -301,7 +320,6 @@ type GroupChannel {
   type: GroupChannelType!
   createdAt: String!  # ISO date string
   groupId: String!
-  messages: [GroupChannelMessage!]
 }
 
 ###########################
@@ -309,7 +327,7 @@ type GroupChannel {
 ###########################
 
 # Represents a comment on a post.
-type GroupChannelPostComment {
+type FeedChannelPostComment {
   id: String!
   content: String!
   postedAt: String!
@@ -320,7 +338,7 @@ type GroupChannelPostComment {
   upvotes: Int!
   hasChildren: Boolean!
   attachmentUrls: [String!]
-  children: [GroupChannelPostComment!]!  # Fetches nested replies
+  children: [FeedChannelPostComment!]!  # Fetches nested replies
 }
 
 enum FriendStatus {

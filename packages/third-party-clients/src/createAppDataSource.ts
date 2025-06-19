@@ -5,10 +5,9 @@ import {
     GroupEntity,
     GroupMemberEntity,
     GroupChannelEntity,
-    GroupChannelMessageEntity,
-    GroupChannelPostEntity,
-    GroupChannelPostCommentEntity,
-    GroupChannelMessageMessageEntity,
+    TextChannelMessageEntity,
+    FeedChannelPostEntity,
+    FeedChannelPostCommentEntity,
 } from 'group-api-client';
 import { UserEntity } from 'user-api-client';
 import { FriendEntity } from 'friends-api-client';
@@ -45,10 +44,9 @@ export function createAppDataSource(): DataSource {
             GroupEntity,
             GroupMemberEntity,
             GroupChannelEntity,
-            GroupChannelMessageEntity,
-            GroupChannelPostEntity,
-            GroupChannelPostCommentEntity,
-            GroupChannelMessageMessageEntity,
+            TextChannelMessageEntity,
+            FeedChannelPostEntity,
+            FeedChannelPostCommentEntity,
         ],
         migrations: ['migrations/**/*.ts'],
         subscribers: [],

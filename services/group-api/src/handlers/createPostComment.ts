@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import {
-    GroupChannelPostEntity,
-    GroupChannelPostCommentEntity,
-    CreateGroupChannelPostCommentPayload,
+    FeedChannelPostEntity,
+    FeedChannelPostCommentEntity,
+    CreateFeedChannelPostCommentPayload,
 } from 'group-api-client';
 import {
     TypeOrmDataSourceSingleton,
@@ -10,7 +10,7 @@ import {
 } from 'third-party-clients';
 
 export const createPostComment = async (
-    req: Request<unknown, unknown, CreateGroupChannelPostCommentPayload>,
+    req: Request<unknown, unknown, CreateFeedChannelPostCommentPayload>,
     res: Response
 ) => {
     try {
@@ -57,7 +57,7 @@ export const createPostComment = async (
         const newComment = await dataSource.manager.transaction(
             async (manager) => {
                 // Ensure the post exists
-                const post = await manager.findOne(GroupChannelPostEntity, {
+                const post = await manager.findOne(FeedChannelPostEntity, {
                     where: { id: postId },
                 });
 
@@ -66,10 +66,10 @@ export const createPostComment = async (
                 }
 
                 // If this is a reply, check that the parent comment exists
-                let parentComment: GroupChannelPostCommentEntity | null = null;
+                let parentComment: FeedChannelPostCommentEntity | null = null;
                 if (parentCommentId) {
                     parentComment = await manager.findOne(
-                        GroupChannelPostCommentEntity,
+                        FeedChannelPostCommentEntity,
                         { where: { id: parentCommentId } }
                     );
 
@@ -79,7 +79,7 @@ export const createPostComment = async (
                 }
 
                 // Create the new comment
-                const comment = manager.create(GroupChannelPostCommentEntity, {
+                const comment = manager.create(FeedChannelPostCommentEntity, {
                     content,
                     postedByUserId,
                     postedAt: new Date(),
@@ -93,7 +93,6 @@ export const createPostComment = async (
                     hasChildren,
                     children: [],
                 });
-                console.log('Children property:', comment.children);
 
                 await manager.save(comment);
 

@@ -1,13 +1,13 @@
 import {
-    GroupChannelPostComment,
-    GroupChannelPostCommentWithAttachmentUrls,
+    FeedChannelPostComment,
+    FeedChannelPostCommentWithAttachmentUrls,
 } from 'group-api-client';
 
 import { fetchAttachmentsForComment } from './fetchAttachmentsForComment';
 
 export async function fetchAttachmentsForCommentsRecursive(
-    comment: GroupChannelPostComment
-): Promise<GroupChannelPostCommentWithAttachmentUrls> {
+    comment: FeedChannelPostComment
+): Promise<FeedChannelPostCommentWithAttachmentUrls> {
     // Process the current comment
     const updatedComment = await fetchAttachmentsForComment(comment);
 

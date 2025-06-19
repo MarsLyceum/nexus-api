@@ -74,7 +74,6 @@ export const groupChannelSchema = Joi.object({
     name: Joi.string().max(100).required(),
     type: Joi.string().valid('text', 'voice', 'feed').required(),
     createdAt: Joi.date().iso().required(),
-    messages: Joi.array().items(groupChannelMessageSchema),
 });
 
 /**
@@ -100,43 +99,54 @@ export const createGroupChannelPayloadSchema = Joi.object({
         .required(),
 });
 
-/**
- * Schema for the payload to create a new group channel message.
- * This schema handles both the regular message and the post message variants.
- */
-export const createGroupChannelMessagePayloadSchema = Joi.alternatives().try(
-    // Regular message payload
-    Joi.object({
-        id: Joi.string()
-            .guid({ version: ['uuidv4'] })
-            .optional(),
-        channelId: Joi.string()
-            .guid({ version: ['uuidv4'] })
-            .required(),
-        postedByUserId: Joi.string()
-            .guid({ version: ['uuidv4'] })
-            .required(),
-        content: Joi.string().required().allow(''),
-        messageType: Joi.string().valid('message').required(),
-        attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
-    }),
-    // Post message payload with extra fields.
-    Joi.object({
-        channelId: Joi.string()
-            .guid({ version: ['uuidv4'] })
-            .required(),
-        postedByUserId: Joi.string()
-            .guid({ version: ['uuidv4'] })
-            .required(),
-        content: Joi.string().required().allow(''),
-        messageType: Joi.string().valid('post').required(),
-        title: Joi.string().max(200).required(),
-        flair: Joi.string().max(50).optional(),
-        domain: Joi.string().optional(),
-        thumbnail: Joi.string().optional(),
-        attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
-    })
-);
+export const createTextChannelMessagePayloadSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .optional(),
+    channelId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required().allow(''),
+    attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
+});
+
+export const createFeedChannelPostPayloadSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .optional(),
+    channelId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required().allow(''),
+    title: Joi.string().max(200).required(),
+    flair: Joi.string().max(50).optional(),
+    domain: Joi.string().optional(),
+    thumbnail: Joi.string().optional(),
+    attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
+});
+
+export const updateFeedChannelPostPayloadSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    channelId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required().allow(''),
+    title: Joi.string().max(200).required(),
+    flair: Joi.string().max(50).optional(),
+    domain: Joi.string().optional(),
+    thumbnail: Joi.string().optional(),
+});
 
 /**
  * Schema for the payload to update an existing group.
@@ -145,6 +155,16 @@ export const createGroupChannelMessagePayloadSchema = Joi.alternatives().try(
 export const updateGroupPayloadSchema = Joi.object({
     name: Joi.string().max(100).optional(),
     description: Joi.string().optional(),
+});
+
+export const updateTextChannelMessagePayloadSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required().allow(''),
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
 });
 
 /**
@@ -156,13 +176,25 @@ export const getPostParamsSchema = groupIdentifierSchema;
 export const deleteGroupParamsSchema = groupIdentifierSchema;
 export const updateGroupParamsSchema = groupIdentifierSchema;
 
+export const deleteTextChannelMessageParamsSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
 export const getUserGroupsParamsSchema = Joi.object({
     userId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),
 });
 
-export const getChannelMessagesParamsSchema = Joi.object({
+export const getTextChannelMessagesParamsSchema = Joi.object({
+    channelId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+});
+
+export const getFeedChannelPostsParamsSchema = Joi.object({
     channelId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),
@@ -174,7 +206,12 @@ export const getPostCommentsParamsSchema = Joi.object({
         .required(),
 });
 
-export const getChannelMessagesQueryParamsSchema = Joi.object({
+export const getTextChannelMessagesQueryParamsSchema = Joi.object({
+    offset: Joi.number(),
+    limit: Joi.number().optional(),
+});
+
+export const getFeedChannelPostsQueryParamsSchema = Joi.object({
     offset: Joi.number(),
     limit: Joi.number().optional(),
 });
@@ -190,7 +227,7 @@ export const getPostCommentsQueryParamsSchema = Joi.object({
         .optional(), // Can be null if it's a top-level comment
 });
 
-export const createGroupChannelPostCommentPayloadSchema = Joi.object({
+export const createFeedChannelPostCommentPayloadSchema = Joi.object({
     content: Joi.string().required().allow(''), // Comment content is required
     postedByUserId: Joi.string()
         .guid({ version: ['uuidv4'] })
@@ -206,6 +243,6 @@ export const createGroupChannelPostCommentPayloadSchema = Joi.object({
     attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
     hasChildren: Joi.boolean(),
     children: Joi.array()
-        .items(Joi.link('#createGroupChannelPostCommentPayloadSchema'))
+        .items(Joi.link('#createFeedChannelPostCommentPayloadSchema'))
         .optional(), // Recursively validates nested replies
-}).id('createGroupChannelPostCommentPayloadSchema'); // Adds an ID for self-referencing
+}).id('createFeedChannelPostCommentPayloadSchema'); // Adds an ID for self-referencing

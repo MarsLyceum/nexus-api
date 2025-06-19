@@ -31,11 +31,10 @@ export const updateMessage = async (
 
                 await manager.update(
                     MessageEntity,
-                    { id },
+                    { id, senderUserId },
                     {
                         content,
                         conversation,
-                        senderUserId,
                         edited: true,
                     }
                 );
