@@ -39,3 +39,5 @@ export type CreatePostCommentResponse = FeedChannelPostComment;
 export type UpdateGroupResponse = Group;
 
 export type UpdateTextChannelMessageResponse = TextChannelMessage;
+
+export type UpdateFeedChannelPostResponse = FeedChannelPost;

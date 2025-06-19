@@ -114,6 +114,9 @@ export const createTextChannelMessagePayloadSchema = Joi.object({
 });
 
 export const createFeedChannelPostPayloadSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .optional(),
     channelId: Joi.string()
         .guid({ version: ['uuidv4'] })
         .required(),
@@ -126,6 +129,23 @@ export const createFeedChannelPostPayloadSchema = Joi.object({
     domain: Joi.string().optional(),
     thumbnail: Joi.string().optional(),
     attachments: Joi.array().items(Joi.object().unknown(true)).default([]),
+});
+
+export const updateFeedChannelPostPayloadSchema = Joi.object({
+    id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    channelId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    postedByUserId: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    content: Joi.string().required().allow(''),
+    title: Joi.string().max(200).required(),
+    flair: Joi.string().max(50).optional(),
+    domain: Joi.string().optional(),
+    thumbnail: Joi.string().optional(),
 });
 
 /**

@@ -9,6 +9,7 @@ import {
     CreateFeedChannelPostPayload,
     CreateFeedChannelPostCommentPayload,
     UpdateTextChannelMessagePayload,
+    UpdateFeedChannelPostPayload,
 } from '../payloads';
 import {
     CreateGroupResponse,
@@ -23,6 +24,7 @@ import {
     CreateFeedChannelPostResponse,
     GetFeedChannelPostsResponse,
     UpdateTextChannelMessageResponse,
+    UpdateFeedChannelPostResponse,
 } from '../responses';
 
 const useLocalApi = true;
@@ -207,6 +209,14 @@ export class GroupApiClient {
     ): Promise<UpdateTextChannelMessageResponse> {
         return this.query(
             axios.put(`${this.baseURL}/text-channel-message`, payload)
+        );
+    }
+
+    async updateFeedChannelPost(
+        payload: UpdateFeedChannelPostPayload
+    ): Promise<UpdateFeedChannelPostResponse> {
+        return this.query(
+            axios.put(`${this.baseURL}/feed-channel-post`, payload)
         );
     }
 

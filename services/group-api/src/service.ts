@@ -45,6 +45,8 @@ import {
     UpdateTextChannelMessagePayload,
     deleteTextChannelMessageParamsSchema,
     DeleteTextChannelMessageParams,
+    updateFeedChannelPostPayloadSchema,
+    UpdateFeedChannelPostPayload,
 } from 'group-api-client';
 import { TypeOrmDataSourceSingleton } from 'third-party-clients';
 
@@ -66,6 +68,7 @@ import {
     getPost,
     updateTextChannelMessage,
     deleteTextChannelMessage,
+    updateFeedChannelPost,
 } from './handlers';
 
 import {
@@ -254,6 +257,14 @@ export async function createService(
             UpdateTextChannelMessagePayload,
             ParsedQs
         >((req, res) => updateTextChannelMessage(req, res))
+    );
+
+    app.put(
+        '/feed-channel-post',
+        validatePayload(updateFeedChannelPostPayloadSchema),
+        asyncHandler<unknown, unknown, UpdateFeedChannelPostPayload, ParsedQs>(
+            (req, res) => updateFeedChannelPost(req, res)
+        )
     );
 
     // Delete a group by id

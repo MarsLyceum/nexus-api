@@ -1,5 +1,5 @@
 import { ParsedQs } from 'qs';
-import { Group, ChannelType } from '../models';
+import { Group, ChannelType, FeedChannelPost } from '../models';
 
 export type CreateFeedChannelPostCommentPayload = {
     content: string;
@@ -46,6 +46,8 @@ export type UpdateTextChannelMessagePayload = {
     content: string;
     postedByUserId: string;
 };
+
+export type UpdateFeedChannelPostPayload = FeedChannelPost;
 
 export type GetGroupParams = {
     id: string;

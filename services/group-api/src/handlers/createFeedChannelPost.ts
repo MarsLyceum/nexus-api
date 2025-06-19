@@ -51,7 +51,7 @@ export const createFeedChannelPost = async (
         }
 
         // Wrap the operations in a transaction.
-        const newMessage = await dataSource.manager.transaction(
+        const newPost = await dataSource.manager.transaction(
             async (manager) => {
                 // Retrieve the channel within the transaction.
                 const groupChannel = await manager.findOne(GroupChannelEntity, {
@@ -114,7 +114,7 @@ export const createFeedChannelPost = async (
             const dataBuffer = Buffer.from(
                 JSON.stringify({
                     type: 'new-message',
-                    payload: newMessage,
+                    payload: newPost,
                 })
             );
 
@@ -126,7 +126,7 @@ export const createFeedChannelPost = async (
             }
         }
 
-        res.status(201).json(newMessage);
+        res.status(201).json(newPost);
     } catch (error) {
         // If the error message is 'Invalid channel id', return 404.
         if ((error as Error).message === 'Invalid channel id') {

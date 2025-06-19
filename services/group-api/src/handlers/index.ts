@@ -13,3 +13,4 @@ export * from './createFeedChannelPost';
 export * from './createTextChannelMessage';
 export * from './updateTextChannelMessage';
 export * from './deleteTextChannelMessage';
+export * from './updateFeedChannelPost';

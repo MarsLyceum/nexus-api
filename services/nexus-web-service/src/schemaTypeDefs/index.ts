@@ -55,6 +55,17 @@ type Mutation {
     content: String!
   ): TextChannelMessage
 
+  updateFeedChannelPost(
+    id: String!
+    postedByUserId: String!
+    channelId: String!
+    content: String!
+    title: String!
+    flair: String
+    domain: String
+    thumbnail: String
+  ): FeedChannelPost
+
   deleteTextChannelMessage(id: String!): Boolean!
 
   createFeedChannelPost(
@@ -62,7 +73,7 @@ type Mutation {
     postedByUserId: String!
     channelId: String!
     content: String!
-    title: String
+    title: String!
     flair: String
     domain: String
     thumbnail: String
