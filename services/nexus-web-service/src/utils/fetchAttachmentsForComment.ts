@@ -1,13 +1,13 @@
 import {
-    GroupChannelPostComment,
-    GroupChannelPostCommentWithAttachmentUrls,
+    FeedChannelPostComment,
+    FeedChannelPostCommentWithAttachmentUrls,
 } from 'group-api-client';
 
 import { getCachedSignedUrl } from './getCachedSignedUrl';
 
 export const fetchAttachmentsForComment = async (
-    comment: GroupChannelPostComment
-): Promise<GroupChannelPostCommentWithAttachmentUrls> => {
+    comment: FeedChannelPostComment
+): Promise<FeedChannelPostCommentWithAttachmentUrls> => {
     const { attachmentFilePaths, ...rest } = comment;
 
     if (!attachmentFilePaths) {
