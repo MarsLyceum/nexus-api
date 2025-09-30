@@ -19,8 +19,13 @@ export const getGroup = async (req: Request<GetGroupParams>, res: Response) => {
             return;
         }
         const cacheKey = `group:${id}`;
-        let cachedGroup =
-            await RedisClientSingleton.getInstance().get(cacheKey);
+        let cachedGroup;
+        try {
+            cachedGroup =
+                await RedisClientSingleton.getInstance().get(cacheKey);
+        } catch (error) {
+            console.error('[Redis] Error fetching from cache:', error);
+        }
 
         if (!cachedGroup) {
             const dataSource = await TypeOrmDataSourceSingleton.getInstance();
@@ -29,7 +34,15 @@ export const getGroup = async (req: Request<GetGroupParams>, res: Response) => {
                 relations: ['members', 'channels'],
             });
             cachedGroup = group;
-            await RedisClientSingleton.getInstance().set(cacheKey, cachedGroup);
+
+            try {
+                await RedisClientSingleton.getInstance().set(
+                    cacheKey,
+                    cachedGroup
+                );
+            } catch (error) {
+                console.error('[Redis] Error setting cache:', error);
+            }
         }
 
         if (!cachedGroup) {

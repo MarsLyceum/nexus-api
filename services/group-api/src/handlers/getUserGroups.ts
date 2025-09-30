@@ -21,7 +21,12 @@ export const getUserGroups = async (
         const cacheKey = `user_groups:${userId}`;
         // Step 1: Check Redis cache
         let cachedUserGroups;
-        // await RedisClientSingleton.getInstance().get(cacheKey);
+        try {
+            cachedUserGroups =
+                await RedisClientSingleton.getInstance().get(cacheKey);
+        } catch (error) {
+            console.error('[Redis] Error fetching from cache:', error);
+        }
 
         if (!cachedUserGroups) {
             const dataSource = await TypeOrmDataSourceSingleton.getInstance();
@@ -35,11 +40,16 @@ export const getUserGroups = async (
                 .getMany();
 
             cachedUserGroups = groups;
-            await RedisClientSingleton.getInstance().set(
-                cacheKey,
-                cachedUserGroups,
-                { ex: REDIS_EXPIRATION_SECONDS }
-            );
+
+            try {
+                await RedisClientSingleton.getInstance().set(
+                    cacheKey,
+                    cachedUserGroups,
+                    { ex: REDIS_EXPIRATION_SECONDS }
+                );
+            } catch (error) {
+                console.error('[Redis] Error setting cache:', error);
+            }
         }
 
         res.status(200).json(cachedUserGroups);

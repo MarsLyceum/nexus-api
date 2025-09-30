@@ -12,7 +12,12 @@ export const getCachedSignedUrl = async (
     const cacheKey = `signed_url:${filePath}`;
 
     // Step 1: Check Redis cache
-    let cachedUrl = await RedisClientSingleton.getInstance().get(cacheKey);
+    let cachedUrl;
+    try {
+        cachedUrl = await RedisClientSingleton.getInstance().get(cacheKey);
+    } catch (error) {
+        console.error('[Redis] Error fetching signed URL from cache:', error);
+    }
 
     if (cachedUrl) {
         return cachedUrl as string;
@@ -29,9 +34,13 @@ export const getCachedSignedUrl = async (
 
     // Step 3: Cache the URL slightly less than the expiry
     const redisCacheExpiry = SIGNED_URL_EXPIRATION_SECONDS - 600; // cache for expiry minus 10 minutes
-    await RedisClientSingleton.getInstance().set(cacheKey, cachedUrl, {
-        ex: redisCacheExpiry,
-    });
+    try {
+        await RedisClientSingleton.getInstance().set(cacheKey, cachedUrl, {
+            ex: redisCacheExpiry,
+        });
+    } catch (error) {
+        console.error('[Redis] Error caching signed URL:', error);
+    }
 
     return cachedUrl as string;
 };

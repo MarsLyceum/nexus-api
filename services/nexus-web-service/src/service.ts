@@ -62,22 +62,30 @@ export async function createService(
     const localPubSub = new InMemoryPubSub();
 
     const allowedOrigins = new Set([
-        // next local
-        'http://localhost:3000',
-        // react native local
-        'http://localhost:8081',
-        // dev
-        'https://dev.my-nexus.net',
+        'http://localhost:3000', // next local
+        'http://localhost:8081', // react native local
+        'https://dev.my-nexus.net', // dev
     ]);
+
+    const parseOrigin = (input: string): URL | undefined => {
+        try {
+            return new URL(input);
+        } catch {
+            return undefined;
+        }
+    };
+
+    const isAllowedOrigin = (origin: string | undefined) =>
+        origin === undefined ||
+        allowedOrigins.has(origin) ||
+        parseOrigin(origin)?.hostname === 'localhost';
 
     const corsSetting = {
         origin(
             origin: string | undefined,
             callback: (err: Error | null, allow?: boolean) => void
         ) {
-            // Allow requests with no origin (like mobile apps or curl requests)
-            if (!origin) return callback(null, true);
-            return allowedOrigins.has(origin)
+            return isAllowedOrigin(origin)
                 ? callback(null, true)
                 : callback(new Error('Not allowed by CORS'), false);
         },
@@ -256,6 +264,36 @@ export async function createService(
             return undefined;
         }
     };
+
+    // Image proxy endpoint to avoid CORS issues with Google Cloud Storage
+    app.get('/api/image-proxy', async (req: Request, res: Response) => {
+        const { url } = req.query;
+
+        if (!url || typeof url !== 'string') {
+            res.status(400).send('Missing or invalid url parameter');
+            return;
+        }
+
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                res.status(response.status).send(response.statusText);
+                return;
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (contentType) {
+                res.setHeader('Content-Type', contentType);
+            }
+
+            const buffer = await response.arrayBuffer();
+            res.send(Buffer.from(buffer));
+        } catch (error) {
+            console.error('Image proxy error:', error);
+            res.status(500).send('Failed to fetch image');
+        }
+    });
 
     app.post(
         '/graphql',

@@ -109,15 +109,20 @@ export async function createService(
             fn: (
                 req: Request<P, ResBody, ReqBody, ReqQuery, Locals>,
                 res: Response<ResBody, Locals>,
-                next: NextFunction
+                next?: NextFunction
             ) => Promise<void>
         ) =>
         (
-            req: Request<P, ResBody, ReqBody, ReqQuery, Locals>,
+            req: Request<P, ResBody, ReqBody, ParsedQs, Locals>,
             res: Response<ResBody, Locals>,
             next: NextFunction
         ) => {
-            fn(req, res, next).catch(next);
+            // Type assertion: validation middleware ensures req.query matches ReqQuery type
+            fn(
+                req as Request<P, ResBody, ReqBody, ReqQuery, Locals>,
+                res,
+                next
+            ).catch(next);
         };
 
     // Define the routes for the group API
@@ -203,7 +208,6 @@ export async function createService(
         '/channels/:channelId/messages',
         validateParams(getTextChannelMessagesParamsSchema),
         validateQueryParams(getTextChannelMessagesQueryParamsSchema),
-        // @ts-expect-error query params
         asyncHandler<
             GetTextChannelMessagesParams,
             unknown,
@@ -216,7 +220,6 @@ export async function createService(
         '/channels/:channelId/posts',
         validateParams(getFeedChannelPostsParamsSchema),
         validateQueryParams(getFeedChannelPostsQueryParamsSchema),
-        // @ts-expect-error query params
         asyncHandler<
             GetFeedChannelPostsParams,
             unknown,
